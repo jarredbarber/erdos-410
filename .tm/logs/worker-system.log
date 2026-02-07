@@ -1424,3 +1424,74 @@ lemma sigma_one_ge (n : ℕ) (hn : n ≥ 1) : sigma 1 n ≥ n := by
 - ✅ Main theorem `erdos_410` statement unchanged
 
 **Confidence**: Certain (Lean typechecker verified the proof; independent type checking confirmed)
+[2026-02-07T15:16:15.425Z] 🔄 Checking git status...
+[2026-02-07T15:16:15.425Z] ✅ Closed task erdos410-6ne
+
+[2026-02-07T15:16:15.437Z] 📝 Committing changes...
+[2026-02-07T15:16:15.458Z] 🚀 Pushing to remote...
+[2026-02-07T15:16:17.056Z] 
+================================================================================
+[2026-02-07T15:16:17.056Z] 📌 Processing task: erdos410-st3 - L1.3: Prove sigma_one_gt (σ(n) > n for n ≥ 2)
+[2026-02-07T15:16:17.056Z]    Role: execute | Priority: 2 | Size: small
+[2026-02-07T15:16:17.056Z] ================================================================================
+
+[2026-02-07T15:16:17.058Z] ✓ Claimed task erdos410-st3
+
+[2026-02-07T15:16:17.058Z] 🤖 Using agent: execute with models: anthropic/claude-opus-4-6:high, anthropic/claude-opus-4-5:high, google-antigravity/gemini-3-pro:high
+
+[2026-02-07T15:16:17.058Z] 💭 Starting pi agent session with model: anthropic/claude-opus-4-6:high...
+[2026-02-07T15:16:21.490Z] 
+$ tm update erdos410-st3 --status "Reading current codebase"
+[2026-02-07T15:16:22.629Z] 
+🛠️  Executing tool: read...
+[2026-02-07T15:16:29.008Z] 
+$ tm show erdos410-f5u 2>/dev/null || echo "Dependency not found"
+[2026-02-07T15:16:30.152Z] 
+$ tm update erdos410-st3 --status "Implementing sigma_one_gt using sigma_one_ge_succ"
+[2026-02-07T15:16:48.138Z] 
+🛠️  Executing tool: edit...
+[2026-02-07T15:16:51.355Z] 
+$ tm update erdos410-st3 --status "Verifying build"
+[2026-02-07T15:16:52.500Z] 
+$ cd /home/jarred/code/erdos-410 && lake build Erdos 2>&1
+[2026-02-07T15:17:18.290Z] 
+$ tm close erdos410-st3 --summary "Proved sigma_one_gt: σ(n) > n for all n ≥ 2" --details "**Proof**: Direct consequence of sigma_one_ge_succ. Since σ(n) ≥ n + 1, we have σ(n) > n by omega.
+
+**Implementation**: Added 4-line lemma after sigma_one_ge_succ in Basic.lean.
+
+**Verification**: \`lake build Erdos\` succeeds with no errors. Only warning is the expected sorry in erdos_410.
+
+**Confidence**: HIGH - trivial corollary of already-proven lemma."
+[2026-02-07T15:17:21.435Z] 
+$ tm close --help | head -30
+[2026-02-07T15:17:27.684Z] 
+$ tm close erdos410-st3 "Proved sigma_one_gt: σ(n) > n for all n ≥ 2" -d "**Proof**: Direct consequence of sigma_one_ge_succ. Since σ(n) ≥ n + 1, we have σ(n) > n by omega.
+
+**Implementation**: Added 4-line lemma after sigma_one_ge_succ in Basic.lean.
+
+**Verification**: lake build Erdos succeeds with no errors. Only warning is the expected sorry in erdos_410.
+
+**Confidence**: HIGH - trivial corollary of already-proven lemma."
+[2026-02-07T15:17:35.555Z] 
+
+📝 Agent response complete.
+
+[2026-02-07T15:17:35.555Z] 📄 Log saved to .tm/logs/worker-erdos410-st3.md
+[2026-02-07T15:17:35.555Z] 
+📊 Task erdos410-st3 completed:
+[2026-02-07T15:17:35.555Z]    Summary: Proved sigma_one_gt: σ(n) > n for all n ≥ 2
+[2026-02-07T15:17:35.555Z]    Details: **Proof strategy**: Direct consequence of the dependency sigma_one_ge_succ. Since σ(n) ≥ n + 1 for n ≥ 2, we have σ(n) > n.
+
+**Implementation**:
+```lean
+/-- For any n ≥ 2, σ(n) > n (strict inequality). -/
+lemma sigma_one_gt (n : ℕ) (hn : n ≥ 2) : sigma 1 n > n := by
+  have h := sigma_one_ge_succ n hn
+  omega
+```
+
+**Location**: Added after sigma_one_ge_succ in Erdos/Basic.lean.
+
+**Verification**: `lake build Erdos` succeeds with no errors. The only warning is for erdos_410 which still has `sorry` (as expected for the main theorem).
+
+**Confidence**: HIGH - trivial corollary using omega to derive > from ≥ n+1.

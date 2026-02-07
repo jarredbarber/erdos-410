@@ -40,6 +40,11 @@ lemma sigma_one_ge_succ (n : ℕ) (hn : n ≥ 2) : sigma 1 n ≥ n + 1 := by
   calc 1 + n = ∑ d ∈ ({1, n} : Finset ℕ), d := hsum.symm
     _ ≤ ∑ d ∈ n.divisors, d := Finset.sum_le_sum_of_subset hsub
 
+/-- For any n ≥ 2, σ(n) > n (strict inequality). -/
+lemma sigma_one_gt (n : ℕ) (hn : n ≥ 2) : sigma 1 n > n := by
+  have h := sigma_one_ge_succ n hn
+  omega
+
 /-! ## Abundancy Lower Bound for Even Numbers
 
 For even n ≥ 2, we have σ(n)/n ≥ 3/2. This is a key ingredient for showing
