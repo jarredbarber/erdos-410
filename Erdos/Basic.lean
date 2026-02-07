@@ -15,7 +15,7 @@ target this exact statement. If the statement appears unprovable as
 written, escalate to the advisor — do not alter the theorem.
 -/
 
-open ArithmeticFunction Filter
+open ArithmeticFunction Filter Finsupp
 
 namespace Erdos410
 
@@ -284,30 +284,301 @@ lemma sigma_odd_prime_pow_iff (p k : ℕ) (hp : p.Prime) (hodd : Odd p) :
   rw [Finset.card_range]
   exact odd_succ_iff_even k
 
-/-- A natural number is a square or twice a square. -/
-def isSquareOrTwiceSquare (n : ℕ) : Prop :=
-  IsSquare n ∨ (∃ m, IsSquare m ∧ n = 2 * m)
+/-- A natural number is a square or twice a square (IsSquarish). -/
+def IsSquarish (n : ℕ) : Prop := IsSquare n ∨ ∃ m, n = 2 * m ∧ IsSquare m
 
-/-- σ(n) is odd iff n is a square or twice a square.
+/-- An odd product of natural numbers is odd iff all factors are odd. -/
+lemma odd_finset_prod {α : Type*} [DecidableEq α] {s : Finset α} {f : α → ℕ} :
+    Odd (∏ a ∈ s, f a) ↔ ∀ a ∈ s, Odd (f a) := by
+  induction s using Finset.induction with
+  | empty => simp [odd_one]
+  | insert x s' hx ih =>
+    rw [Finset.prod_insert hx, Nat.odd_mul, ih]
+    constructor
+    · intro ⟨h1, h2⟩ a ha'
+      simp only [Finset.mem_insert] at ha'
+      cases ha' with
+      | inl heq => rw [heq]; exact h1
+      | inr hmem => exact h2 a hmem
+    · intro h
+      exact ⟨h _ (Finset.mem_insert_self _ _), 
+             fun a ha' => h a (Finset.mem_insert_of_mem ha')⟩
 
-This is a well-known number-theoretic result. The proof uses multiplicativity of σ
-and the characterization of σ(p^k) parity:
-- σ(2^a) is always odd
-- σ(p^a) for odd p is odd ⟺ a is even
-- n is a square or twice a square ⟺ all odd prime exponents in n are even -/
-lemma sigma_odd_iff (n : ℕ) (hn : n ≠ 0) :
-    Odd (sigma 1 n) ↔ isSquareOrTwiceSquare n := by
-  sorry  -- Requires multiplicativity argument with prime factorization
+/-- A Finsupp product is odd iff all factors in support are odd. -/
+lemma odd_finsupp_prod {α : Type*} [DecidableEq α] {f : α →₀ ℕ} {g : α → ℕ → ℕ} :
+    Odd (f.prod g) ↔ ∀ a ∈ f.support, Odd (g a (f a)) := by
+  unfold Finsupp.prod
+  exact odd_finset_prod
+
+/-- Sum of powers of an odd number has same parity as the count. -/
+lemma sum_range_pow_mod_two {p k : ℕ} (hp : Odd p) :
+    (∑ j ∈ Finset.range (k + 1), p ^ j) % 2 = (k + 1) % 2 := by
+  induction k with
+  | zero => simp
+  | succ k ih =>
+    rw [Finset.range_add_one, Finset.sum_insert Finset.notMem_range_self, Nat.add_mod, ih]
+    have h : (p ^ (k + 1)) % 2 = 1 := Nat.odd_iff.mp hp.pow
+    rw [h]; omega
+
+/-- σ(p^k) for odd prime p is odd iff k is even (alternative formulation). -/
+lemma sigma_prime_pow_odd_iff' {p k : ℕ} (hp : Nat.Prime p) (hp_odd : Odd p) :
+    Odd (sigma 1 (p ^ k)) ↔ Even k := by
+  rw [sigma_apply_prime_pow hp]; simp only [mul_one]
+  rw [Nat.odd_iff, sum_range_pow_mod_two hp_odd]
+  constructor
+  · intro h; exact Nat.even_iff.mpr (by omega : k % 2 = 0)
+  · intro ⟨m, hm⟩; rw [hm]; omega
+
+/-- σ(2^k) is always odd (alternative proof). -/
+lemma sigma_two_pow_odd' (k : ℕ) : Odd (sigma 1 (2 ^ k)) := by
+  rw [sigma_apply_prime_pow Nat.prime_two]; simp only [mul_one]
+  have h := Nat.geomSum_eq (m := 2) (by omega : 2 ≤ 2) (k + 1)
+  simp at h; rw [h]
+  have hpos : 2 ^ (k + 1) ≥ 1 := Nat.one_le_pow (k + 1) 2 (by omega)
+  exact Nat.Even.sub_odd hpos (Nat.even_pow.mpr ⟨even_two, by omega⟩) odd_one
+
+/-- Helper: get prime from membership in factorization support. -/
+lemma prime_of_mem_factorization_support {n p : ℕ} (h : p ∈ n.factorization.support) : Nat.Prime p := by
+  have : p ∈ n.primeFactors := Nat.support_factorization n ▸ h
+  exact (Nat.mem_primeFactors.mp this).1
+
+/-- Factorization of m² = 2 • m.factorization. -/
+lemma factorization_of_sq {n m : ℕ} (h : n = m * m) : n.factorization = 2 • m.factorization := by
+  rw [h, ← sq, Nat.factorization_pow]
+
+/-- If all prime valuations are even, n is a perfect square. -/
+lemma isSquare_of_all_valuations_even {n : ℕ} (hn : n ≠ 0) 
+    (h : ∀ p ∈ n.primeFactors, Even (n.factorization p)) : IsSquare n := by
+  have hsup : n.factorization.support = n.primeFactors := Nat.support_factorization n
+  have key : n = (n.primeFactors.prod (fun p => p ^ (n.factorization p / 2))) ^ 2 := by
+    conv_lhs => rw [← Nat.factorization_prod_pow_eq_self hn]
+    unfold Finsupp.prod
+    rw [hsup, sq, ← Finset.prod_mul_distrib]
+    apply Finset.prod_congr rfl
+    intro p hp
+    obtain ⟨k, hk⟩ := h p hp
+    rw [hk, ← two_mul, Nat.mul_div_cancel_left _ (by omega : 0 < 2)]; ring
+  use n.primeFactors.prod (fun p => p ^ (n.factorization p / 2))
+  rw [sq] at key; exact key
+
+/-- If n is squarish, then all odd prime valuations are even. -/
+lemma isSquarish_odd_prime_val_even {n p : ℕ} (hn : n ≠ 0) (hp : Nat.Prime p) (hodd : Odd p) 
+    (hsq : IsSquarish n) : Even (n.factorization p) := by
+  rcases hsq with ⟨m, hm⟩ | ⟨m, hn_eq, ⟨k, hk⟩⟩
+  · have hm0 : m ≠ 0 := by intro h; rw [h] at hm; simp at hm; exact hn hm
+    rw [factorization_of_sq hm]
+    simp only [Finsupp.smul_apply, smul_eq_mul]
+    use m.factorization p; ring
+  · have hk0 : k ≠ 0 := by intro h; rw [h] at hk; simp at hk; rw [hk] at hn_eq; simp at hn_eq; exact hn hn_eq
+    rw [hn_eq, hk]
+    have hpow : k * k ≠ 0 := by positivity
+    rw [Nat.factorization_mul (by omega) hpow, factorization_of_sq rfl]
+    simp only [Finsupp.add_apply, Finsupp.smul_apply, smul_eq_mul]
+    have hp2 : p ≠ 2 := fun h => by rw [h] at hodd; exact (Nat.not_even_iff_odd.mpr hodd) even_two
+    rw [Nat.Prime.factorization Nat.prime_two, Finsupp.single_apply, if_neg hp2.symm, zero_add]
+    use k.factorization p; ring
+
+/-- If all odd prime valuations are even, then n is squarish. -/
+lemma isSquarish_of_odd_valuations_even {n : ℕ} (hn : n ≠ 0) 
+    (h : ∀ p, Nat.Prime p → Odd p → Even (n.factorization p)) : IsSquarish n := by
+  by_cases hv2 : Even (n.factorization 2)
+  · left
+    apply isSquare_of_all_valuations_even hn
+    intro p hp
+    have hp_prime : Nat.Prime p := by
+      have : p ∈ n.factorization.support := Nat.support_factorization n ▸ hp
+      exact prime_of_mem_factorization_support this
+    rcases Nat.Prime.eq_two_or_odd hp_prime with rfl | hodd
+    · exact hv2
+    · exact h p hp_prime (Nat.odd_iff.mpr hodd)
+  · right
+    have hv2_odd : Odd (n.factorization 2) := Nat.not_even_iff_odd.mp hv2
+    obtain ⟨k, hk⟩ := hv2_odd
+    have h2_pos : n.factorization 2 ≥ 1 := by omega
+    have hdiv : 2 ∣ n := (Nat.Prime.dvd_iff_one_le_factorization Nat.prime_two hn).mpr h2_pos
+    use n / 2
+    constructor
+    · exact (Nat.mul_div_cancel' hdiv).symm
+    · have hn2 : n / 2 ≠ 0 := Nat.div_ne_zero_iff_of_dvd hdiv |>.mpr ⟨hn, by omega⟩
+      apply isSquare_of_all_valuations_even hn2
+      intro p hp
+      have hp_prime : Nat.Prime p := by
+        have : p ∈ (n/2).factorization.support := Nat.support_factorization (n/2) ▸ hp
+        exact prime_of_mem_factorization_support this
+      rcases Nat.Prime.eq_two_or_odd hp_prime with rfl | hodd
+      · have hdiv2 : (n / 2).factorization 2 = n.factorization 2 - 1 := by
+          rw [Nat.factorization_div hdiv]; simp [Nat.Prime.factorization Nat.prime_two]
+        rw [hdiv2, hk]; use k; omega
+      · have hpne2 : p ≠ 2 := fun heq => by rw [heq] at hodd; omega
+        have hdivp : (n / 2).factorization p = n.factorization p := by
+          rw [Nat.factorization_div hdiv]; simp [Nat.Prime.factorization Nat.prime_two, hpne2]
+        rw [hdivp]
+        by_cases hp_div : p ∈ n.primeFactors
+        · exact h p hp_prime (Nat.odd_iff.mpr hodd)
+        · have : n.factorization p = 0 := Finsupp.notMem_support_iff.mp (Nat.support_factorization n ▸ hp_div)
+          rw [this]; exact ⟨0, rfl⟩
+
+/-- σ(n) is odd if n is squarish. -/
+lemma sigma_odd_of_squarish {n : ℕ} (hn : n ≠ 0) (hsq : IsSquarish n) : Odd (sigma 1 n) := by
+  have hfact : sigma 1 n = n.factorization.prod (fun p k => sigma 1 (p ^ k)) := 
+    ArithmeticFunction.IsMultiplicative.multiplicative_factorization (sigma 1) isMultiplicative_sigma hn
+  rw [hfact, odd_finsupp_prod]
+  intro p hp_mem
+  have hp : Nat.Prime p := prime_of_mem_factorization_support hp_mem
+  rcases Nat.Prime.eq_two_or_odd hp with rfl | hodd'
+  · exact sigma_two_pow_odd' _
+  · rw [sigma_prime_pow_odd_iff' hp (Nat.odd_iff.mpr hodd')]
+    exact isSquarish_odd_prime_val_even hn hp (Nat.odd_iff.mpr hodd') hsq
+
+/-- If σ(n) is odd, then n is squarish. -/
+lemma squarish_of_sigma_odd {n : ℕ} (hn : n ≠ 0) (hodd : Odd (sigma 1 n)) : IsSquarish n := by
+  have hfact : sigma 1 n = n.factorization.prod (fun p k => sigma 1 (p ^ k)) := 
+    ArithmeticFunction.IsMultiplicative.multiplicative_factorization (sigma 1) isMultiplicative_sigma hn
+  rw [hfact, odd_finsupp_prod] at hodd
+  apply isSquarish_of_odd_valuations_even hn
+  intro p hp hodd'
+  by_cases hp_div : p ∣ n
+  · have hp_mem : p ∈ n.factorization.support := by
+      rw [Finsupp.mem_support_iff]
+      exact Nat.pos_iff_ne_zero.mp (Nat.Prime.factorization_pos_of_dvd hp hn hp_div)
+    have h := hodd p hp_mem
+    rwa [sigma_prime_pow_odd_iff' hp hodd'] at h
+  · have : n.factorization p = 0 := Nat.factorization_eq_zero_of_not_dvd hp_div
+    rw [this]; exact ⟨0, rfl⟩
+
+/-- Main characterization: σ(n) is odd iff n is squarish. -/
+lemma sigma_odd_iff_squarish {n : ℕ} (hn : n ≠ 0) : Odd (sigma 1 n) ↔ IsSquarish n :=
+  ⟨squarish_of_sigma_odd hn, sigma_odd_of_squarish hn⟩
+
+/-- Contrapositive: if n is not squarish, then σ(n) is even. -/
+lemma sigma_even_of_not_squarish {n : ℕ} (hn : n ≠ 0) (hnsq : ¬IsSquarish n) : Even (sigma 1 n) := by
+  by_contra h
+  exact hnsq (squarish_of_sigma_odd hn (Nat.not_even_iff_odd.mp h))
 
 /-- For n ≥ 2, the sequence σₖ(n) eventually becomes even and stays even.
 
-This follows from `sigma_odd_iff` and the growth of σ:
-- σ(n) is odd ⟺ n is a square or twice a square
+This follows from `sigma_odd_iff_squarish` and the growth of σ:
+- σ(n) is odd ⟺ n is squarish (a square or twice a square)
 - The sequence σₖ(n) grows unboundedly
-- Squares and twice-squares become increasingly sparse -/
+- Squarish numbers become increasingly sparse
+
+Note: This is a deep number-theoretic fact. The key difficulty is proving that
+the iterates cannot perpetually land on squarish numbers despite growing. -/
 lemma sigma_iterate_eventually_even (n : ℕ) (hn : n ≥ 2) :
     ∃ k₀, ∀ k ≥ k₀, Even ((sigma 1)^[k] n) := by
-  sorry  -- Requires sigma_odd_iff and analysis of iteration
+  sorry  -- Requires analysis showing iterates escape squarish set
+
+/-! ## Compounding Growth from Multiplicativity
+
+Using multiplicativity of σ, we show that if σₖ(n) stays even, we get
+exponential growth with base 3/2. However, this is NOT super-exponential.
+
+For super-exponential, we need the abundancy ratio σ(m)/m to grow,
+which requires the number of prime factors to increase.
+-/
+
+/-- For odd m, σ(2m) = 3σ(m). This follows from multiplicativity of σ. -/
+lemma sigma_two_mul_odd (m : ℕ) (hodd : Odd m) : sigma 1 (2 * m) = 3 * sigma 1 m := by
+  have hcop : Nat.gcd 2 m = 1 := Nat.coprime_two_left.mpr hodd
+  rw [isMultiplicative_sigma.map_mul_of_coprime hcop]
+  rw [sigma_two]
+
+/-- Inductive exponential lower bound: if the sequence stays even from k₀ onwards,
+    then 2^j · σₖ₀₊ⱼ(n) ≥ 3^j · σₖ₀(n) for all j ≥ 0.
+    
+    This is equivalent to σₖ₀₊ⱼ(n) ≥ (3/2)^j · σₖ₀(n). -/
+lemma exp_growth_induct (n : ℕ) (hn : n ≥ 2) (k₀ : ℕ) 
+    (heven : ∀ k ≥ k₀, Even ((sigma 1)^[k] n)) (j : ℕ) :
+    2^j * (sigma 1)^[k₀ + j] n ≥ 3^j * (sigma 1)^[k₀] n := by
+  induction j with
+  | zero => simp
+  | succ j ih =>
+    have hiter : (sigma 1)^[k₀ + (j + 1)] n = sigma 1 ((sigma 1)^[k₀ + j] n) := by
+      rw [show k₀ + (j + 1) = (k₀ + j) + 1 by omega]
+      simp only [Function.iterate_succ', Function.comp_apply]
+    have heven_j : Even ((sigma 1)^[k₀ + j] n) := heven (k₀ + j) (by omega)
+    have hge2_j : (sigma 1)^[k₀ + j] n ≥ 2 := sigma_iterate_ge_two n hn (k₀ + j)
+    have hstep : 2 * sigma 1 ((sigma 1)^[k₀ + j] n) ≥ 3 * (sigma 1)^[k₀ + j] n :=
+      abundancy_bound_even _ hge2_j heven_j
+    rw [hiter, pow_succ, pow_succ, mul_comm (2^j) 2, mul_comm (3^j) 3]
+    calc 2 * 2^j * sigma 1 ((sigma 1)^[k₀ + j] n)
+        = 2^j * (2 * sigma 1 ((sigma 1)^[k₀ + j] n)) := by ring
+      _ ≥ 2^j * (3 * (sigma 1)^[k₀ + j] n) := Nat.mul_le_mul_left _ hstep
+      _ = 3 * (2^j * (sigma 1)^[k₀ + j] n) := by ring
+      _ ≥ 3 * (3^j * (sigma 1)^[k₀] n) := Nat.mul_le_mul_left _ ih
+      _ = 3 * 3^j * (sigma 1)^[k₀] n := by ring
+
+/-- Real-valued exponential bound: σₖ₀₊ⱼ(n) ≥ (3/2)^j · σₖ₀(n).
+    
+    This shows that staying even gives EXPONENTIAL growth with base 3/2,
+    but this is NOT sufficient for super-exponential growth (which requires
+    base → ∞). -/
+lemma exp_growth_real (n : ℕ) (hn : n ≥ 2) (k₀ : ℕ) 
+    (heven : ∀ k ≥ k₀, Even ((sigma 1)^[k] n)) (j : ℕ) :
+    ((sigma 1)^[k₀ + j] n : ℝ) ≥ (3/2 : ℝ)^j * ((sigma 1)^[k₀] n : ℝ) := by
+  have h := exp_growth_induct n hn k₀ heven j
+  have h2pow_pos : (0 : ℝ) < (2 : ℝ)^j := by positivity
+  rw [ge_iff_le, div_pow]
+  rw [div_mul_eq_mul_div, div_le_iff₀ h2pow_pos, mul_comm]
+  calc ((sigma 1)^[k₀] n : ℝ) * (3 : ℝ)^j 
+      = (3 : ℝ)^j * ((sigma 1)^[k₀] n : ℝ) := by ring
+    _ = ((3^j : ℕ) : ℝ) * ((sigma 1)^[k₀] n : ℝ) := by norm_cast
+    _ = ((3^j * (sigma 1)^[k₀] n : ℕ) : ℝ) := by rw [Nat.cast_mul]
+    _ ≤ ((2^j * (sigma 1)^[k₀ + j] n : ℕ) : ℝ) := by exact_mod_cast h
+    _ = ((2^j : ℕ) : ℝ) * ((sigma 1)^[k₀ + j] n : ℝ) := by rw [Nat.cast_mul]
+    _ = (2 : ℝ)^j * ((sigma 1)^[k₀ + j] n : ℝ) := by norm_cast
+    _ = ((sigma 1)^[k₀ + j] n : ℝ) * (2 : ℝ)^j := by ring
+
+/-! ## Prime Factor Accumulation Theory
+
+For super-exponential growth, we need more than just σ(m) ≥ 3m/2.
+The key insight is that the abundancy σ(m)/m depends on the prime factors:
+
+  σ(m)/m ≥ ∏_{p | m} (1 + 1/p)
+
+For m divisible by first k primes p₁, ..., pₖ:
+  σ(m)/m ≥ (1 + 1/2)(1 + 1/3)(1 + 1/5)... = ∏_{i≤k} (pᵢ+1)/pᵢ
+
+This product grows without bound as k → ∞ (by Mertens' theorem,
+∏_{p≤x} (1 - 1/p)⁻¹ ~ e^γ log x).
+
+So if the number of distinct prime factors of σₖ(n) grows unboundedly,
+we get super-exponential growth.
+
+**Gap Analysis**: The (3/2)^k growth from `exp_growth_real` only gives
+exponential growth. For c = 2 > 3/2, we need σₖ(n) > 2^k eventually,
+but (3/2)^k / 2^k = (3/4)^k → 0, so exponential bounds don't help.
+
+Super-exponential requires showing that the effective base grows, i.e.,
+σ(σₖ(n))/σₖ(n) → ∞. This would follow from ω(σₖ(n)) → ∞.
+-/
+
+/-- The number of distinct prime factors of n. -/
+noncomputable def omega (n : ℕ) : ℕ := n.primeFactors.card
+
+/-- For n with prime factors p₁, ..., pₖ, we have 
+    σ(n)/n ≥ ∏ᵢ (1 + 1/pᵢ).
+    
+    This is a lower bound based on just counting p^1 and p^0 for each prime. -/
+lemma abundancy_prime_factor_bound (n : ℕ) (hn : n ≥ 1) :
+    (sigma 1 n : ℝ) / n ≥ ∏ p ∈ n.primeFactors, (1 + 1 / (p : ℝ)) := by
+  sorry  -- Requires multiplicativity and prime factorization
+
+/-- The product ∏_{p ∈ first k primes} (1 + 1/p) is unbounded as k → ∞.
+    (This follows from divergence of ∑ 1/p.) -/
+lemma prod_one_plus_inv_primes_unbounded :
+    Tendsto (fun k => ∏ p ∈ Finset.filter Nat.Prime (Finset.range k), 
+      (1 + 1 / (p : ℝ))) atTop atTop := by
+  sorry  -- Deep number theory (Mertens)
+
+/-- **CONJECTURE**: The number of prime factors of σₖ(n) grows unboundedly.
+    This is the key missing piece for proving Erdős Problem 410.
+    
+    If proven, combined with `abundancy_prime_factor_bound` and
+    `prod_one_plus_inv_primes_unbounded`, this would give σₖ(n)^{1/k} → ∞. -/
+lemma prime_factors_accumulate (n : ℕ) (hn : n ≥ 2) :
+    Tendsto (fun k => omega ((sigma 1)^[k] n)) atTop atTop := by
+  sorry  -- OPEN PROBLEM - this is the core of Erdős 410
 
 /-! ## Super-Exponential Lower Bound (Partial Progress)
 
