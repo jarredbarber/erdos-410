@@ -19,11 +19,16 @@ open ArithmeticFunction Filter
 
 namespace Erdos410
 
+/-- For any n ≥ 1, σ(n) ≥ n since n is always a divisor of itself. -/
+lemma sigma_one_ge (n : ℕ) (hn : n ≥ 1) : sigma 1 n ≥ n := by
+  rw [sigma_one_apply, ge_iff_le]
+  exact Finset.single_le_sum (fun d _ => Nat.zero_le d)
+    (Nat.mem_divisors_self n (Nat.one_le_iff_ne_zero.mp hn))
+
 /-- Erdős Problem 410: Iterated sum-of-divisors grows super-exponentially.
 
 DO NOT MODIFY THIS STATEMENT. This is the canonical formalization from
 google-deepmind/formal-conjectures. -/
-@[reducible]
 theorem erdos_410 : ∀ n > 1,
     Tendsto (fun k : ℕ ↦ ((sigma 1)^[k] n : ℝ) ^ (1 / (k : ℝ))) atTop atTop := by
   sorry
