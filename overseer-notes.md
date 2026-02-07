@@ -77,4 +77,21 @@ This is genuinely impressive Lean formalization work. The worker built ~180 line
 
 **Assessment**: The sorry chain is now well-decomposed. Items 2-3 are provable with more work. Item 1 is hard but potentially doable. Item 4 is the mathematical frontier.
 
+### Check-in 4 — 16:30 UTC
+
+**Sorry count: 6 → 5.** A4 (abundancy prime factor bound) was proven. A5 (Mertens-type divergence) now in progress.
+
+**Novel formalizations**: The `sigma_odd_iff_squarish` characterization (σ(n) is odd ⟺ n is a perfect square or twice a perfect square) and its supporting infrastructure (`isSquare_of_all_valuations_even`, squarish ↔ even-odd-valuations) are genuinely new Lean formalizations. This classical result has never been in Mathlib. ~100 lines of careful factorization work. Could be upstreamed. Everything else is either routine or known-but-unformalised Mathlib gaps.
+
+**Task throughput**: 18 tasks created total, 15 closed. Worker has been running ~2 hours. The L3.2 task keeps getting closed as "open conjecture" when picked up — need to either restructure to avoid this or accept that the workers correctly identify the mathematical frontier.
+
+**Remaining sorrys** (5):
+1. `sigma_iterate_eventually_even` — iterates escape squarish set
+2. `prod_one_plus_inv_primes_unbounded` — ∏(1+1/p) diverges (A5 working on this)
+3. `prime_factors_accumulate` — ω(σₖ(n)) → ∞ (the true core)
+4. `sigma_iterate_superexp_gt_one` — c > 1 case
+5. `erdos_410` — main theorem
+
+Items 4-5 follow from 1-3. Item 2 is provable (Mertens). Items 1 and 3 are the mathematical frontier.
+
 ---
