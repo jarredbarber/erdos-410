@@ -467,7 +467,7 @@ lemma sigma_two_mul_sq_not_squarish (k : ℕ) (hk : k ≥ 1) : ¬IsSquarish (sig
     use k^2
     constructor
     · ring
-    · use k; rfl
+    · use k; rw [sq]
   -- Since it is odd, if it is squarish, it must be a square.
   have h_square : IsSquare (sigma 1 (2 * k^2)) := by
     rcases h_squarish with h | ⟨m, h1, h2⟩
@@ -510,24 +510,25 @@ lemma sigma_iterate_eventually_even (n : ℕ) (hn : n ≥ 2) :
       have val_gt : (sigma 1)^[k] n > 121 := by
         apply lt_of_lt_of_le (by norm_num) (hk₁ k hk)
       obtain ⟨x, hx⟩ := h_sq
-      rw [← hx] at val_gt
-      rw [Function.iterate_succ_apply]
-      rw [← hx]
+      -- hx : (sigma 1)^[k] n = x * x
+      rw [hx] at val_gt
+      rw [Function.iterate_succ_apply']
+      rw [hx, ← sq]
       apply sigma_sq_squarish_bound x
-      -- x > 11 since x² > 121
-      rw [← mul_self_gt_mul_self_iff (by positivity)] at val_gt
-      exact val_gt
+      have hx_gt : x > 11 := by nlinarith [val_gt]
+      exact hx_gt
     · -- Case 2m²
-      rw [Function.iterate_succ_apply]
+      rw [Function.iterate_succ_apply']
       rw [h_eq]
       obtain ⟨x, hx⟩ := h_sq
-      rw [← hx]
+      -- hx : m = x * x
+      rw [hx, ← sq]
       apply sigma_two_mul_sq_not_squarish
       -- Need x ≥ 1. Since (sigma 1)^[k] n > 121, 2x² > 121 => x² ≥ 61 => x ≥ 8
       have val_gt : (sigma 1)^[k] n > 121 := lt_of_lt_of_le (by norm_num) (hk₁ k hk)
-      rw [h_eq, ← hx] at val_gt
-      have : 2 * x^2 > 0 := by omega
-      have : x^2 > 0 := by omega
+      rw [h_eq, hx] at val_gt
+      have : 2 * (x * x) > 0 := by omega
+      have : x * x > 0 := by omega
       exact Nat.pos_of_ne_zero (fun h => by rw [h] at this; simp at this)
 
   -- This shows we can't have consecutive squarish numbers.
