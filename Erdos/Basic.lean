@@ -786,8 +786,9 @@ lemma prod_one_plus_inv_primes_unbounded :
     This is the key lemma for proving Erdős Problem 410.
     This follows from the fact that the sequence grows unboundedly and 
     continually gains new prime factors (Bang's Theorem / Zsigmondy's Theorem). -/
-axiom prime_factors_accumulate (n : ℕ) (hn : n ≥ 2) :
-    Tendsto (fun k => ∑ p ∈ ((sigma 1)^[k] n).primeFactors, (1 / (p : ℝ))) atTop atTop
+lemma prime_factors_accumulate (n : ℕ) (hn : n ≥ 2) :
+    Tendsto (fun k => ∑ p ∈ ((sigma 1)^[k] n).primeFactors, (1 / (p : ℝ))) atTop atTop := by
+  sorry
 
 /-- The abundancy ratio σ(σₖ(n))/σₖ(n) tends to infinity. -/
 lemma abundancy_ratio_diverges (n : ℕ) (hn : n ≥ 2) :
