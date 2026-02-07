@@ -1,4 +1,5 @@
 import Mathlib
+import Archive.Wiedijk100Theorems.SumOfPrimeReciprocalsDiverges
 
 /-!
 # Erdős Problem 410
@@ -736,12 +737,63 @@ lemma abundancy_prime_factor_bound (n : ℕ) (hn : n ≥ 1) :
     have hk := factorization_pos_of_mem_primeFactors hp
     exact sigma_prime_pow_ratio_ge p (n.factorization p) hp_prime hk
 
+/-- Key helper: ∏(1 + f(x)) ≥ 1 + ∑f(x) for nonneg f.
+    This is a weak form of the multinomial expansion. -/
+lemma prod_one_add_ge_one_add_sum {ι : Type*} {s : Finset ι} {f : ι → ℝ}
+    (hf : ∀ x ∈ s, 0 ≤ f x) : ∏ x ∈ s, (1 + f x) ≥ 1 + ∑ x ∈ s, f x := by
+  classical
+  induction s using Finset.induction_on with
+  | empty => simp
+  | insert x s' hx ih =>
+    have hfx : 0 ≤ f x := hf x (Finset.mem_insert_self x s')
+    have hfs' : ∀ y ∈ s', 0 ≤ f y := fun y hy => hf y (Finset.mem_insert_of_mem hy)
+    rw [Finset.prod_insert hx, Finset.sum_insert hx]
+    have hsum_nonneg : 0 ≤ ∑ y ∈ s', f y := Finset.sum_nonneg hfs'
+    have hih : ∏ y ∈ s', (1 + f y) ≥ 1 + ∑ y ∈ s', f y := ih hfs'
+    have h1fx_pos : 0 ≤ 1 + f x := by linarith
+    have hprod_pos : 0 ≤ ∏ y ∈ s', (1 + f y) := by
+      apply Finset.prod_nonneg
+      intro y hy
+      have := hfs' y hy
+      linarith
+    have h1sum_pos : 0 ≤ 1 + ∑ y ∈ s', f y := by linarith
+    have step1 : (1 + f x) * ∏ y ∈ s', (1 + f y) ≥ (1 + f x) * (1 + ∑ y ∈ s', f y) := by
+      apply mul_le_mul_of_nonneg_left hih h1fx_pos
+    have step2 : (1 + f x) * (1 + ∑ y ∈ s', f y) =
+        1 + f x + ∑ y ∈ s', f y + f x * ∑ y ∈ s', f y := by ring
+    have h_cross_pos : 0 ≤ f x * ∑ y ∈ s', f y := mul_nonneg hfx hsum_nonneg
+    linarith
+
 /-- The product ∏_{p ∈ first k primes} (1 + 1/p) is unbounded as k → ∞.
-    (This follows from divergence of ∑ 1/p.) -/
+    This follows from the divergence of ∑ 1/p (Euler's theorem, 1737).
+
+    Proof strategy:
+    - ∏ (1 + 1/p) ≥ 1 + ∑ 1/p by `prod_one_add_ge_one_add_sum`
+    - ∑ 1/p → ∞ by `Theorems100.Real.tendsto_sum_one_div_prime_atTop`
+    - Therefore ∏ (1 + 1/p) → ∞ -/
 lemma prod_one_plus_inv_primes_unbounded :
-    Tendsto (fun k => ∏ p ∈ Finset.filter Nat.Prime (Finset.range k), 
+    Tendsto (fun k => ∏ p ∈ Finset.filter Nat.Prime (Finset.range k),
       (1 + 1 / (p : ℝ))) atTop atTop := by
-  sorry  -- Deep number theory (Mertens)
+  -- The product ≥ 1 + sum of 1/p
+  have h_lower_bound : ∀ k,
+      1 + ∑ p ∈ Finset.filter Nat.Prime (Finset.range k), 1 / (p : ℝ) ≤
+      ∏ p ∈ Finset.filter Nat.Prime (Finset.range k), (1 + 1 / (p : ℝ)) := fun k => by
+    apply prod_one_add_ge_one_add_sum
+    intro p _
+    simp only [one_div, inv_nonneg]
+    exact Nat.cast_nonneg p
+  -- The sum diverges (from Erdős's proof in the Archive)
+  have h_sum_unbounded :
+      Tendsto (fun k => ∑ p ∈ Finset.filter Nat.Prime (Finset.range k), 1 / (p : ℝ))
+        atTop atTop :=
+    Theorems100.Real.tendsto_sum_one_div_prime_atTop
+  -- Therefore 1 + sum diverges
+  have h_one_add_sum_unbounded :
+      Tendsto (fun k => 1 + ∑ p ∈ Finset.filter Nat.Prime (Finset.range k), 1 / (p : ℝ))
+        atTop atTop := by
+    exact tendsto_atTop_add_const_left atTop 1 h_sum_unbounded
+  -- By lower bound, product diverges
+  exact tendsto_atTop_mono h_lower_bound h_one_add_sum_unbounded
 
 /-- **CONJECTURE**: The number of prime factors of σₖ(n) grows unboundedly.
     This is the key missing piece for proving Erdős Problem 410.
