@@ -25,6 +25,21 @@ lemma sigma_one_ge (n : ℕ) (hn : n ≥ 1) : sigma 1 n ≥ n := by
   exact Finset.single_le_sum (fun d _ => Nat.zero_le d)
     (Nat.mem_divisors_self n (Nat.one_le_iff_ne_zero.mp hn))
 
+/-- For any n ≥ 2, σ(n) ≥ n + 1 since both 1 and n are divisors of n and 1 ≠ n. -/
+lemma sigma_one_ge_succ (n : ℕ) (hn : n ≥ 2) : sigma 1 n ≥ n + 1 := by
+  rw [sigma_one_apply, ge_iff_le, add_comm]
+  have h1n : 1 ≠ n := by omega
+  have hn0 : n ≠ 0 := by omega
+  have hsub : ({1, n} : Finset ℕ) ⊆ n.divisors := by
+    intro d hd
+    simp only [Finset.mem_insert, Finset.mem_singleton] at hd
+    cases hd with
+    | inl h => rw [h]; exact Nat.one_mem_divisors.mpr hn0
+    | inr h => rw [h]; exact Nat.mem_divisors_self n hn0
+  have hsum : ∑ d ∈ ({1, n} : Finset ℕ), (d : ℕ) = 1 + n := Finset.sum_pair h1n
+  calc 1 + n = ∑ d ∈ ({1, n} : Finset ℕ), d := hsum.symm
+    _ ≤ ∑ d ∈ n.divisors, d := Finset.sum_le_sum_of_subset hsub
+
 /-- Erdős Problem 410: Iterated sum-of-divisors grows super-exponentially.
 
 DO NOT MODIFY THIS STATEMENT. This is the canonical formalization from
