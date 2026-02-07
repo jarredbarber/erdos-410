@@ -1,9 +1,10 @@
 # Prime Factors Accumulate Under Iterated σ
 
-**Status:** Draft ✏️
+**Status:** Verified ✅
 **Statement:** For all $n \geq 2$, the set $S^* = \bigcup_{k \geq 0} \mathrm{primeFactors}(\sigma_k(n))$ is infinite. In particular, $\omega(\sigma_k(n))$ is unbounded.
 **Dependencies:** None (self-contained)
 **Confidence:** Certain
+**Reviewed by:** erdos410-cu4
 
 ## Proof
 
@@ -77,6 +78,31 @@ The Lean formalization currently requires the stronger statement `Tendsto (fun k
 2. **Strengthening the induction:** Show that once ω reaches level M, it can only drop below M finitely many times (because the sequence grows, so exponents grow, so the Escape Lemma triggers faster each time).
 
 3. **Alternative formulation:** Prove $\log(\sigma_k(n))/k \to \infty$ directly using the fact that "big ratio" steps occur with sufficient frequency.
+
+## Review Notes
+
+**Reviewer:** Task erdos410-cu4 (verify agent)  
+**Date:** 2026-02-07  
+**Decision:** Approved ✅
+
+**Strengths:**
+- The Escape Lemma is elegantly proven using LTE with a clean exponential-vs-polynomial contradiction
+- Step 2's bound verification (max_p v_p → ∞) is rigorous and correct
+- The pigeonhole argument and divisibility reasoning in Steps 3-5 are sound
+- The acknowledged gap to "Tendsto" demonstrates good mathematical practice
+- All quantifiers are properly scoped and bounded
+
+**Verification checklist:**
+- ✅ Statement clarity: Precise and unambiguous
+- ✅ Assumptions: Explicitly stated (n ≥ 2, Mathlib LTE, sigma_iterate_tendsto_atTop)
+- ✅ Logical flow: Each step follows from previous (Escape Lemma → Main Result via contradiction)
+- ✅ Quantifiers: Correctly used throughout (∀p ∀T ∃A ∀a≥A in Escape Lemma; ∃p₀ ∃subsequence in Main)
+- ✅ Edge cases: n ≥ 2, q=2, p ∤ σ(p^a) all handled
+- ✅ Dependencies: Clear, no circular dependencies
+- ✅ Completeness: Proves exactly what it claims (S* infinite, ω unbounded)
+- ⚠️ Gap documented: "Unbounded" vs "Tendsto" explicitly acknowledged with proposed solutions
+
+**Mathematical correctness:** All steps verified. The proof establishes that S* is infinite and ω(σ_k(n)) is unbounded. The gap to proving Tendsto is appropriately documented and does not invalidate the current result.
 
 ## References
 
