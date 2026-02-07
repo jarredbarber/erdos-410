@@ -191,6 +191,124 @@ lemma abundancy_ratio_even (n : ℕ) (hn : n ≥ 2) (heven : Even n) :
   have h3 : (3 * n : ℝ) ≤ 2 * sigma 1 n := by exact_mod_cast h2
   linarith
 
+/-! ## Sigma Parity Lemmas
+
+The parity of σ(n) is determined by the prime factorization of n:
+- σ(2^k) is always odd
+- σ(p^k) for odd prime p is odd ⟺ k is even
+- σ(n) is odd ⟺ n is a square or twice a square
+
+These results are building blocks for showing that σₖ(n) is eventually even,
+which in turn gives exponential growth with base ≥ 3/2.
+-/
+
+/-- The geometric sum ∑_{i=0}^{n-1} 2^i = 2^n - 1. -/
+lemma sum_pow_two' (n : ℕ) : ∑ k ∈ Finset.range n, 2^k = 2^n - 1 := by
+  have h := Nat.geomSum_eq (by norm_num : (2 : ℕ) ≤ 2) n
+  have h2 : (2 : ℕ) - 1 = 1 := by norm_num
+  rw [h2, Nat.div_one] at h
+  exact h
+
+/-- Helper: convert ¬Odd to Even for naturals. -/
+lemma not_odd_to_even (n : ℕ) (h : ¬Odd n) : Even n := by
+  rcases Nat.even_or_odd n with he | ho
+  · exact he
+  · exact (h ho).elim
+
+/-- A sum of odd numbers is odd iff there are an odd number of them. -/
+lemma odd_sum_odd_iff {ι : Type*} (s : Finset ι) (f : ι → ℕ) (hodd : ∀ i ∈ s, Odd (f i)) :
+    Odd (∑ i ∈ s, f i) ↔ Odd s.card := by
+  classical
+  induction s using Finset.induction_on with
+  | empty => simp only [Finset.sum_empty, Finset.card_empty]
+  | @insert a s ha ih =>
+    rw [Finset.sum_insert ha]
+    simp only [Finset.card_insert_eq_ite, if_neg ha]
+    have hodd_a : Odd (f a) := hodd a (Finset.mem_insert_self a s)
+    have hodd_rest : ∀ i ∈ s, Odd (f i) := fun i hi => hodd i (Finset.mem_insert_of_mem hi)
+    have ih' := ih hodd_rest
+    rw [Nat.odd_add_one]
+    constructor
+    · intro h_total_odd h_card_odd
+      have h_sum_odd : Odd (∑ x ∈ s, f x) := ih'.mpr h_card_odd
+      have := Odd.add_odd hodd_a h_sum_odd
+      rw [Nat.even_iff] at this
+      rw [Nat.odd_iff] at h_total_odd
+      omega
+    · intro h_card_not_odd
+      have h_sum_not_odd : ¬Odd (∑ x ∈ s, f x) := fun h => h_card_not_odd (ih'.mp h)
+      rw [Nat.odd_iff, Nat.add_mod]
+      have hodd_a' : f a % 2 = 1 := Nat.odd_iff.mp hodd_a
+      have h_sum_even : (∑ x ∈ s, f x) % 2 = 0 := Nat.even_iff.mp (not_odd_to_even _ h_sum_not_odd)
+      simp [hodd_a', h_sum_even]
+
+/-- Helper: Odd (n+1) ↔ Even n. -/
+lemma odd_succ_iff_even (n : ℕ) : Odd (n + 1) ↔ Even n := by
+  constructor
+  · intro h
+    rw [Nat.odd_iff] at h
+    rw [Nat.even_iff]
+    omega
+  · intro h
+    rw [Nat.even_iff] at h
+    rw [Nat.odd_iff]
+    omega
+
+/-- σ(2^k) = 2^(k+1) - 1, the Mersenne number. -/
+lemma sigma_pow_two' (k : ℕ) : sigma 1 (2^k) = 2^(k+1) - 1 := by
+  rw [sigma_apply_prime_pow (Nat.prime_two)]
+  have h : ∀ j, 2^(j * 1) = 2^j := fun j => by ring_nf
+  simp_rw [h]
+  exact sum_pow_two' (k + 1)
+
+/-- 2^(k+1) - 1 is always odd. -/
+lemma pow_two_sub_one_odd (k : ℕ) : Odd (2^(k+1) - 1) := by
+  rw [Nat.odd_iff]
+  have h : 2^(k+1) ≥ 1 := Nat.one_le_pow (k+1) 2 (by norm_num)
+  omega
+
+/-- σ(2^k) is always odd. -/
+lemma sigma_pow_two_odd (k : ℕ) : Odd (sigma 1 (2^k)) := by
+  rw [sigma_pow_two']
+  exact pow_two_sub_one_odd k
+
+/-- For odd prime p, σ(p^k) is odd iff k is even. -/
+lemma sigma_odd_prime_pow_iff (p k : ℕ) (hp : p.Prime) (hodd : Odd p) :
+    Odd (sigma 1 (p^k)) ↔ Even k := by
+  rw [sigma_apply_prime_pow hp]
+  have h_eq : ∑ j ∈ Finset.range (k + 1), p ^ (j * 1) = ∑ j ∈ Finset.range (k + 1), p ^ j := by
+    congr 1; ext j; ring_nf
+  rw [h_eq]
+  have hall_odd : ∀ j ∈ Finset.range (k+1), Odd (p^j) := fun j _ => hodd.pow
+  rw [odd_sum_odd_iff (Finset.range (k+1)) (fun j => p^j) hall_odd]
+  rw [Finset.card_range]
+  exact odd_succ_iff_even k
+
+/-- A natural number is a square or twice a square. -/
+def isSquareOrTwiceSquare (n : ℕ) : Prop :=
+  IsSquare n ∨ (∃ m, IsSquare m ∧ n = 2 * m)
+
+/-- σ(n) is odd iff n is a square or twice a square.
+
+This is a well-known number-theoretic result. The proof uses multiplicativity of σ
+and the characterization of σ(p^k) parity:
+- σ(2^a) is always odd
+- σ(p^a) for odd p is odd ⟺ a is even
+- n is a square or twice a square ⟺ all odd prime exponents in n are even -/
+lemma sigma_odd_iff (n : ℕ) (hn : n ≠ 0) :
+    Odd (sigma 1 n) ↔ isSquareOrTwiceSquare n := by
+  sorry  -- Requires multiplicativity argument with prime factorization
+
+/-- For n ≥ 2, the sequence σₖ(n) eventually becomes even and stays even.
+
+This follows from `sigma_odd_iff` and the growth of σ:
+- σ(n) is odd ⟺ n is a square or twice a square
+- The sequence σₖ(n) grows unboundedly
+- Squares and twice-squares become increasingly sparse -/
+lemma sigma_iterate_eventually_even (n : ℕ) (hn : n ≥ 2) :
+    ∃ k₀, ∀ k ≥ k₀, Even ((sigma 1)^[k] n) := by
+  sorry  -- Requires sigma_odd_iff and analysis of iteration
+
 /-! ## Super-Exponential Lower Bound (Partial Progress)
 
 The main theorem `erdos_410` requires showing that σₖ(n)^{1/k} → ∞,
