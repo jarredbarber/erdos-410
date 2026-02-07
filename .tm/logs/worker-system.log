@@ -1335,3 +1335,92 @@ $ cd /home/jarred/code/erdos-410 && tm close erdos410-5c7
 **Verification**: `lake build Erdos` succeeds. Only warning is the expected `sorry` in the main `erdos_410` theorem.
 
 **Confidence**: HIGH - the proof compiles and uses standard Mathlib API correctly.
+[2026-02-07T15:14:54.223Z] ✅ Closed task erdos410-5c7
+
+[2026-02-07T15:14:54.223Z] 🔄 Checking git status...
+[2026-02-07T15:14:54.235Z] 📝 Committing changes...
+[2026-02-07T15:14:54.261Z] 🚀 Pushing to remote...
+[2026-02-07T15:14:55.885Z] 
+================================================================================
+[2026-02-07T15:14:55.885Z] 📌 Processing task: erdos410-6ne - V1.1: Verify σ(n) ≥ n lemma compiles
+[2026-02-07T15:14:55.885Z]    Role: verify | Priority: 2 | Size: small
+[2026-02-07T15:14:55.885Z] ================================================================================
+
+[2026-02-07T15:14:55.887Z] ✓ Claimed task erdos410-6ne
+
+[2026-02-07T15:14:55.888Z] 🤖 Using agent: verify with models: anthropic/claude-opus-4-6:high, anthropic/claude-opus-4-5:high, google-antigravity/gemini-3-pro:high
+
+[2026-02-07T15:14:55.888Z] 💭 Starting pi agent session with model: anthropic/claude-opus-4-6:high...
+[2026-02-07T15:15:01.822Z] 
+$ cd /home/jarred/code/erdos-410 && tm update erdos410-6ne --status "Starting verification of σ(n) ≥ n lemma"
+[2026-02-07T15:15:02.995Z] 
+$ cd /home/jarred/code/erdos-410 && tm show erdos410-c3j 2>/dev/null || echo "Checking dependency..."
+[2026-02-07T15:15:04.123Z] 
+🛠️  Executing tool: read...
+[2026-02-07T15:15:09.197Z] 
+$ cd /home/jarred/code/erdos-410 && tm update erdos410-6ne --status "Running lake build to verify compilation"
+[2026-02-07T15:15:10.310Z] 
+$ cd /home/jarred/code/erdos-410 && lake build Erdos 2>&1
+[2026-02-07T15:15:30.647Z] 
+$ cd /home/jarred/code/erdos-410 && tm update erdos410-6ne --status "Verifying proof logic and checking for issues"
+[2026-02-07T15:15:37.132Z] 
+$ cd /home/jarred/code/erdos-410 && grep -n "sorry" Erdos/Basic.lean
+[2026-02-07T15:15:37.136Z] 
+$ cd /home/jarred/code/erdos-410 && lake env lean -D warningAsError=true --run -c 'import Erdos; #check Erdos410.sigma_one_ge' 2>&1 | head -20 || echo "Checking Lean API..."
+[2026-02-07T15:15:44.552Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/check_lemma.lean << 'EOF'
+import Mathlib
+
+open ArithmeticFunction
+
+-- Test that sigma_one_ge compiles and check the types
+#check @sigma_one_apply -- Nat.sigma 1 n = ∑ d ∈ n.divisors, d
+#check @Finset.single_le_sum
+#check @Nat.mem_divisors_self
+#check @Nat.one_le_iff_ne_zero
+
+-- Verify our lemma is correctly typed
+theorem test_sigma_one_ge (n : ℕ) (hn : n ≥ 1) : sigma 1 n ≥ n := by
+  rw [sigma_one_apply, ge_iff_le]
+  exact Finset.single_le_sum (fun d _ => Nat.zero_le d)
+    (Nat.mem_divisors_self n (Nat.one_le_iff_ne_zero.mp hn))
+EOF
+lake env lean /tmp/check_lemma.lean 2>&1
+[2026-02-07T15:16:01.398Z] 
+$ cd /home/jarred/code/erdos-410 && tm close erdos410-6ne --summary "Verified: sigma_one_ge compiles correctly with no sorry"
+[2026-02-07T15:16:05.334Z] 
+$ cd /home/jarred/code/erdos-410 && tm close erdos410-6ne
+[2026-02-07T15:16:15.422Z] 
+
+📝 Agent response complete.
+
+[2026-02-07T15:16:15.422Z] 📄 Log saved to .tm/logs/worker-erdos410-6ne.md
+[2026-02-07T15:16:15.423Z] 
+📊 Task erdos410-6ne completed:
+[2026-02-07T15:16:15.423Z]    Summary: Approved - σ(n) ≥ n lemma verified
+[2026-02-07T15:16:15.423Z]    Details: ## Verification Results
+
+### Build Status
+✅ `lake build Erdos` succeeded
+
+### Lemma Verified
+```lean
+lemma sigma_one_ge (n : ℕ) (hn : n ≥ 1) : sigma 1 n ≥ n := by
+  rw [sigma_one_apply, ge_iff_le]
+  exact Finset.single_le_sum (fun d _ => Nat.zero_le d)
+    (Nat.mem_divisors_self n (Nat.one_le_iff_ne_zero.mp hn))
+```
+
+### Proof Logic Verified
+1. **`sigma_one_apply`**: Correctly unfolds `σ 1 n = ∑ d ∈ n.divisors, d`
+2. **`Finset.single_le_sum`**: Valid application - shows `a ∈ s` implies `f a ≤ ∑ x ∈ s, f x` when `f` is non-negative
+3. **`Nat.mem_divisors_self`**: Correctly shows `n ∈ n.divisors` when `n ≠ 0`
+4. **`Nat.one_le_iff_ne_zero`**: Proper bridge from `n ≥ 1` to `n ≠ 0`
+
+### No Issues Found
+- ✅ No `sorry` in the lemma
+- ✅ Proof is self-contained
+- ✅ Uses standard Mathlib API correctly
+- ✅ Main theorem `erdos_410` statement unchanged
+
+**Confidence**: Certain (Lean typechecker verified the proof; independent type checking confirmed)
