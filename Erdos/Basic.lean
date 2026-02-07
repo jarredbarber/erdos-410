@@ -682,13 +682,59 @@ lemma sigma_two_pow_mul_odd {k m : ℕ} (hm_odd : Odd m) :
       Nat.Coprime.pow_left k (Nat.coprime_two_left.mpr hm_odd)
     exact isMultiplicative_sigma.map_mul_of_coprime hcop
 
+/-- If p is in n's prime factors, then the factorization exponent is at least 1. -/
+lemma factorization_pos_of_mem_primeFactors {n p : ℕ} (h : p ∈ n.primeFactors) :
+    n.factorization p ≥ 1 := by
+  rw [Nat.mem_primeFactors] at h
+  have hne : n ≠ 0 := h.2.2
+  have hdvd : p ∣ n := h.2.1
+  exact Nat.Prime.factorization_pos_of_dvd h.1 hne hdvd
+
 /-- For n with prime factors p₁, ..., pₖ, we have 
     σ(n)/n ≥ ∏ᵢ (1 + 1/pᵢ).
     
     This is a lower bound based on just counting p^1 and p^0 for each prime. -/
 lemma abundancy_prime_factor_bound (n : ℕ) (hn : n ≥ 1) :
     (sigma 1 n : ℝ) / n ≥ ∏ p ∈ n.primeFactors, (1 + 1 / (p : ℝ)) := by
-  sorry  -- Requires multiplicativity and prime factorization
+  have hn0 : n ≠ 0 := Nat.one_le_iff_ne_zero.mp hn
+  -- Use multiplicativity: σ(n) = ∏_{p | n} σ(p^{fact p})
+  have h_sigma : sigma 1 n = n.factorization.prod (fun p k => sigma 1 (p^k)) :=
+    IsMultiplicative.multiplicative_factorization (sigma 1) isMultiplicative_sigma hn0
+  -- n = ∏_{p | n} p^{fact p}
+  have h_n : (n : ℕ) = n.factorization.prod (fun p k => p^k) :=
+    (Nat.factorization_prod_pow_eq_self hn0).symm
+  have hsup : n.factorization.support = n.primeFactors := Nat.support_factorization n
+  -- Each factor p^k contributes positive real
+  have h_all_pos : ∀ p ∈ n.primeFactors, (0 : ℝ) < (p : ℝ)^(n.factorization p) := fun p hp => by
+    have hp_prime := Nat.prime_of_mem_primeFactors hp
+    have hcasted : (0 : ℝ) < (p : ℝ) := Nat.cast_pos.mpr hp_prime.pos
+    exact pow_pos hcasted (n.factorization p)
+  -- Rewrite n as the product of prime powers (casted to ℝ)
+  have h_n_cast : (n : ℝ) = ∏ p ∈ n.primeFactors, (p : ℝ)^(n.factorization p) := by
+    conv_lhs => rw [h_n]
+    unfold Finsupp.prod
+    rw [hsup]
+    simp only [Nat.cast_prod, Nat.cast_pow]
+  -- Rewrite σ(n) as product of σ(p^k) (casted to ℝ)
+  have h_sigma_cast : (sigma 1 n : ℝ) = 
+      ∏ p ∈ n.primeFactors, (sigma 1 (p^(n.factorization p)) : ℝ) := by
+    conv_lhs => rw [h_sigma]
+    unfold Finsupp.prod
+    rw [hsup]
+    simp only [Nat.cast_prod]
+  -- Rewrite goal as product of ratios
+  rw [h_sigma_cast, h_n_cast, ← Finset.prod_div_distrib]
+  -- Apply pointwise bound: σ(p^k)/p^k ≥ 1 + 1/p
+  apply Finset.prod_le_prod
+  · intro p hp
+    have hp_prime := Nat.prime_of_mem_primeFactors hp
+    have hp_pos : (0 : ℝ) < (p : ℝ) := Nat.cast_pos.mpr hp_prime.pos
+    have h1 : (0 : ℝ) ≤ 1 / (p : ℝ) := by positivity
+    linarith
+  · intro p hp
+    have hp_prime := Nat.prime_of_mem_primeFactors hp
+    have hk := factorization_pos_of_mem_primeFactors hp
+    exact sigma_prime_pow_ratio_ge p (n.factorization p) hp_prime hk
 
 /-- The product ∏_{p ∈ first k primes} (1 + 1/p) is unbounded as k → ∞.
     (This follows from divergence of ∑ 1/p.) -/
