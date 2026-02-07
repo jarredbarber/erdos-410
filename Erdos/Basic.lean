@@ -556,6 +556,132 @@ Super-exponential requires showing that the effective base grows, i.e.,
 /-- The number of distinct prime factors of n. -/
 noncomputable def omega (n : ℕ) : ℕ := n.primeFactors.card
 
+/-- omega ≥ 1 for n ≥ 2. -/
+lemma omega_pos_of_ge_two (n : ℕ) (hn : n ≥ 2) : omega n ≥ 1 := by
+  unfold omega
+  have h := Nat.exists_prime_and_dvd (by omega : n ≠ 1)
+  obtain ⟨p, hp, hdvd⟩ := h
+  have hp_mem : p ∈ n.primeFactors := Nat.mem_primeFactors.mpr ⟨hp, hdvd, by omega⟩
+  exact Finset.one_le_card.mpr ⟨p, hp_mem⟩
+
+/-- If a | b and b ≠ 0, then omega(a) ≤ omega(b). -/
+lemma omega_mono_of_dvd {a b : ℕ} (hab : a ∣ b) (hb : b ≠ 0) : omega a ≤ omega b := by
+  by_cases ha : a = 0
+  · simp [omega, ha]
+  · unfold omega
+    exact Finset.card_le_card (Nat.primeFactors_mono hab hb)
+
+/-- omega of product (as union of prime factors). -/
+lemma omega_mul {a b : ℕ} (ha : a ≠ 0) (hb : b ≠ 0) : 
+    omega (a * b) = (a.primeFactors ∪ b.primeFactors).card := by
+  unfold omega
+  rw [Nat.primeFactors_mul ha hb]
+
+/-- σ(p^k) ≥ p^k + p^{k-1} for k ≥ 1. -/
+lemma sigma_prime_pow_ge (p k : ℕ) (hp : Nat.Prime p) (hk : k ≥ 1) :
+    sigma 1 (p^k) ≥ p^k + p^(k-1) := by
+  rw [sigma_apply_prime_pow hp]
+  simp only [mul_one]
+  have h_subset : ({k-1, k} : Finset ℕ) ⊆ Finset.range (k + 1) := by
+    intro j hj
+    simp only [Finset.mem_insert, Finset.mem_singleton] at hj
+    simp only [Finset.mem_range]
+    omega
+  have hne : k - 1 ≠ k := by omega
+  have h_sum : ∑ j ∈ ({k-1, k} : Finset ℕ), p^j = p^(k-1) + p^k := Finset.sum_pair hne
+  calc ∑ j ∈ Finset.range (k + 1), p^j 
+      ≥ ∑ j ∈ ({k-1, k} : Finset ℕ), p^j := Finset.sum_le_sum_of_subset h_subset
+    _ = p^(k-1) + p^k := h_sum
+    _ = p^k + p^(k-1) := by ring
+
+/-- σ(p^k)/p^k ≥ 1 + 1/p for k ≥ 1.
+    This is the key per-prime-power bound for abundancy. -/
+lemma sigma_prime_pow_ratio_ge (p k : ℕ) (hp : Nat.Prime p) (hk : k ≥ 1) :
+    (sigma 1 (p^k) : ℝ) / (p^k : ℝ) ≥ 1 + 1 / (p : ℝ) := by
+  have hp_pos : (p : ℝ) > 0 := Nat.cast_pos.mpr hp.pos
+  have hpk_pos : (p^k : ℝ) > 0 := by positivity
+  have hpk_ne : (p^k : ℝ) ≠ 0 := ne_of_gt hpk_pos
+  have hbound := sigma_prime_pow_ge p k hp hk
+  -- Direct approach: show LHS ≥ RHS
+  have h_lhs : (sigma 1 (p^k) : ℝ) / (p^k : ℝ) ≥ (p^k + p^(k-1) : ℕ) / (p^k : ℝ) := by
+    apply div_le_div_of_nonneg_right
+    · exact Nat.cast_le.mpr hbound
+    · exact le_of_lt hpk_pos
+  have h_rhs : (p^k + p^(k-1) : ℕ) / (p^k : ℝ) = 1 + 1 / (p : ℝ) := by
+    rw [Nat.cast_add, Nat.cast_pow, Nat.cast_pow]
+    rw [add_div, div_self hpk_ne]
+    congr 1
+    -- p^{k-1} / p^k = 1/p
+    have h : (p : ℝ)^(k-1) / (p : ℝ)^k = 1 / (p : ℝ) := by
+      rw [div_eq_div_iff hpk_ne (ne_of_gt hp_pos)]
+      rw [one_mul]
+      have hk1 : k - 1 + 1 = k := Nat.sub_add_cancel hk
+      calc (p : ℝ)^(k-1) * p = (p : ℝ)^(k-1+1) := by rw [pow_succ]
+        _ = (p : ℝ)^k := by rw [hk1]
+    exact h
+  calc (sigma 1 (p^k) : ℝ) / (p^k : ℝ) 
+      ≥ (p^k + p^(k-1) : ℕ) / (p^k : ℝ) := h_lhs
+    _ = 1 + 1 / (p : ℝ) := h_rhs
+
+/-- σ(2^k) for k ≥ 1 has at least one prime factor. -/
+lemma sigma_two_pow_has_prime_factor (k : ℕ) (hk : k ≥ 1) : 
+    ∃ p, Nat.Prime p ∧ p ∣ sigma 1 (2^k) := by
+  have hsigma : sigma 1 (2^k) ≥ 3 := by
+    rw [sigma_apply_prime_pow Nat.prime_two]
+    simp only [mul_one]
+    calc ∑ j ∈ Finset.range (k + 1), 2^j 
+        ≥ ∑ j ∈ Finset.range 2, 2^j := by
+          apply Finset.sum_le_sum_of_subset
+          intro j hj
+          simp only [Finset.mem_range] at hj ⊢
+          omega
+      _ = 3 := by native_decide
+  exact Nat.exists_prime_and_dvd (by omega : sigma 1 (2^k) ≠ 1)
+
+/-- All prime factors of σ(2^k) are odd (since σ(2^k) = 2^{k+1} - 1 is odd). -/
+lemma sigma_two_pow_prime_factors_odd (k : ℕ) (p : ℕ) 
+    (hp : p ∈ (sigma 1 (2^k)).primeFactors) : Odd p := by
+  have h_odd := sigma_two_pow_odd' k
+  have hp_prime := Nat.prime_of_mem_primeFactors hp
+  have hp_dvd := Nat.dvd_of_mem_primeFactors hp
+  rcases Nat.Prime.eq_two_or_odd hp_prime with rfl | hodd
+  · -- Case p = 2: leads to contradiction since σ(2^k) is odd
+    have h_even : Even (sigma 1 (2^k)) := by
+      rw [even_iff_two_dvd]; exact hp_dvd
+    exact absurd h_even (Nat.not_even_iff_odd.mpr h_odd)
+  · exact Nat.odd_iff.mpr hodd
+
+/-- The prime factors of σ(2^k) are disjoint from {2}. -/
+lemma sigma_two_pow_primeFactors_not_two (k : ℕ) : 
+    2 ∉ (sigma 1 (2^k)).primeFactors := by
+  intro h
+  have hodd := sigma_two_pow_prime_factors_odd k 2 h
+  exact (Nat.not_even_iff_odd.mpr hodd) even_two
+
+/-- omega(σ(2^k)) ≥ 1 for k ≥ 1. -/
+lemma omega_sigma_two_pow_pos (k : ℕ) (hk : k ≥ 1) : omega (sigma 1 (2^k)) ≥ 1 := by
+  obtain ⟨p, hp, hdvd⟩ := sigma_two_pow_has_prime_factor k hk
+  have hsigma_ne : sigma 1 (2^k) ≠ 0 := by
+    have : sigma 1 (2^k) ≥ 3 := by
+      rw [sigma_apply_prime_pow Nat.prime_two]; simp only [mul_one]
+      calc ∑ j ∈ Finset.range (k + 1), 2^j ≥ ∑ j ∈ Finset.range 2, 2^j := by
+            apply Finset.sum_le_sum_of_subset; intro j hj; simp at hj ⊢; omega
+        _ = 3 := by native_decide
+    omega
+  unfold omega
+  have hp_mem : p ∈ (sigma 1 (2^k)).primeFactors := 
+    Nat.mem_primeFactors.mpr ⟨hp, hdvd, hsigma_ne⟩
+  exact Finset.one_le_card.mpr ⟨p, hp_mem⟩
+
+/-- For n = 2^k * m with m odd, σ(n) = σ(2^k) * σ(m). -/
+lemma sigma_two_pow_mul_odd {k m : ℕ} (hm_odd : Odd m) :
+    sigma 1 (2^k * m) = sigma 1 (2^k) * sigma 1 m := by
+  by_cases hk : k = 0
+  · simp [hk]
+  · have hcop : Nat.Coprime (2^k) m := 
+      Nat.Coprime.pow_left k (Nat.coprime_two_left.mpr hm_odd)
+    exact isMultiplicative_sigma.map_mul_of_coprime hcop
+
 /-- For n with prime factors p₁, ..., pₖ, we have 
     σ(n)/n ≥ ∏ᵢ (1 + 1/pᵢ).
     
@@ -573,6 +699,33 @@ lemma prod_one_plus_inv_primes_unbounded :
 
 /-- **CONJECTURE**: The number of prime factors of σₖ(n) grows unboundedly.
     This is the key missing piece for proving Erdős Problem 410.
+    
+    ## Why This Is Hard
+    
+    The difficulty is that σ doesn't always increase the prime factor count:
+    - σ(4) = 7: ω = 1 → ω = 1 (no increase)
+    - σ(6) = 12 = 2²·3: ω = 2 → ω = 2 (no increase)
+    - σ(12) = 28 = 2²·7: ω = 2 → ω = 2 (no increase, but 7 replaces 3!)
+    
+    The sequence does grow, and the prime factors shift around, but proving
+    they must eventually accumulate requires delicate analysis.
+    
+    ## Proof Strategies
+    
+    1. **Via Mersenne factors**: When m = 2^a · (odd), we have σ(m) = σ(2^a) · σ(odd).
+       The Mersenne-like number σ(2^a) = 2^{a+1} - 1 contributes new odd prime factors.
+       By Zsygmondy's theorem, 2^a - 1 gains new prime factors as a grows (except a = 6).
+       But the power of 2 in σₖ(n) doesn't necessarily grow monotonically.
+    
+    2. **Via eventual divisibility**: Show that for each prime p, eventually p | σₖ(n).
+       - 2 | σₖ(n) eventually (proven: sequence escapes squarish set)
+       - 3 | σₖ(n) eventually (σ(2) = 3, σ(4) = 7, σ(8) = 15 = 3·5, ...)
+       - Building this for all primes requires understanding σ's dynamics.
+    
+    3. **Via density arguments**: Squarish numbers (where σ is odd) have density 0.
+       Large numbers typically have many prime factors (Hardy-Ramanujan: ω(n) ~ log log n).
+       The sequence σₖ(n) grows at least linearly, so "eventually" it should have many factors.
+       But "typically" ≠ "always for this specific sequence".
     
     If proven, combined with `abundancy_prime_factor_bound` and
     `prod_one_plus_inv_primes_unbounded`, this would give σₖ(n)^{1/k} → ∞. -/
