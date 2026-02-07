@@ -456,6 +456,33 @@ lemma sigma_even_of_not_squarish {n : ℕ} (hn : n ≠ 0) (hnsq : ¬IsSquarish n
   by_contra h
   exact hnsq (squarish_of_sigma_odd hn (Nat.not_even_iff_odd.mp h))
 
+/-- Helper 1: σ(2k²) is never squarish for k ≥ 1. -/
+lemma sigma_two_mul_sq_not_squarish (k : ℕ) (hk : k ≥ 1) : ¬IsSquarish (sigma 1 (2 * k^2)) := by
+  -- It is sufficient to show it is not a square, since it is odd.
+  intro h_squarish
+  have h_ne_zero : 2 * k^2 ≠ 0 := by positivity
+  have h_odd : Odd (sigma 1 (2 * k^2)) := by
+    rw [sigma_odd_iff_squarish h_ne_zero]
+    right
+    use k^2
+    constructor
+    · ring
+    · use k; rfl
+  -- Since it is odd, if it is squarish, it must be a square.
+  have h_square : IsSquare (sigma 1 (2 * k^2)) := by
+    rcases h_squarish with h | ⟨m, h1, h2⟩
+    · exact h
+    · -- 2m is even, but sigma is odd. Contradiction.
+      rw [h1] at h_odd
+      have : Even (2 * m) := even_two_mul m
+      rw [← Nat.not_even_iff_odd] at h_odd
+      exact (h_odd this).elim
+  sorry -- Proof that σ(2k²) is not a square (requires analysis of Mersenne/mod properties)
+
+/-- Helper 2: σ(m²) is squarish only for m² ≤ 121. -/
+lemma sigma_sq_squarish_bound (m : ℕ) (hm : m > 11) : ¬IsSquarish (sigma 1 (m^2)) := by
+  sorry -- Bound on σ(m²) being square
+
 /-- For n ≥ 2, the sequence σₖ(n) eventually becomes even and stays even.
 
 This follows from `sigma_odd_iff_squarish` and the growth of σ:
@@ -467,7 +494,46 @@ Note: This is a deep number-theoretic fact. The key difficulty is proving that
 the iterates cannot perpetually land on squarish numbers despite growing. -/
 lemma sigma_iterate_eventually_even (n : ℕ) (hn : n ≥ 2) :
     ∃ k₀, ∀ k ≥ k₀, Even ((sigma 1)^[k] n) := by
-  sorry  -- TODO: counting argument - squarish numbers have density 0, sequence grows
+  -- Sequence tends to infinity
+  have h_limit : Tendsto (fun k => (sigma 1)^[k] n) atTop atTop := 
+    tendsto_natCast_atTop_iff.mp (sigma_iterate_tendsto_atTop n hn)
+  
+  -- Eventually > 121
+  have h_gt : ∀ b, ∃ i, ∀ a, i ≤ a → b ≤ (sigma 1)^[a] n := tendsto_atTop_atTop.mp h_limit
+  obtain ⟨k₁, hk₁⟩ := h_gt 122
+  
+  -- We claim that for k ≥ k₁, if x_k is squarish, then x_{k+1} is not squarish.
+  have h_no_sq_chain : ∀ k ≥ k₁, IsSquarish ((sigma 1)^[k] n) → ¬IsSquarish ((sigma 1)^[k+1] n) := by
+    intro k hk h_sq
+    rcases h_sq with h_sq | ⟨m, h_eq, h_sq⟩
+    · -- Case m²
+      have val_gt : (sigma 1)^[k] n > 121 := by
+        apply lt_of_lt_of_le (by norm_num) (hk₁ k hk)
+      obtain ⟨x, hx⟩ := h_sq
+      rw [← hx] at val_gt
+      rw [Function.iterate_succ_apply]
+      rw [← hx]
+      apply sigma_sq_squarish_bound x
+      -- x > 11 since x² > 121
+      rw [← mul_self_gt_mul_self_iff (by positivity)] at val_gt
+      exact val_gt
+    · -- Case 2m²
+      rw [Function.iterate_succ_apply]
+      rw [h_eq]
+      obtain ⟨x, hx⟩ := h_sq
+      rw [← hx]
+      apply sigma_two_mul_sq_not_squarish
+      -- Need x ≥ 1. Since (sigma 1)^[k] n > 121, 2x² > 121 => x² ≥ 61 => x ≥ 8
+      have val_gt : (sigma 1)^[k] n > 121 := lt_of_lt_of_le (by norm_num) (hk₁ k hk)
+      rw [h_eq, ← hx] at val_gt
+      have : 2 * x^2 > 0 := by omega
+      have : x^2 > 0 := by omega
+      exact Nat.pos_of_ne_zero (fun h => by rw [h] at this; simp at this)
+
+  -- This shows we can't have consecutive squarish numbers.
+  -- This breaks S -> S chains.
+  -- To complete the proof, we need to show S is visited finitely often.
+  sorry
 
 /-! ## Compounding Growth from Multiplicativity
 
