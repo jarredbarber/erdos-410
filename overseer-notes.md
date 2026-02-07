@@ -51,4 +51,30 @@
 
 **Lesson for the agentic workflow**: The "escalate as open" behavior is a failure mode. Need to bias agents toward attempting proofs rather than researching why they can't. Writing STATUS.md about why you can't do something is not progress.
 
+### Check-in 3 — 16:15 UTC
+
+**Huge progress on the attack tasks.** After the course correction, the workers delivered real mathematics:
+
+**A1 completed**: Full parity characterization of σ — proved `sigma_odd_iff_squarish`: σ(n) is odd ⟺ n is a perfect square or twice a perfect square. This required:
+- Multiplicative factorization of σ via `ArithmeticFunction.IsMultiplicative`
+- `sigma_prime_pow_odd_iff'`: σ(p^k) for odd p is odd iff k is even
+- `sigma_two_pow_odd'`: σ(2^k) is always odd
+- `isSquarish_of_odd_valuations_even` / `isSquarish_odd_prime_val_even` — full prime factorization characterization
+
+This is genuinely impressive Lean formalization work. The worker built ~180 lines of new proof.
+
+**A2 completed**: Added multiplicativity lemma `sigma_two_pow_mul_odd'` (σ(2^k·m) = σ(2^k)·σ(m) for odd m), exponential growth bounds for the even case.
+
+**A3 in progress**: Working on prime factor accumulation — the true mathematical core. The worker proved `sigma_two_pow_primeFactors_not_two` (prime factors of σ(2^k) exclude 2) and is building toward showing that Mersenne-like numbers 2^{a+1}-1 introduce new prime factors.
+
+**Current sorry count**: 6 (up from 4 — more scaffolding added). Key sorrys:
+1. `sigma_iterate_eventually_even` — escape from squarish
+2. `abundancy_prime_factor_bound` — σ(n)/n ≥ ∏(1+1/p)  
+3. `prod_one_plus_inv_primes_unbounded` — Mertens
+4. `prime_factors_accumulate` — **THE CORE**
+5. `sigma_iterate_superexp_gt_one` — follows from 1-4
+6. `erdos_410` — follows from 5
+
+**Assessment**: The sorry chain is now well-decomposed. Items 2-3 are provable with more work. Item 1 is hard but potentially doable. Item 4 is the mathematical frontier.
+
 ---
