@@ -61,6 +61,25 @@ lemma sigma_iterate_ge_two (n : ℕ) (hn : n ≥ 2) (k : ℕ) :
     simp only [Function.iterate_succ', Function.comp_apply]
     exact sigma_one_ge_two ((sigma 1)^[k] n) ih
 
+/-- For any n ≥ 2 and k ≥ 0, the k-th iterate of σ is at least n + k.
+This provides a linear lower bound on the iterated sum-of-divisors. -/
+lemma sigma_iterate_ge (n : ℕ) (hn : n ≥ 2) (k : ℕ) :
+    (sigma 1)^[k] n ≥ n + k := by
+  induction k with
+  | zero =>
+    -- σ^[0](n) = n ≥ n + 0
+    simp
+  | succ k ih =>
+    -- σ^[k+1](n) = σ(σ^[k](n))
+    simp only [Function.iterate_succ', Function.comp_apply]
+    -- By IH: σ^[k](n) ≥ n + k ≥ 2
+    have hge2 : (sigma 1)^[k] n ≥ 2 := sigma_iterate_ge_two n hn k
+    -- By sigma_one_ge_succ: σ(σ^[k](n)) ≥ σ^[k](n) + 1
+    have hstep : sigma 1 ((sigma 1)^[k] n) ≥ (sigma 1)^[k] n + 1 :=
+      sigma_one_ge_succ ((sigma 1)^[k] n) hge2
+    -- Combine: σ(σ^[k](n)) ≥ σ^[k](n) + 1 ≥ n + k + 1 = n + (k + 1)
+    omega
+
 /-! ## Abundancy Lower Bound for Even Numbers
 
 For even n ≥ 2, we have σ(n)/n ≥ 3/2. This is a key ingredient for showing

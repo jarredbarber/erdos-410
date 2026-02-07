@@ -1855,3 +1855,69 @@ $ lake build Erdos
 ```
 
 **Confidence**: Certain (Lean typechecker verified the proof)
+[2026-02-07T15:21:38.803Z] ✅ Closed task erdos410-gy3
+
+[2026-02-07T15:21:38.803Z] 🔄 Checking git status...
+[2026-02-07T15:21:38.815Z] 📝 Committing changes...
+[2026-02-07T15:21:38.836Z] 🚀 Pushing to remote...
+[2026-02-07T15:21:40.569Z] 
+================================================================================
+[2026-02-07T15:21:40.569Z] 📌 Processing task: erdos410-2gd - L2.1: Prove sigma_iterate_ge (σₖ(n) ≥ n + k for n ≥ 2)
+[2026-02-07T15:21:40.569Z]    Role: execute | Priority: 2 | Size: medium
+[2026-02-07T15:21:40.569Z] ================================================================================
+
+[2026-02-07T15:21:40.572Z] ✓ Claimed task erdos410-2gd
+
+[2026-02-07T15:21:40.572Z] 🤖 Using agent: execute with models: anthropic/claude-opus-4-6:high, anthropic/claude-opus-4-5:high, google-antigravity/gemini-3-pro:high
+
+[2026-02-07T15:21:40.573Z] 💭 Starting pi agent session with model: anthropic/claude-opus-4-6:high...
+[2026-02-07T15:21:43.982Z] 
+$ tm update erdos410-2gd --status "Reading current codebase"
+[2026-02-07T15:21:45.119Z] 
+🛠️  Executing tool: read...
+[2026-02-07T15:21:54.358Z] 
+$ tm update erdos410-2gd --status "Writing sigma_iterate_ge proof"
+[2026-02-07T15:22:10.382Z] 
+🛠️  Executing tool: edit...
+[2026-02-07T15:22:13.408Z] 
+$ cd /home/jarred/code/erdos-410 && lake build Erdos 2>&1
+[2026-02-07T15:22:35.565Z] 
+$ cd /home/jarred/code/erdos-410 && grep -A 20 "lemma sigma_iterate_ge " Erdos/Basic.lean | head -25
+[2026-02-07T15:22:39.119Z] 
+$ tm close erdos410-2gd --summary "Proved sigma_iterate_ge: σ^[k](n) ≥ n + k for n ≥ 2 by induction on k"
+[2026-02-07T15:22:42.988Z] 
+$ tm close --help
+[2026-02-07T15:22:46.552Z] 
+$ tm close erdos410-2gd "Proved sigma_iterate_ge: σ^[k](n) ≥ n + k for n ≥ 2 by induction on k"
+[2026-02-07T15:22:57.961Z] 
+
+📝 Agent response complete.
+
+[2026-02-07T15:22:57.962Z] 📄 Log saved to .tm/logs/worker-erdos410-2gd.md
+[2026-02-07T15:22:57.962Z] 
+📊 Task erdos410-2gd completed:
+[2026-02-07T15:22:57.962Z]    Summary: Proved sigma_iterate_ge: σ^[k](n) ≥ n + k for n ≥ 2 by induction on k
+[2026-02-07T15:22:57.962Z]    Details: ## Proof Strategy
+
+The proof uses simple induction on k:
+
+1. **Base case (k = 0)**: σ^[0](n) = n ≥ n + 0 = n. Discharged by `simp`.
+
+2. **Inductive step (k → k+1)**:
+   - Unfold: σ^[k+1](n) = σ(σ^[k](n)) using `Function.iterate_succ'`
+   - By the existing lemma `sigma_iterate_ge_two`: σ^[k](n) ≥ 2
+   - By `sigma_one_ge_succ` (from L1.2): σ(σ^[k](n)) ≥ σ^[k](n) + 1
+   - By IH: σ^[k](n) ≥ n + k
+   - Combine with `omega`: σ(σ^[k](n)) ≥ σ^[k](n) + 1 ≥ n + k + 1 = n + (k+1)
+
+## Dependencies Used
+- `sigma_one_ge_succ` (L1.2): σ(n) ≥ n + 1 for n ≥ 2
+- `sigma_iterate_ge_two`: σ^[k](n) ≥ 2 for n ≥ 2 (already in codebase)
+
+## Verification
+- `lake build Erdos` succeeds
+- No `sorry` in the new lemma
+- Only warning is expected `sorry` in `erdos_410`
+
+## Confidence
+Certain - proof compiles and follows standard induction pattern.
