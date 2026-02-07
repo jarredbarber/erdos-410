@@ -191,6 +191,58 @@ lemma abundancy_ratio_even (n : ℕ) (hn : n ≥ 2) (heven : Even n) :
   have h3 : (3 * n : ℝ) ≤ 2 * sigma 1 n := by exact_mod_cast h2
   linarith
 
+/-! ## Super-Exponential Lower Bound (Partial Progress)
+
+The main theorem `erdos_410` requires showing that σₖ(n)^{1/k} → ∞,
+which is equivalent to: for any c > 0, eventually c^k < σₖ(n).
+
+We split this into two cases:
+- Case c ≤ 1: Trivial since σₖ(n) ≥ 2 for all k.
+- Case c > 1: This is the CORE DIFFICULTY — requires showing super-exponential growth.
+
+The case c > 1 is an **open problem in number theory**. It would follow from any of:
+1. Showing that the abundancy σ(σₖ(n))/σₖ(n) tends to infinity
+2. Showing that σₖ(n) accumulates arbitrarily many small prime factors
+3. Showing that σₖ(n) eventually avoids being a perfect square often enough
+
+See `problem.md` for references to Erdős-Granville-Pomerance-Spiro (1990) and
+Guy's *Unsolved Problems in Number Theory* (2004), Problem B9.
+-/
+
+/-- For c ∈ (0, 1], eventually c^k < σₖ(n) (trivial case).
+This follows immediately from σₖ(n) ≥ 2 and c^k ≤ 1 for c ≤ 1. -/
+lemma sigma_iterate_superexp_le_one (n : ℕ) (hn : n ≥ 2) (c : ℝ) (hc_pos : c > 0) (hc_le : c ≤ 1) :
+    ∃ k₀, ∀ k ≥ k₀, c ^ k < ((sigma 1)^[k] n : ℝ) := by
+  use 0
+  intro k _
+  have h1 : c ^ k ≤ 1 := pow_le_one₀ (le_of_lt hc_pos) hc_le
+  have h2 : (sigma 1)^[k] n ≥ 2 := sigma_iterate_ge_two n hn k
+  calc c ^ k ≤ 1 := h1
+    _ < 2 := by norm_num
+    _ ≤ ((sigma 1)^[k] n : ℝ) := by exact_mod_cast h2
+
+/-- **OPEN PROBLEM**: For c > 1, eventually c^k < σₖ(n).
+This is the core difficulty in Erdős Problem #410.
+
+To complete this lemma, we would need to prove one of:
+- `abundancy_iterate_unbounded`: σ(σₖ(n))/σₖ(n) → ∞ as k → ∞
+- `prime_factors_accumulate`: σₖ(n) divisible by first m primes for arbitrarily large m
+- An explicit super-exponential lower bound on σₖ(n)
+
+See the paper "On the normal behavior of the iterates of some arithmetical functions"
+by Erdős, Granville, Pomerance, and Spiro (1990). -/
+lemma sigma_iterate_superexp_gt_one (n : ℕ) (hn : n ≥ 2) (c : ℝ) (hc : c > 1) :
+    ∃ k₀, ∀ k ≥ k₀, c ^ k < ((sigma 1)^[k] n : ℝ) := by
+  sorry
+
+/-- Combined super-exponential bound for any c > 0.
+Proven for c ≤ 1; the case c > 1 requires `sigma_iterate_superexp_gt_one`. -/
+lemma sigma_iterate_superexp (n : ℕ) (hn : n ≥ 2) (c : ℝ) (hc : c > 0) :
+    ∃ k₀, ∀ k ≥ k₀, c ^ k < ((sigma 1)^[k] n : ℝ) := by
+  rcases le_or_gt c 1 with hle | hgt
+  · exact sigma_iterate_superexp_le_one n hn c hc hle
+  · exact sigma_iterate_superexp_gt_one n hn c hgt
+
 /-- Erdős Problem 410: Iterated sum-of-divisors grows super-exponentially.
 
 DO NOT MODIFY THIS STATEMENT. This is the canonical formalization from
