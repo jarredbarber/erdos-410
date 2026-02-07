@@ -1605,3 +1605,140 @@ Matches the specification exactly.
 📊 Task erdos410-8ov completed:
 [2026-02-07T15:18:52.894Z]    Summary: Approved - sigma_one_ge_succ lemma verified correct
 [2026-02-07T15:18:52.894Z]    Details: The lemma `sigma_one_ge_succ (n : ℕ) (hn : n ≥ 2) : sigma 1 n ≥ n + 1` compiles successfully with no errors. Build passes, no hidden sorry, and the proof logic is sound: shows {1, n} ⊆ n.divisors then uses Finset.sum_le_sum_of_subset. Downstream lemma `sigma_one_gt` also works correctly.
+[2026-02-07T15:18:52.897Z] ✅ Closed task erdos410-8ov
+
+[2026-02-07T15:18:52.897Z] 🔄 Checking git status...
+[2026-02-07T15:18:52.908Z] 📝 Committing changes...
+[2026-02-07T15:18:52.930Z] 🚀 Pushing to remote...
+[2026-02-07T15:18:54.475Z] 
+================================================================================
+[2026-02-07T15:18:54.475Z] 📌 Processing task: erdos410-xu4 - V1.3: Verify σ(n) > n lemma compiles
+[2026-02-07T15:18:54.475Z]    Role: verify | Priority: 2 | Size: small
+[2026-02-07T15:18:54.475Z] ================================================================================
+
+[2026-02-07T15:18:54.477Z] ✓ Claimed task erdos410-xu4
+
+[2026-02-07T15:18:54.477Z] 🤖 Using agent: verify with models: anthropic/claude-opus-4-6:high, anthropic/claude-opus-4-5:high, google-antigravity/gemini-3-pro:high
+
+[2026-02-07T15:18:54.477Z] 💭 Starting pi agent session with model: anthropic/claude-opus-4-6:high...
+[2026-02-07T15:19:00.623Z] 
+$ cd /home/jarred/code/erdos-410 && tm update erdos410-xu4 --status "Starting verification of σ(n) > n lemma"
+[2026-02-07T15:19:01.768Z] 
+$ cd /home/jarred/code/erdos-410 && tm show erdos410-xu4
+[2026-02-07T15:19:02.945Z] 
+$ cd /home/jarred/code/erdos-410 && tm show erdos410-st3
+[2026-02-07T15:19:07.858Z] 
+🛠️  Executing tool: read...
+[2026-02-07T15:19:07.864Z] 
+$ cd /home/jarred/code/erdos-410 && tm update erdos410-xu4 --status "Reading lemma and building project"
+[2026-02-07T15:19:15.511Z] 
+$ cd /home/jarred/code/erdos-410 && lake build Erdos 2>&1
+[2026-02-07T15:19:30.000Z] 
+$ cd /home/jarred/code/erdos-410 && tm update erdos410-xu4 --status "Build successful, verifying logic"
+[2026-02-07T15:19:40.195Z] 
+$ cd /home/jarred/code/erdos-410 && tm complete erdos410-xu4 --summary "Verified sigma_one_gt compiles and is logically correct" --details "## Verification Results
+
+**Compilation**: ✅ PASS
+- \`lake build Erdos\` completes successfully
+- Only warning is for \`erdos_410\` (the main theorem with \`sorry\`) — expected
+
+**Logical Correctness**: ✅ PASS
+
+**Lemma verified**:
+\`\`\`lean
+lemma sigma_one_gt (n : ℕ) (hn : n ≥ 2) : sigma 1 n > n := by
+  have h := sigma_one_ge_succ n hn
+  omega
+\`\`\`
+
+**Proof analysis**:
+1. Correctly invokes dependency \`sigma_one_ge_succ\` which provides \`σ(n) ≥ n + 1\`
+2. Uses \`omega\` to derive the strict inequality \`σ(n) > n\` from \`σ(n) ≥ n + 1\`
+
+**Mathematical soundness**:
+- For n ≥ 2, divisors include distinct elements 1 and n
+- Therefore σ(n) = 1 + n + (other divisors) ≥ n + 1 > n
+- The derivation is a trivial corollary of the stronger bound
+
+**No issues found**:
+- No hidden assumptions
+- No unintended axioms
+- Statement matches requirements
+- Doc comment is accurate
+
+**Confidence**: CERTAIN"
+[2026-02-07T15:19:46.533Z] 
+$ cd /home/jarred/code/erdos-410 && tm close erdos410-xu4 --summary "Verified sigma_one_gt compiles and is logically correct" --details "## Verification Results
+
+**Compilation**: ✅ PASS
+- \`lake build Erdos\` completes successfully
+- Only warning is for \`erdos_410\` (the main theorem with \`sorry\`) — expected
+
+**Logical Correctness**: ✅ PASS
+
+**Lemma verified**:
+\`\`\`lean
+lemma sigma_one_gt (n : ℕ) (hn : n ≥ 2) : sigma 1 n > n := by
+  have h := sigma_one_ge_succ n hn
+  omega
+\`\`\`
+
+**Proof analysis**:
+1. Correctly invokes dependency \`sigma_one_ge_succ\` which provides \`σ(n) ≥ n + 1\`
+2. Uses \`omega\` to derive the strict inequality \`σ(n) > n\` from \`σ(n) ≥ n + 1\`
+
+**Mathematical soundness**:
+- For n ≥ 2, divisors include distinct elements 1 and n
+- Therefore σ(n) = 1 + n + (other divisors) ≥ n + 1 > n
+- The derivation is a trivial corollary of the stronger bound
+
+**No issues found**:
+- No hidden assumptions
+- No unintended axioms
+- Statement matches requirements
+- Doc comment is accurate
+
+**Confidence**: CERTAIN"
+[2026-02-07T15:19:52.193Z] 
+$ cd /home/jarred/code/erdos-410 && tm close --help
+[2026-02-07T15:19:58.844Z] 
+$ cd /home/jarred/code/erdos-410 && tm close erdos410-xu4 "Verified sigma_one_gt compiles and is logically correct" --details "## Verification Results
+
+**Compilation**: ✅ PASS
+- \`lake build Erdos\` completes successfully
+- Only warning is for \`erdos_410\` (the main theorem with \`sorry\`) — expected
+
+**Logical Correctness**: ✅ PASS
+
+**Lemma verified**:
+\`\`\`lean
+lemma sigma_one_gt (n : ℕ) (hn : n ≥ 2) : sigma 1 n > n := by
+  have h := sigma_one_ge_succ n hn
+  omega
+\`\`\`
+
+**Proof analysis**:
+1. Correctly invokes dependency \`sigma_one_ge_succ\` which provides \`σ(n) ≥ n + 1\`
+2. Uses \`omega\` to derive the strict inequality \`σ(n) > n\` from \`σ(n) ≥ n + 1\`
+
+**Mathematical soundness**:
+- For n ≥ 2, divisors include distinct elements 1 and n
+- Therefore σ(n) = 1 + n + (other divisors) ≥ n + 1 > n
+- The derivation is a trivial corollary of the stronger bound
+
+**No issues found**:
+- No hidden assumptions
+- No unintended axioms
+- Statement matches requirements
+- Doc comment is accurate
+
+**Confidence**: CERTAIN"
+[2026-02-07T15:20:05.265Z] 
+
+📝 Agent response complete.
+
+[2026-02-07T15:20:05.265Z] 📄 Log saved to .tm/logs/worker-erdos410-xu4.md
+[2026-02-07T15:20:05.265Z] 
+📊 Task erdos410-xu4 completed:
+[2026-02-07T15:20:05.265Z]    Summary: Approved - sigma_one_gt compiles and is logically correct
+[2026-02-07T15:20:05.265Z]    Details: The lemma `sigma_one_gt` correctly proves that σ(n) > n for all n ≥ 2. The proof uses `sigma_one_ge_succ` (which provides σ(n) ≥ n + 1) and derives the strict inequality via `omega`. Build succeeds with only the expected warning on the main theorem's `sorry`.
