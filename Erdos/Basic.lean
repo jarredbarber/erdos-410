@@ -80,6 +80,21 @@ lemma sigma_iterate_ge (n : ℕ) (hn : n ≥ 2) (k : ℕ) :
     -- Combine: σ(σ^[k](n)) ≥ σ^[k](n) + 1 ≥ n + k + 1 = n + (k + 1)
     omega
 
+/-- The k-th iterate of σ tends to infinity as k → ∞.
+This follows from the linear lower bound σₖ(n) ≥ n + k. -/
+lemma sigma_iterate_tendsto_atTop (n : ℕ) (hn : n ≥ 2) :
+    Tendsto (fun k => ((sigma 1)^[k] n : ℝ)) atTop atTop := by
+  -- We have σₖ(n) ≥ n + k by sigma_iterate_ge
+  -- The function k ↦ (n + k : ℝ) tends to atTop
+  -- By monotonicity (tendsto_atTop_mono), σₖ(n) also tends to atTop
+  have h_lower : ∀ k : ℕ, (n + k : ℝ) ≤ ((sigma 1)^[k] n : ℝ) := fun k => by
+    have hnat : (sigma 1)^[k] n ≥ n + k := sigma_iterate_ge n hn k
+    exact_mod_cast hnat
+  have h_tendsto_lower : Tendsto (fun k : ℕ => (n + k : ℝ)) atTop atTop := by
+    have h1 : Tendsto (fun k : ℕ => (k : ℝ)) atTop atTop := tendsto_natCast_atTop_atTop
+    exact tendsto_atTop_add_const_left atTop (n : ℝ) h1
+  exact tendsto_atTop_mono h_lower h_tendsto_lower
+
 /-! ## Abundancy Lower Bound for Even Numbers
 
 For even n ≥ 2, we have σ(n)/n ≥ 3/2. This is a key ingredient for showing
