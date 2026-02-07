@@ -22,6 +22,8 @@ The theorem `erdos_410` in `Erdos/Basic.lean` is the **canonical problem definit
 
 All proof work (helper lemmas, intermediate results, tactic scripts) must ultimately discharge the `sorry` in `erdos_410` without altering its statement.
 
+**CRITICAL**: DO NOT USE `axiom`
+
 ## Commands
 
 ```bash
