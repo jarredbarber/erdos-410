@@ -45,6 +45,22 @@ lemma sigma_one_gt (n : ℕ) (hn : n ≥ 2) : sigma 1 n > n := by
   have h := sigma_one_ge_succ n hn
   omega
 
+/-- For any n ≥ 2, σ(n) ≥ 2. This follows immediately from σ(n) > n ≥ 2. -/
+lemma sigma_one_ge_two (n : ℕ) (hn : n ≥ 2) : sigma 1 n ≥ 2 := by
+  have h := sigma_one_gt n hn
+  omega
+
+/-- For any n ≥ 2 and k ≥ 0, the k-th iterate of σ is at least 2.
+This is proved by induction: the base case is n ≥ 2, and each application
+of σ preserves the property since σ(m) > m for m ≥ 2. -/
+lemma sigma_iterate_ge_two (n : ℕ) (hn : n ≥ 2) (k : ℕ) :
+    (sigma 1)^[k] n ≥ 2 := by
+  induction k with
+  | zero => simp [hn]
+  | succ k ih =>
+    simp only [Function.iterate_succ', Function.comp_apply]
+    exact sigma_one_ge_two ((sigma 1)^[k] n) ih
+
 /-! ## Abundancy Lower Bound for Even Numbers
 
 For even n ≥ 2, we have σ(n)/n ≥ 3/2. This is a key ingredient for showing
