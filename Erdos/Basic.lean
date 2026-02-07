@@ -937,14 +937,64 @@ lemma abundancy_ratio_diverges (n : ℕ) (hn : n ≥ 2) :
 Follows from `abundancy_ratio_diverges`. -/
 lemma sigma_iterate_superexp_gt_one (n : ℕ) (hn : n ≥ 2) (c : ℝ) (hc : c > 1) :
     ∃ k₀, ∀ k ≥ k₀, c ^ k < ((sigma 1)^[k] n : ℝ) := by
+  have hc_pos : c > 0 := by linarith
   have h_ratio := abundancy_ratio_diverges n hn
-  rw [tendsto_atTop_atTop] at h_ratio
-  obtain ⟨k₁, hk₁⟩ := h_ratio (2 * c)
-  -- Proof sketch: x_{k+1}/x_k eventually > 2c.
-  -- Then y_k = x_k/c^k satisfies y_{k+1} > 2 y_k.
-  -- So y_k grows geometrically and eventually > 1.
-  -- Detailed proof omitted to ensure build stability due to missing lemma names.
-  sorry
+  rw [tendsto_atTop] at h_ratio
+  have h2c := h_ratio (2 * c)
+  rw [eventually_atTop] at h2c
+  obtain ⟨k₁, hk₁⟩ := h2c
+  have key : ∀ m : ℕ, ((sigma 1)^[k₁ + m] n : ℝ) ≥ (2 * c)^m * ((sigma 1)^[k₁] n : ℝ) := by
+    intro m
+    induction m with
+    | zero => simp
+    | succ m ih =>
+      have hstep : (sigma 1)^[k₁ + (m + 1)] n = sigma 1 ((sigma 1)^[k₁ + m] n) := by
+        simp only [show k₁ + (m + 1) = (k₁ + m) + 1 by omega,
+          Function.iterate_succ', Function.comp_apply]
+      rw [hstep]
+      have hratio := hk₁ (k₁ + m) (by omega)
+      have hpos : ((sigma 1)^[k₁ + m] n : ℝ) > 0 := by
+        have := sigma_iterate_ge_two n hn (k₁ + m); positivity
+      calc (sigma 1 ((sigma 1)^[k₁ + m] n) : ℝ)
+          ≥ (2 * c) * ((sigma 1)^[k₁ + m] n : ℝ) := by
+            have h := le_div_iff₀ hpos |>.mp hratio; linarith
+        _ ≥ (2 * c) * ((2 * c)^m * ((sigma 1)^[k₁] n : ℝ)) :=
+            mul_le_mul_of_nonneg_left ih (by linarith : 2 * c ≥ 0)
+        _ = (2 * c)^(m+1) * ((sigma 1)^[k₁] n : ℝ) := by ring
+  have hbase : ((sigma 1)^[k₁] n : ℝ) ≥ 2 := by exact_mod_cast sigma_iterate_ge_two n hn k₁
+  have hlog : ∃ k₂ : ℕ, (2 : ℝ)^(k₂ + 1) > c^k₁ := by
+    have htend := tendsto_pow_atTop_atTop_of_one_lt (by norm_num : (2:ℝ) > 1)
+    rw [tendsto_atTop] at htend
+    have h := htend (c^k₁ + 1)
+    rw [eventually_atTop] at h
+    obtain ⟨N, hN⟩ := h
+    use N; have := hN (N + 1) (by omega); linarith
+  obtain ⟨k₂, hk₂⟩ := hlog
+  use k₁ + k₂ + 1
+  intro k hk
+  have hm : k - k₁ ≥ k₂ + 1 := by omega
+  have h := key (k - k₁)
+  rw [show k₁ + (k - k₁) = k by omega] at h
+  have step1 : ((sigma 1)^[k] n : ℝ) ≥ (2 * c)^(k - k₁) * 2 :=
+    calc ((sigma 1)^[k] n : ℝ) ≥ (2 * c)^(k - k₁) * ((sigma 1)^[k₁] n : ℝ) := h
+      _ ≥ (2 * c)^(k - k₁) * 2 :=
+          mul_le_mul_of_nonneg_left hbase (pow_nonneg (by linarith) _)
+  have step2 : (2 * c)^(k - k₁) * 2 = (2 : ℝ)^(k - k₁ + 1) * c^(k - k₁) := by
+    rw [mul_pow]; ring
+  have step3 : (2 : ℝ)^(k - k₁ + 1) ≥ 2^(k₂ + 2) :=
+    pow_le_pow_right₀ (by norm_num) (by omega)
+  have step4 : (2 : ℝ)^(k₂ + 2) > c^k₁ := by
+    have h1 : (2 : ℝ)^(k₂ + 2) = 2 * 2^(k₂ + 1) := by ring
+    have h2 : (2 : ℝ)^(k₂ + 1) > c^k₁ := hk₂
+    have h3 : (2 : ℝ)^(k₂ + 1) > 0 := by positivity
+    linarith
+  calc c^k = c^k₁ * c^(k - k₁) := by rw [← pow_add]; congr; omega
+    _ < 2^(k₂ + 2) * c^(k - k₁) :=
+        mul_lt_mul_of_pos_right step4 (pow_pos hc_pos _)
+    _ ≤ 2^(k - k₁ + 1) * c^(k - k₁) :=
+        mul_le_mul_of_nonneg_right step3 (pow_nonneg (le_of_lt hc_pos) _)
+    _ = (2 * c)^(k - k₁) * 2 := step2.symm
+    _ ≤ ((sigma 1)^[k] n : ℝ) := step1
 
 /-- Combined super-exponential bound for any c > 0.
 Proven for c ≤ 1; the case c > 1 requires `sigma_iterate_superexp_gt_one`. -/
@@ -958,9 +1008,37 @@ lemma sigma_iterate_superexp (n : ℕ) (hn : n ≥ 2) (c : ℝ) (hc : c > 0) :
 
 DO NOT MODIFY THIS STATEMENT. This is the canonical formalization from
 google-deepmind/formal-conjectures. -/
+-- c^k < x implies c < x^{1/k} for k ≥ 1, c > 0, x > 0
+lemma lt_rpow_inv_of_pow_lt {c x : ℝ} {k : ℕ} (hc : c > 0) (hx : x > 0) (hk : k ≥ 1)
+    (h : c ^ k < x) : c < x ^ (1 / (k : ℝ)) := by
+  have hk_pos : (k : ℝ) > 0 := by positivity
+  have h1div : (1 : ℝ) / (k : ℝ) = ((k : ℝ))⁻¹ := one_div (k : ℝ)
+  rw [h1div, Real.lt_rpow_inv_iff_of_pos (le_of_lt hc) (le_of_lt hx) hk_pos]
+  rw [Real.rpow_natCast]
+  exact h
+
 theorem erdos_410 : ∀ n > 1,
     Tendsto (fun k : ℕ ↦ ((sigma 1)^[k] n : ℝ) ^ (1 / (k : ℝ))) atTop atTop := by
-  sorry
+  intro n hn
+  rw [tendsto_atTop]
+  intro B
+  by_cases hB : B ≤ 0
+  · filter_upwards [eventually_ge_atTop 1] with k hk
+    have hge2 := sigma_iterate_ge_two n (by omega) k
+    have hpos : (0:ℝ) < ((sigma 1)^[k] n : ℝ) := by positivity
+    have := Real.rpow_pos_of_pos hpos (1 / k)
+    linarith
+  · push_neg at hB
+    have hcpos : max B 2 > 0 := by positivity
+    obtain ⟨k₀, hk₀⟩ := sigma_iterate_superexp n (by omega) (max B 2) hcpos
+    filter_upwards [eventually_ge_atTop (max k₀ 1)] with k hk
+    have hk_ge_1 : k ≥ 1 := le_max_right k₀ 1 |>.trans hk
+    have hk_ge_k₀ : k ≥ k₀ := le_max_left k₀ 1 |>.trans hk
+    have hf_bound := hk₀ k hk_ge_k₀
+    have hf_pos : (0:ℝ) < ((sigma 1)^[k] n : ℝ) := by
+      have := sigma_iterate_ge_two n (by omega) k; positivity
+    have h1 := lt_rpow_inv_of_pow_lt hcpos hf_pos hk_ge_1 hf_bound
+    linarith [le_max_left B 2]
 
 
 end Erdos410
