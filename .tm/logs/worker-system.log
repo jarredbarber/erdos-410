@@ -1495,3 +1495,113 @@ lemma sigma_one_gt (n : ℕ) (hn : n ≥ 2) : sigma 1 n > n := by
 **Verification**: `lake build Erdos` succeeds with no errors. The only warning is for erdos_410 which still has `sorry` (as expected for the main theorem).
 
 **Confidence**: HIGH - trivial corollary using omega to derive > from ≥ n+1.
+[2026-02-07T15:17:35.558Z] ✅ Closed task erdos410-st3
+
+[2026-02-07T15:17:35.558Z] 🔄 Checking git status...
+[2026-02-07T15:17:35.570Z] 📝 Committing changes...
+[2026-02-07T15:17:35.593Z] 🚀 Pushing to remote...
+[2026-02-07T15:17:37.230Z] 
+================================================================================
+[2026-02-07T15:17:37.230Z] 📌 Processing task: erdos410-8ov - V1.2: Verify σ(n) ≥ n+1 lemma compiles
+[2026-02-07T15:17:37.230Z]    Role: verify | Priority: 2 | Size: small
+[2026-02-07T15:17:37.230Z] ================================================================================
+
+[2026-02-07T15:17:37.233Z] ✓ Claimed task erdos410-8ov
+
+[2026-02-07T15:17:37.233Z] 🤖 Using agent: verify with models: anthropic/claude-opus-4-6:high, anthropic/claude-opus-4-5:high, google-antigravity/gemini-3-pro:high
+
+[2026-02-07T15:17:37.233Z] 💭 Starting pi agent session with model: anthropic/claude-opus-4-6:high...
+[2026-02-07T15:17:42.349Z] 
+$ tm update erdos410-8ov --status "Reading task dependencies and Lean files"
+[2026-02-07T15:17:43.482Z] 
+$ tm show erdos410-f5u 2>/dev/null || echo "Dependency task not found"
+[2026-02-07T15:17:44.585Z] 
+🛠️  Executing tool: read...
+[2026-02-07T15:17:56.219Z] 
+$ tm update erdos410-8ov --status "Building Lean project to verify compilation"
+[2026-02-07T15:17:57.432Z] 
+$ cd /home/jarred/code/erdos-410 && lake build Erdos 2>&1
+[2026-02-07T15:18:14.610Z] 
+$ tm update erdos410-8ov --status "Verifying no hidden sorry and checking proof logic"
+[2026-02-07T15:18:15.750Z] 
+$ cd /home/jarred/code/erdos-410 && grep -n "sorry" Erdos/Basic.lean
+[2026-02-07T15:18:15.756Z] 
+$ # Extract just the sigma_one_ge_succ lemma to verify structure
+cd /home/jarred/code/erdos-410 && sed -n '24,36p' Erdos/Basic.lean
+[2026-02-07T15:18:20.635Z] 
+$ # Check the exact lines 28-40 for the complete lemma
+cd /home/jarred/code/erdos-410 && sed -n '28,42p' Erdos/Basic.lean
+[2026-02-07T15:18:20.640Z] 
+$ # Verify sigma_one_gt uses sigma_one_ge_succ correctly
+cd /home/jarred/code/erdos-410 && sed -n '43,48p' Erdos/Basic.lean
+[2026-02-07T15:18:36.021Z] 
+$ tm update erdos410-8ov --status "Verification complete - all checks passed"
+[2026-02-07T15:18:37.159Z] 
+$ tm close erdos410-8ov --summary "Verified sigma_one_ge_succ lemma compiles correctly with no errors or sorry" --details "## Verification Results
+
+**Build Status**: ✅ PASS
+- \`lake build Erdos\` completes successfully
+- Only warning is for main \`erdos_410\` theorem (expected sorry)
+
+**No Hidden Sorry**: ✅ PASS  
+- Checked grep for 'sorry' - only occurrence at line 150 (main theorem)
+- \`sigma_one_ge_succ\` lemma has no sorry
+
+**Statement Match**: ✅ PASS
+\`\`\`lean
+lemma sigma_one_ge_succ (n : ℕ) (hn : n ≥ 2) : sigma 1 n ≥ n + 1
+\`\`\`
+Matches the specification exactly.
+
+**Proof Logic Review**: ✅ SOUND
+1. Expands σ(n) via \`sigma_one_apply\` to ∑ d ∈ n.divisors, d
+2. Proves {1, n} ⊆ n.divisors using:
+   - \`Nat.one_mem_divisors.mpr hn0\` for 1 ∈ n.divisors
+   - \`Nat.mem_divisors_self n hn0\` for n ∈ n.divisors  
+3. Uses \`Finset.sum_pair h1n\` (h1n : 1 ≠ n from n ≥ 2)
+4. Applies \`Finset.sum_le_sum_of_subset\` for the bound
+
+**Downstream Dependency**: ✅ WORKS
+- \`sigma_one_gt\` correctly uses this lemma and compiles
+
+**Confidence**: CERTAIN - fully machine-checked proof"
+[2026-02-07T15:18:40.867Z] 
+$ tm close --help
+[2026-02-07T15:18:48.141Z] 
+$ tm close erdos410-8ov "Verified sigma_one_ge_succ lemma compiles correctly with no errors or sorry" --details "## Verification Results
+
+**Build Status**: ✅ PASS
+- \`lake build Erdos\` completes successfully
+- Only warning is for main \`erdos_410\` theorem (expected sorry)
+
+**No Hidden Sorry**: ✅ PASS  
+- Checked grep for 'sorry' - only occurrence at line 150 (main theorem)
+- \`sigma_one_ge_succ\` lemma has no sorry
+
+**Statement Match**: ✅ PASS
+\`\`\`lean
+lemma sigma_one_ge_succ (n : ℕ) (hn : n ≥ 2) : sigma 1 n ≥ n + 1
+\`\`\`
+Matches the specification exactly.
+
+**Proof Logic Review**: ✅ SOUND
+1. Expands σ(n) via \`sigma_one_apply\` to ∑ d ∈ n.divisors, d
+2. Proves {1, n} ⊆ n.divisors using:
+   - \`Nat.one_mem_divisors.mpr hn0\` for 1 ∈ n.divisors
+   - \`Nat.mem_divisors_self n hn0\` for n ∈ n.divisors  
+3. Uses \`Finset.sum_pair h1n\` (h1n : 1 ≠ n from n ≥ 2)
+4. Applies \`Finset.sum_le_sum_of_subset\` for the bound
+
+**Downstream Dependency**: ✅ WORKS
+- \`sigma_one_gt\` correctly uses this lemma and compiles
+
+**Confidence**: CERTAIN - fully machine-checked proof"
+[2026-02-07T15:18:52.893Z] 
+
+📝 Agent response complete.
+
+[2026-02-07T15:18:52.894Z] 📄 Log saved to .tm/logs/worker-erdos410-8ov.md
+[2026-02-07T15:18:52.894Z] 
+📊 Task erdos410-8ov completed:
+[2026-02-07T15:18:52.894Z]    Summary: Approved - sigma_one_ge_succ lemma verified correct
+[2026-02-07T15:18:52.894Z]    Details: The lemma `sigma_one_ge_succ (n : ℕ) (hn : n ≥ 2) : sigma 1 n ≥ n + 1` compiles successfully with no errors. Build passes, no hidden sorry, and the proof logic is sound: shows {1, n} ⊆ n.divisors then uses Finset.sum_le_sum_of_subset. Downstream lemma `sigma_one_gt` also works correctly.
