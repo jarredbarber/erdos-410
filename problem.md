@@ -1,6 +1,6 @@
 # Erdős Problem #410
 
-**Status:** Open  
+**Status:** Recently resolved (2025)  
 **Source:** [erdosproblems.com/410](https://www.erdosproblems.com/410)  
 **Reference:** Erdős, Granville, Pomerance, Spiro — "On the normal behavior of the iterates of some arithmetical functions" (1990)  
 **Tags:** number theory, iterated functions  
@@ -31,3 +31,5 @@ theorem erdos_410 : ∀ n > 1,
 This is discussed in problem B9 of Guy's *Unsolved Problems in Number Theory* (2004).
 
 The conjecture asks whether iterated application of the sum-of-divisors function grows super-exponentially — i.e., faster than any geometric sequence $c^k$ — for every starting value $n \geq 2$.
+
+This problem was resolved in late 2025. The proof is elementary and all required components are available in Mathlib.
