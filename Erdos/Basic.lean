@@ -40,6 +40,102 @@ lemma sigma_one_ge_succ (n : ℕ) (hn : n ≥ 2) : sigma 1 n ≥ n + 1 := by
   calc 1 + n = ∑ d ∈ ({1, n} : Finset ℕ), d := hsum.symm
     _ ≤ ∑ d ∈ n.divisors, d := Finset.sum_le_sum_of_subset hsub
 
+/-! ## Abundancy Lower Bound for Even Numbers
+
+For even n ≥ 2, we have σ(n)/n ≥ 3/2. This is a key ingredient for showing
+that iterated σ grows super-exponentially.
+-/
+
+/-- σ(2) = 3 (computed directly). -/
+lemma sigma_two : sigma 1 2 = 3 := by
+  rw [sigma_one_apply]
+  have h : (2 : ℕ).divisors = {1, 2} := by decide
+  rw [h]
+  simp [Finset.sum_pair (by decide : (1:ℕ) ≠ 2)]
+
+private lemma div_two_ne_one {n : ℕ} (hn : n ≥ 4) : n / 2 ≠ 1 := by omega
+
+private lemma div_two_ne_self {n : ℕ} (hn : n ≥ 2) : n / 2 ≠ n := by omega
+
+private lemma one_ne_self_of_ge_two {n : ℕ} (hn : n ≥ 2) : (1 : ℕ) ≠ n := by omega
+
+/-- For even n ≥ 4, {1, n/2, n} is a subset of the divisors of n. -/
+lemma subset_divisors_even (n : ℕ) (hn4 : n ≥ 4) (heven : Even n) :
+    ({1, n / 2, n} : Finset ℕ) ⊆ n.divisors := by
+  intro d hd
+  simp only [Finset.mem_insert, Finset.mem_singleton] at hd
+  have hn0 : n ≠ 0 := by omega
+  cases hd with
+  | inl h1 =>
+    rw [h1]
+    exact Nat.one_mem_divisors.mpr hn0
+  | inr h2 =>
+    cases h2 with
+    | inl h_half =>
+      rw [h_half, Nat.mem_divisors]
+      exact ⟨Nat.div_dvd_of_dvd (Even.two_dvd heven), hn0⟩
+    | inr h_n =>
+      rw [h_n]
+      exact Nat.mem_divisors_self n hn0
+
+/-- The sum 1 + n/2 + n over the set {1, n/2, n} for n ≥ 4. -/
+lemma sum_three_divisors (n : ℕ) (hn4 : n ≥ 4) :
+    ∑ d ∈ ({1, n / 2, n} : Finset ℕ), d = 1 + n / 2 + n := by
+  have h1 : (1 : ℕ) ≠ n / 2 := (div_two_ne_one hn4).symm
+  have h2 : (1 : ℕ) ≠ n := one_ne_self_of_ge_two (by omega : n ≥ 2)
+  have h3 : n / 2 ≠ n := div_two_ne_self (by omega : n ≥ 2)
+  have h3' : n / 2 ∉ ({n} : Finset ℕ) := by simp [h3]
+  have h12 : (1 : ℕ) ∉ ({n / 2, n} : Finset ℕ) := by simp [h1, h2]
+  calc ∑ d ∈ ({1, n / 2, n} : Finset ℕ), d
+      = ∑ d ∈ insert 1 {n / 2, n}, d := by rfl
+    _ = 1 + ∑ d ∈ ({n / 2, n} : Finset ℕ), d := Finset.sum_insert h12
+    _ = 1 + ∑ d ∈ insert (n / 2) {n}, d := by rfl
+    _ = 1 + (n / 2 + ∑ d ∈ ({n} : Finset ℕ), d) := by rw [Finset.sum_insert h3']
+    _ = 1 + (n / 2 + n) := by simp
+    _ = 1 + n / 2 + n := by ring
+
+/-- Lower bound for σ when n ≥ 4 is even: σ(n) ≥ 1 + n/2 + n. -/
+lemma sigma_lower_bound_ge_four (n : ℕ) (hn4 : n ≥ 4) (heven : Even n) :
+    sigma 1 n ≥ 1 + n / 2 + n := by
+  rw [sigma_one_apply, ge_iff_le]
+  calc 1 + n / 2 + n = ∑ d ∈ ({1, n / 2, n} : Finset ℕ), d := (sum_three_divisors n hn4).symm
+    _ ≤ ∑ d ∈ n.divisors, d := Finset.sum_le_sum_of_subset (subset_divisors_even n hn4 heven)
+
+/-- For even n ≥ 2, we have 2 * σ(n) ≥ 3 * n.
+This is equivalent to σ(n)/n ≥ 3/2 (the abundancy lower bound). -/
+lemma abundancy_bound_even (n : ℕ) (hn : n ≥ 2) (heven : Even n) :
+    2 * sigma 1 n ≥ 3 * n := by
+  rcases Nat.lt_or_eq_of_le hn with hn_gt | rfl
+  · -- n > 2, and n is even so n ≥ 4
+    have h4 : n ≥ 4 := by
+      obtain ⟨k, hk⟩ := heven
+      omega
+    have hbound := sigma_lower_bound_ge_four n h4 heven
+    -- σ(n) ≥ 1 + n/2 + n
+    -- 2 * σ(n) ≥ 2 + n + 2n = 2 + 3n ≥ 3n
+    calc 2 * sigma 1 n ≥ 2 * (1 + n / 2 + n) := by omega
+      _ = 2 + 2 * (n / 2) + 2 * n := by ring
+      _ = 2 + n + 2 * n := by rw [Nat.mul_div_cancel' (Even.two_dvd heven)]
+      _ = 2 + 3 * n := by ring
+      _ ≥ 3 * n := by omega
+  · -- n = 2
+    simp [sigma_two]
+
+/-- For even n ≥ 2, the abundancy σ(n)/n is at least 3/2. -/
+lemma abundancy_ratio_even (n : ℕ) (hn : n ≥ 2) (heven : Even n) :
+    (sigma 1 n : ℝ) / n ≥ 3 / 2 := by
+  have hn_pos : (0 : ℝ) < n := by positivity
+  have hbound := abundancy_bound_even n hn heven
+  rw [ge_iff_le, le_div_iff₀ hn_pos]
+  -- Need: 3/2 * n ≤ σ(n)
+  -- From hbound: 2 * σ(n) ≥ 3 * n
+  -- So σ(n) ≥ 3*n/2 = 3/2 * n
+  have h : (3 : ℝ) / 2 * n = 3 * n / 2 := by ring
+  rw [h]
+  have h2 : (3 * n : ℕ) ≤ 2 * sigma 1 n := hbound
+  have h3 : (3 * n : ℝ) ≤ 2 * sigma 1 n := by exact_mod_cast h2
+  linarith
+
 /-- Erdős Problem 410: Iterated sum-of-divisors grows super-exponentially.
 
 DO NOT MODIFY THIS STATEMENT. This is the canonical formalization from
