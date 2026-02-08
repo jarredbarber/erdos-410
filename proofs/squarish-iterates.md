@@ -1,9 +1,10 @@
 # Eventually No Iterate Is Squarish
 
-**Status:** Draft ✏️
+**Status:** Under review 🔍
 **Statement:** For any $n \geq 2$, there exists $K$ such that $\sigma_k(n)$ is not squarish for all $k \geq K$.
 **Dependencies:** proofs/prime-factors-accumulate.md (Escape Lemma, $\sigma_k(n) \to \infty$, $S^*$ infinite)
 **Confidence:** High
+**Reviewed by:** erdos410-9m4
 
 ---
 
@@ -375,3 +376,143 @@ The key insight is that while globally there are infinitely many $m$ with $\sigm
 - proofs/prime-factors-accumulate.md (Verified ✅) — Escape Lemma, $\sigma_k(n) \to \infty$, $S^*$ infinite
 - Zsygmondy's theorem (1892) for primitive prime divisors of $2^a - 1$
 - Dirichlet's theorem on primes in arithmetic progressions
+
+---
+
+## Review Notes
+
+**Reviewer:** Task erdos410-9m4 (verify agent)  
+**Date:** 2026-02-08  
+**Decision:** Revision Requested 🔍
+
+### Summary
+
+This proof contains a **sound overall strategy** but has **critical gaps** in execution that prevent verification. The orbit-specific approach is correct, and the use of Zsygmondy's theorem is appropriate. However, two key arguments require substantial strengthening:
+
+1. **Part 1 (Transition Set Finite):** The finiteness argument is incomplete
+2. **Stage 3 (Reentry Impossible):** The claim that $N_k \to \infty$ is not rigorously proven
+
+### Detailed Issues
+
+#### **Part 1: Transition Set Finiteness**
+
+**Issue 1.1 (Case A, $a \leq 5$):** The claim that $T_a$ is finite for each $a \leq 5$ is asserted without proof. The argument states:
+
+> "This places constraints on $t$: for each $q_i$, either $v_{q_i}(\sigma(t^2))$ is even or odd... Intersecting the finitely many constraints from all $q_i \mid M$ gives finitely many valid $t$."
+
+**Problem:** It is not proven that the parity constraint $v_{q_i}(\sigma(t^2)) \equiv -e_i \pmod 2$ can only be satisfied by finitely many $t$. The assertion "this occurs for finitely many primes $p$" needs justification. Why can't infinitely many $t$ satisfy all the parity constraints simultaneously?
+
+**Issue 1.2 (Case B, Sub-claim B1):** The argument that $A_t = \{a \geq 6 : (2^{a+1} - 1) \cdot \sigma(t^2) \text{ is a square}\}$ is finite for each fixed $t$ is incomplete.
+
+The proof says:
+> "Since $\mathrm{ord}_{p_a}(2) = a + 1 \to \infty$ as $a \to \infty$... eventually $\mathrm{ord}_{p_a}(r_j) > 2f_j + 1$"
+
+**Problem:** The relationship between $\mathrm{ord}_{p_a}(2)$ and $\mathrm{ord}_{p_a}(r_j)$ is not established. Why does $p_a$ having large order with respect to 2 imply it has large order with respect to $r_j$? These are independent properties.
+
+The better argument (sketched later) is that $p_a$ is a prime divisor of $2^{a+1} - 1$, and for $a > \sigma(t^2)$, we have $p_a > a > \sigma(t^2)$, so $p_a$ cannot divide $\sigma(t^2)$ (since all primes dividing $\sigma(t^2)$ are $\leq \sigma(t^2)$). But the proof doesn't establish that $p_a > a$ for primitive primes (is this even true?).
+
+**Issue 1.3 (Case B, Combining):** The "König-type" argument to show $\bigcup_{a \geq 6} \{2^a \cdot t^2 : t \in T_a\}$ is finite is **incorrect as stated**.
+
+The proof claims:
+> By B2, each $T_a$ is finite. By B1, each $t$ belongs to only finitely many $T_a$. Therefore $\bigcup_a T_a$ is finite.
+
+**Problem:** Having finite fibers under both projections does NOT imply the set is finite. Counterexample: $\{(n, n) : n \in \mathbb{N}\}$ has finite fibers under both coordinate projections but is infinite.
+
+The attempted correction using the bound $A_t \subseteq \{6, 7, \ldots, \sigma(t^2)\}$ is better but still incomplete. It's claimed that this bound is "effective" and makes the set finite, but the actual proof is missing.
+
+**Recommended fix:** Prove directly that $T$ is finite by bounding the elements. For instance, show that for $m = 2^a \cdot t^2 \in T$, both $a$ and $t$ are bounded by an absolute constant (not depending on either variable). The Zsygmondy approach is good for showing constraints, but the finiteness needs a cleaner argument.
+
+#### **Stage 3: Reentry Impossible**
+
+This is the **most critical gap**. The proof needs to show that for large $k$, the quantity $(2^{a_k+1} - 1) \cdot Q_k$ cannot be a perfect square.
+
+**Issue 3.1 (Odd exponents from Escape Lemma):** The proof assumes:
+
+> "When $p$ enters $m_k$ with odd exponent (e.g., exponent 1), the contribution to $\sigma(m_k)$ includes $\sigma(p) = p + 1$."
+
+**Problem:** The Escape Lemma states that new primes enter $\sigma_k(n)$ for some $k$. It does NOT guarantee that:
+1. These primes enter $m_k$ (the odd part) rather than just the power of 2
+2. These primes enter with exponent 1 (odd) rather than an even exponent
+
+When a new prime $q$ first appears in the orbit, it appears in some $\sigma_k(n)$. If $q = 2$, it doesn't affect $m_k$. If $q$ is odd, it enters $m_k$, but with what exponent? The Escape Lemma says $q \mid \sigma(p_0^a)$ for some $p_0$ already in the orbit. The exponent $v_q(\sigma(p_0^a))$ could be even or odd.
+
+**Issue 3.2 (New odd-exponent primes in $Q_k$):** Even if $p$ enters $m_k$ with odd exponent 1, so $\sigma(p) = p + 1$ divides $\sigma(m_k)$, the proof claims:
+
+> "The prime factors of $p + 1$ enter $\sigma(m_k)$ and hence $Q_k$ (after extracting powers of 2)."
+
+**Problem:** Multiple primes in $m_k$ might contribute the same prime factor $r$ to $Q_k$. For instance, if $p_1, p_2 \in m_k$ (both with odd exponent) and both $r \mid (p_1 + 1)$ and $r \mid (p_2 + 1)$, then $v_r(Q_k)$ gets contributions from both, and the total exponent could be even even if each individual contribution has odd exponent.
+
+The proof acknowledges this with "(mostly)" but doesn't prove that the accumulation of such collisions doesn't eventually balance out to give a perfect square.
+
+**Issue 3.3 (Mersenne factor balancing):** The proof says:
+
+> "The Mersenne number $2^{a_k+1} - 1$ is fixed (for given $k$) and cannot balance infinitely many new primes."
+
+**Problem:** As $k$ varies, $a_k$ varies, so different Mersenne numbers appear. Each Mersenne number $2^{a_k+1} - 1$ has its own factorization, and these could balance different primes at different reentry points. The proof needs to show that across ALL potential reentry points $k \geq K_1$, the accumulation effect dominates, not just that a single Mersenne number can't balance infinitely many primes.
+
+**Issue 3.4 (The divergence claim):** The proof claims:
+
+> "Claim: $\limsup_{k \to \infty} N_k = \infty$"
+
+where $N_k = |\{r \text{ odd prime} : v_r((2^{a_k+1}-1) \cdot Q_k) \text{ is odd}\}|$.
+
+The "proof" argues that primes $p \equiv 3 \pmod 4$ in $S^*$ contribute factors $(p+1)/4$ to $Q_k$, and these accumulate. But this is **informal and incomplete**:
+
+1. Not all reentry indices $k$ will have all these primes in $m_k$ — the orbit is a sequence, not a cumulative set
+2. Even if $p \mid m_k$, it might have even exponent, so $\sigma(p^{2j})$ is odd and contributes differently
+3. The factors from different primes might combine to give even exponents
+
+**Recommended fix:** A rigorous proof would need to:
+- Show that for infinitely many $k$, there exists a prime $p$ with $v_p(m_k)$ odd and $p + 1$ having a prime factor $r$ with $v_r((2^{a_k+1}-1) \cdot Q_k)$ odd
+- OR show that the constraints for $(2^{a_k+1}-1) \cdot Q_k$ being a square form a system of Diophantine equations that, combined with the growth properties of the orbit, have only finitely many solutions
+
+An alternative approach: Use the unbounded growth of $\omega(m_k)$ more directly. As $m_k$ has more distinct prime factors with odd exponents, the number of independent parity constraints for $(2^{a_k+1}-1) \cdot Q_k$ being a square grows. With sufficiently many independent constraints, the probability that they all happen to be satisfied becomes vanishingly small (though making this rigorous requires careful analysis).
+
+### What Works Well
+
+1. **Lemma 1 (Parity Criterion):** The characterization of when $\sigma(m)$ is odd is **correct and clearly proven**.
+
+2. **Lemma 2 (Zsygmondy):** Correctly cited and applied.
+
+3. **Stage 1 (No consecutive squarish):** The logic is **sound**: if $T$ is finite (assuming Part 1 is fixed), then eventually all squarish iterates are isolated.
+
+4. **Stage 2 (Reentry characterization):** The setup is **correct**: for a reentry point, $(2^{a_k+1} - 1) \cdot Q_k$ must be a perfect square.
+
+5. **Dependencies:** Correctly references proofs/prime-factors-accumulate.md (Verified ✅). The use of the Escape Lemma and $\omega(m_k)$ unbounded is appropriate.
+
+6. **Overall strategy:** The orbit-specific approach is the right way to proceed (as opposed to global set properties which were proven insufficient).
+
+### Verification Checklist
+
+- ✅ **Statement clarity:** Precise and unambiguous
+- ✅ **Assumptions:** Explicitly stated and justified (n ≥ 2, Zsygmondy, Dirichlet)
+- ❌ **Logical flow:** Gaps in Part 1 (finiteness) and Stage 3 (divergence)
+- ✅ **Quantifiers:** Correctly used in preliminary lemmas
+- ⚠️ **Edge cases:** Handled in preliminaries, but not addressed in the main arguments
+- ✅ **Dependencies:** Correctly referenced and used appropriately
+- ❌ **Completeness:** Does not prove the claimed result rigorously
+- ✅ **No circular dependencies:** Dependency chain is clear
+
+### Recommendation
+
+**This proof requires significant revision before it can be verified.** The issues in Part 1 can potentially be addressed by a more direct finiteness argument or by making the Zsygmondy-based approach more rigorous. The issues in Stage 3 are more fundamental and require either:
+
+1. A stronger result from the Escape Lemma about exponents of new primes, OR
+2. A different approach to showing reentry is impossible (perhaps probabilistic or density-based), OR
+3. A direct construction showing that for large enough $k$, the parity constraints cannot all be satisfied
+
+The current draft represents good mathematical intuition and correct high-level strategy, but the execution has substantial gaps that must be filled before the proof can be considered complete.
+
+### Suggested Next Steps
+
+1. **For Part 1:** Either prove directly that $T$ is finite by bounding its elements, OR fix the Zsygmondy argument by:
+   - Proving Case A rigorously for each $a \leq 5$
+   - Establishing the bound $p_a > a$ for primitive primes
+   - Giving a correct finiteness argument for the union (not the flawed König-type reasoning)
+
+2. **For Stage 3:** Either:
+   - Prove a stronger version of the Escape Lemma showing new primes enter with exponent 1, OR
+   - Use a counting/density argument to show that the set of $k$ where reentry is possible has density 0, OR  
+   - Show directly that the Diophantine constraint $(2^{a_k+1}-1) \cdot Q_k = \text{square}$ combined with $\omega(m_k) \to \infty$ and the specific structure of the orbit implies only finitely many solutions
+
+3. Consider whether a **probabilistic heuristic** could be made rigorous: as $\omega(m_k) \to \infty$, the number of parity constraints grows, and the "probability" that they all align to give a square decreases exponentially, making infinite reentry measure-zero impossible.
