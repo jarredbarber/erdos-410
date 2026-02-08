@@ -759,3 +759,65 @@ Persistence (1): prime_div_eventually_always (1247)
 - Does 348 produce a rigorous proof for squarish_reentry_set_finite?
 - Human response on persistence — still pending.
 - Realistic end state if v2 + reentry succeed: 5 sorrys (Zsygmondy × 4 + persistence × 1)
+
+## Heartbeat — 2026-02-08 04:05 UTC (Check-in 24)
+
+**Metrics**: 8 sorrys (lines 847, 859, 869, 946, 958, 1219, 1236, 1295), 1496+ lines, 49 tasks (44 closed, 2 failed, 1 in_progress, 2 open).
+**Status**: ⚠️ STRUCTURAL CRISIS — squarish_reentry_set_finite proved FALSE. Intervention required.
+
+**Key developments since last heartbeat**:
+1. **8ay (verify) COMPLETED**: REJECTED v2-hits-multiple.md ❌. Found critical gaps in Steps 3-6.
+2. **sru (formalize) COMPLETED**: Despite rejection, decomposed v2_hits_multiple_once into:
+   - `v2_iterate_unbounded` (sorry 1219): v₂(σₖ(n)) → ∞
+   - `v2_hits_target_residue` (sorry 1236): v₂ hits specific residue mod d
+   - v2_hits_multiple_once now PROVEN from these two. Good decomposition.
+   - Sorry count 7→8 (split one sorry into two).
+3. **348 (explore) FAILED — CRITICALLY IMPORTANT**: Found squarish_reentry_set_finite is **FALSE**.
+   - Counterexamples: ALL Mersenne primes (3, 7, 31, 127, 8191, ...) are non-squarish with squarish σ
+   - Also: primes p with p+1 = 2t² (e.g., 17, 97, 241, 337)
+   - Also: many composites (10, 21, 22, ...)
+   - Computational: thousands of examples up to 100k, density decreasing but non-zero
+   - Published proofs/squarish-reentry.md documenting the disproof
+
+**STRUCTURAL IMPACT**:
+```
+squarish_reentry_set_finite (sorry, FALSE!) ──→ squarish_iterates_finite (proof BROKEN) 
+  ──→ prime_persistence_two (BROKEN) ──→ prime_persistence (BROKEN)
+  ──→ ... ──→ erdos_410 (BROKEN)
+```
+Every "proven" result from squarish_iterates_finite upward depends on a FALSE sorry.
+Lean code still compiles (sorry allows anything), but mathematical soundness is broken.
+
+**squarish_iterates_finite itself is likely STILL TRUE** — it just needs a different proof:
+- Orbit-specific argument (growth of σ_k(n) + sparsity of squarish numbers)
+- Or: prime factor accumulation makes squarish impossible (too many odd primes need even exponents simultaneously)
+
+**Also still open**: squarish_transition_set_finite likely IS true (depends on Zsygmondy only).
+
+**Actions**:
+1. Created **vou** (explore, p:0): CRITICAL — orbit-specific proof of squarish_iterates_finite. Worker picked up immediately.
+2. Created **221** (explore, p:1): Prove v2_iterate_unbounded (v₂ unbounded)
+3. Acknowledged 348 failure (correct — statement is false)
+
+**Pipeline**:
+```
+vou (in progress, p:0, CRITICAL) → [verify] → [formalize: restructure squarish_iterates_finite]
+221 (open, p:1) → [verify] → [formalize v2_iterate_unbounded]
+```
+
+**Current 8 sorrys in 4 clusters**:
+```
+Zsygmondy (3): zsygmondy_two_pow, squarish_constraint_set_finite, squarish_a_set_finite
+Finiteness (2): squarish_transition_set_finite (likely true), squarish_reentry_set_finite (FALSE!)
+v2 (2): v2_iterate_unbounded, v2_hits_target_residue (new from sru decomposition)
+Persistence (1): prime_div_eventually_always (5+ failed attempts)
+```
+
+**Critical path**: vou MUST succeed. Without a correct proof of squarish_iterates_finite, the entire chain is mathematically unsound.
+
+**Watch next**:
+- Does vou (explore) find an orbit-specific proof? This is THE critical task.
+- If vou fails: need to consider completely different approach to prime_persistence_two
+- After vou: need formalize task to restructure squarish_iterates_finite proof in Lean (remove false reentry sorry, add correct approach)
+- 221 (v2 unbounded) is secondary but useful for later
+- Human escalation on persistence still pending (2+ hours)
