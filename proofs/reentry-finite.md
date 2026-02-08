@@ -1,6 +1,6 @@
 # Reentry Into the Squarish Set Is Finite
 
-**Status:** Draft ✏️
+**Status:** Under review 🔍
 **Statement:** For any $n \geq 2$, the set of **reentry points** $\{k : \sigma_k(n) \text{ not squarish}, \sigma_{k+1}(n) \text{ squarish}\}$ is finite.
 **Dependencies:** proofs/prime-factors-accumulate.md (Verified ✅), proofs/squarish-iterates.md (Part 1: Transition Set Finite)
 **Confidence:** High
@@ -390,3 +390,186 @@ This revision addresses the issues raised in the erdos410-1t1 review:
 - proofs/squarish-iterates.md: Theorem 1 (Transition Set Finite)
 - Zsygmondy's theorem (1892) for primitive prime divisors of Mersenne numbers
 - Results on $\sigma(m) = N$ having finitely many solutions
+
+---
+
+## Review Notes
+
+**Reviewer:** Task erdos410-n86 (verify agent)  
+**Date:** 2026-02-08  
+**Decision:** Revision Requested 🔍
+
+### Summary
+
+This proof represents a **significant improvement** over the previous version (by pml). The new approach using Zsygmondy primitive primes and entry timing successfully avoids the three critical issues from the previous review. However, the proof contains **three critical gaps** that prevent verification:
+
+1. **Lemma 5** (primitive prime with odd valuation) uses circular reasoning
+2. **Proposition 2, Case 1b** (density argument) appeals to non-rigorous heuristics
+3. **Dependency** on squarish-iterates.md Theorem 1, which is itself under review with critical gaps
+
+The overall strategy is sound and promising. With targeted revisions to address these three issues, this proof could be verified.
+
+### Critical Issues
+
+#### **Issue 1: Lemma 5 — Circular Reasoning (HIGH PRIORITY)**
+
+**Location:** Lemma 5, lines ~135-155
+
+**Claim:** At a reentry point $k$ with $a_k = a \geq 6$, there exists a primitive prime $p$ of $2^{a+1} - 1$ with $v_p(2^{a+1}-1)$ odd.
+
+**Problem:** The "proof" of the claim states:
+
+> "Suppose all primitive primes have even valuation in $2^{a+1} - 1$. Then the primitive part of $2^{a+1} - 1$ (product of primitive prime powers) is a perfect square. But the primitive part grows roughly like $(2^{a+1} - 1) / O(a^C)$ (non-primitive factors are bounded), which for large $a$ is not a square **(it has a primitive prime to the first power, generically)**."
+
+This is **circular reasoning**: the argument assumes "it has a primitive prime to the first power" to prove that such a prime exists. The phrase "generically" is vague and non-rigorous.
+
+Moreover, the proof states "For the exceptional cases $a \leq 10$, we can verify directly..." but **does not perform this verification**. Since Lemma 5 is needed for $a \geq 6$, the cases $a \in \{6, 7, 8, 9, 10\}$ must be checked explicitly if the generic argument fails for small $a$.
+
+**Impact:** Lemma 5 is critical for Proposition 1, which in turn is needed for the main theorem. Without Lemma 5, the entire proof collapses.
+
+**Recommended fix:** 
+
+**Option A (Direct verification for small cases):** 
+- Compute the factorization of $2^{a+1} - 1$ for $a \in \{6, 7, ..., 20\}$ and verify that at least one primitive prime has odd exponent
+- If this holds for $a \leq 20$, argue that for $a > 20$, the reentry constraint forces $a \leq 20$ anyway (by the timing argument in Proposition 1), so only small cases matter
+
+**Option B (Theoretical argument):**
+- Prove that for Mersenne numbers $2^{a+1} - 1$ with $a \geq 6$, the product of all primitive primes with odd exponent is non-trivial. This requires understanding the factorization structure of Mersenne numbers more deeply.
+- Alternatively, weaken the lemma to: "For sufficiently many $a \geq 6$, there exists a primitive prime with odd valuation." Then argue that the infinitely many reentry points would require unbounded $a$, but only finitely many $a$ lack the required primitive prime, so most reentry points satisfy the constraint.
+
+**Option C (Different approach):**
+- Avoid Lemma 5 entirely by using a different constraint. For instance, use properties of $\text{Par}(2^{a+1} - 1)$ directly without requiring a specific primitive prime with odd valuation.
+
+---
+
+#### **Issue 2: Proposition 2, Case 1b — Non-Rigorous Density Argument (HIGH PRIORITY)**
+
+**Location:** Proposition 2, Case 1b, lines ~270-300
+
+**Claim:** For fixed $a$, if infinitely many distinct $U_k$ appear in the reentry sequence, then only finitely many $k$ can satisfy the constraint $\text{odd part of } \sigma(m_k) = P \cdot U_k^2$.
+
+**Problem:** The proof appeals to:
+
+1. **"Standard results on the distribution of $\sigma(m)$ modulo squares"** — This is vague. What specific theorem is being invoked? 
+
+2. **Density $O(m^{-1/2})$** — The proof claims "the density of $m$ with $(\text{odd part of } \sigma(m)) / P$ being a square is $O(m^{-1/2})$" but provides no justification or citation. Why is this the correct exponent?
+
+3. **Borel-Cantelli for deterministic sequences** — The proof states: "By the Borel-Cantelli principle (made rigorous for this deterministic sequence via the orbit's growth): only finitely many $k$ satisfy the constraint." 
+
+   The Borel-Cantelli lemma applies to **independent random events** with probabilities. Here, the sequence $(m_k)$ is **deterministic**, not random. The phrase "made rigorous... via the orbit's growth" is hand-waving. How exactly does one make this rigorous?
+
+4. Even if $\sum_k (m_k)^{-1/2} < \infty$ (which is correct for exponentially growing $m_k$), how does this imply that only finitely many $k$ satisfy the constraint? The Borel-Cantelli lemma would say "with probability 1, only finitely many events occur" in a probabilistic setting. For a deterministic sequence, a different argument is needed.
+
+**Impact:** Proposition 2 is needed for the main theorem. Case 1b handles the scenario where infinitely many distinct $U_k$ values appear. If this case is not rigorously proven, the proof of Proposition 2 is incomplete.
+
+**Recommended fix:**
+
+**Option A (Cite a specific result):**
+- Find a theorem in analytic number theory about the density of $m$ with $\sigma(m) / P$ being a square (for fixed $P$)
+- Verify that this result applies to deterministic subsequences (not just random samples)
+- Apply it rigorously to the orbit's sequence $m_k$
+
+**Option B (Diophantine approach):**
+- Use the Claim in Case 1b: "Only finitely many odd integers $m$ satisfy $\sigma(m) = 2^b \cdot P \cdot U^2$ for some $b \geq 0$ and $U \leq U_0$"
+- For the sequence $m_k \to \infty$, if infinitely many satisfy the constraint, then $U_k \to \infty$
+- Use the specific structure of the orbit (e.g., $m_k$ are odd parts of $\sigma_j(n)$ for various $j$) to show that the Diophantine constraint $\sigma(m_k) = 2^{b_k} \cdot P \cdot U_k^2$ with $U_k \to \infty$ leads to a contradiction
+- This avoids probabilistic arguments entirely
+
+**Option C (Weaker claim):**
+- Instead of proving that $R_a$ is finite for each $a$, prove that $\sum_a |R_a| < \infty$. This might be easier and sufficient for the main theorem.
+
+---
+
+#### **Issue 3: Unverified Dependency on squarish-iterates.md Theorem 1 (BLOCKING)**
+
+**Location:** Main Theorem, Step 1
+
+**Dependency:** The proof assumes squarish-iterates.md Theorem 1: "The transition set $T = \{m : m, \sigma(m) \text{ both squarish}\}$ is finite."
+
+**Problem:** The file proofs/squarish-iterates.md has status **Under review 🔍** and was reviewed by task erdos410-9m4, which found **critical gaps** in the proof of Theorem 1 and requested revision. Specifically:
+
+- **Part 1, Case A ($a \leq 5$):** The finiteness of $T_a$ is asserted without rigorous proof
+- **Part 1, Case B (Combining):** The argument that $\bigcup_{a \geq 6} \{2^a \cdot t^2 : t \in T_a\}$ is finite uses flawed "König-type" reasoning
+- **Stage 3:** The claim that $N_k \to \infty$ (preventing reentry) has fundamental gaps
+
+**Impact:** Without Theorem 1 from squarish-iterates.md, the Main Theorem in reentry-finite.md cannot be verified. The dependency is **critical** and **blocking**.
+
+**Recommended action:**
+
+1. **Do not verify reentry-finite.md** until squarish-iterates.md Theorem 1 is verified
+2. Create a follow-up task to fix squarish-iterates.md Theorem 1
+3. Once that is verified, re-review reentry-finite.md with the dependency satisfied
+
+**Alternative:** The proof could be restructured to include a self-contained proof of Theorem 1 (finite transition set) within reentry-finite.md, making it independent of squarish-iterates.md. However, this would substantially increase the length and complexity.
+
+---
+
+### What Works Well
+
+1. **Lemma 1-4 (Preliminaries):** The setup is clear and correct. The reentry constraint, Zsygmondy's theorem, entry time bounds are all properly established.
+
+2. **Proposition 1 Logic (assuming Lemma 5):** The logic chain from entry timing to bounded $a_k$ is **valid**. The argument that $a < \beta \log a$ leads to a contradiction for large $a$ is sound.
+
+3. **Proposition 2, Case 2:** The claim that $\{m : \text{odd part of } \sigma(m) = Q^*\}$ is finite for fixed $Q^*$ is **correct** and properly justified using the standard result that $\sigma(m) = N$ has finitely many solutions.
+
+4. **Lemma 6 (Sparse Set Structure):** The bound $|V_T \cap [1, X]| \ll X^{1/2} \cdot (\log X)^{|T|}$ is correct and nicely proven.
+
+5. **Lemma 7 (Q_k Growth):** The argument that $Q_k \to \infty$ along reentry points with fixed $a$ is sound.
+
+6. **Overall Strategy:** The new approach successfully addresses the three issues from the previous review:
+   - No longer relies on "Par(Q_k) escaping finite sets"
+   - No longer applies Escape Lemma to subsequences
+   - No longer needs uniform bounds on $|V(Q)|$
+
+7. **Dependencies:** Correctly references proofs/prime-factors-accumulate.md (Verified ✅) and uses it appropriately.
+
+---
+
+### Verification Checklist
+
+- ✅ **Statement clarity:** Precise and unambiguous
+- ✅ **Assumptions:** Explicitly stated (n ≥ 2, Zsygmondy, etc.)
+- ❌ **Logical flow:** Gaps in Lemma 5 and Proposition 2, Case 1b
+- ✅ **Quantifiers:** Correctly used throughout
+- ⚠️ **Edge cases:** Small values of $a$ in Lemma 5 not verified
+- ❌ **Dependencies:** squarish-iterates.md Theorem 1 is unverified (Under review 🔍)
+- ❌ **Completeness:** Does not prove the claimed result rigorously due to gaps
+- ✅ **No hidden assumptions:** Assumptions are stated explicitly
+- ⚠️ **Circular dependencies:** No circularity, but linear dependency chain has a blocker
+
+---
+
+### Recommendation
+
+**This proof requires revision before it can be verified.** The three critical issues must be addressed:
+
+1. **Fix Lemma 5:** Provide a rigorous proof (direct verification for small cases, or theoretical argument, or alternative approach)
+2. **Fix Proposition 2, Case 1b:** Replace the non-rigorous density/Borel-Cantelli argument with a rigorous proof (cite specific results, use Diophantine constraints, or weaker claim)
+3. **Resolve dependency:** Either wait for squarish-iterates.md Theorem 1 to be verified, or include a self-contained proof of the transition set finiteness
+
+**Priority:** High (this is iteration 3, and significant progress has been made)
+
+**Estimated effort:** Medium (the gaps are well-defined and likely fixable with focused work)
+
+### Suggested Next Steps
+
+1. **Immediate:** Create an `explore` task to fix Lemma 5 (verify small cases $a \in \{6, ..., 20\}$ computationally or find a theoretical argument)
+
+2. **Immediate:** Create an `explore` task to replace the density argument in Proposition 2, Case 1b with a rigorous proof
+
+3. **Coordinate with advisor:** Discuss whether to wait for squarish-iterates.md Theorem 1 verification or to include a self-contained proof in this file
+
+4. **After fixes:** Re-submit for verification (iteration 4)
+
+---
+
+### Positive Notes
+
+Despite the critical gaps, this proof represents **substantial mathematical progress**:
+
+- The Zsygmondy primitive prime approach is elegant and novel
+- The entry timing argument is a clever use of orbit dynamics
+- The overall structure is much clearer than previous iterations
+- Most technical details are correct
+
+With targeted revisions addressing the three identified gaps, this proof should be verifiable. The mathematical ideas are sound; the execution needs tightening.
