@@ -1041,19 +1041,40 @@ lemma q_dvd_sigma_of_v2_dvd (q m : ℕ) (hm : m ≠ 0)
     (Nat.Coprime.pow_left _ (Nat.coprime_two_left.mpr (odd_part_is_odd m hm)))]
   exact dvd_mul_of_dvd_left hq _
 
+/-- For n ≥ 2 and d ≥ 1, there exists some k such that d ∣ v₂(σₖ(n)) + 1.
+    This is the "single hit" version — the infinitely-often version
+    (`v2_hits_residue`) follows by applying this to σ^K(n).
+
+    The proof uses the dynamics of σ acting on 2-adic valuations:
+    - Escape Lemma: new primes keep entering the orbit (S* is infinite)
+    - Dirichlet's theorem: among new primes, some have v₂(p+1) = j for any target j
+    - When such a prime p enters with odd exponent, σ(p^1) = p+1 contributes
+      v₂(p+1) = j to v₂(σ(odd part))
+    - By choosing j appropriately mod d, we can ensure d ∣ v₂(σₖ(n)) + 1
+
+    See proofs/prime-persistence.md, Lemma 5 + Corollary 5.1. -/
+lemma v2_hits_multiple_once (n : ℕ) (hn : n ≥ 2) (d : ℕ) (hd : d ≥ 1) :
+    ∃ k, d ∣ ((sigma 1)^[k] n).factorization 2 + 1 := by
+  sorry
+
 /-- The 2-adic valuation of σₖ(n) hits multiples of any d ≥ 1 infinitely often.
-    
+
     Precisely: for any d ≥ 1 and K, there exists k ≥ K such that
     d ∣ (v₂(σₖ(n)) + 1). This is the key number-theoretic input for
     showing that odd primes enter the orbit.
-    
-    The proof uses the Escape Lemma (S* is infinite) together with
-    Dirichlet's theorem on primes in arithmetic progressions to show
-    that v₂(σₖ(n)) is unbounded and hits all residue classes.
+
+    The proof reduces to `v2_hits_multiple_once` by applying it to σ^K(n).
+    Since σ^K(n) ≥ 2, the single-hit lemma applies, giving some j with
+    d ∣ v₂(σ^j(σ^K(n))) + 1, and then k = K + j works.
     See proofs/prime-persistence.md, Lemma 5 and Corollary 5.1. -/
 lemma v2_hits_residue (n : ℕ) (hn : n ≥ 2) (d : ℕ) (hd : d ≥ 1) :
     ∀ K, ∃ k ≥ K, d ∣ ((sigma 1)^[k] n).factorization 2 + 1 := by
-  sorry
+  intro K
+  -- Apply the "single hit" lemma to σ^K(n), which is ≥ 2
+  have hK : (sigma 1)^[K] n ≥ 2 := sigma_iterate_ge_two n hn K
+  obtain ⟨j, hj⟩ := v2_hits_multiple_once ((sigma 1)^[K] n) hK d hd
+  exact ⟨K + j, Nat.le_add_right K j, by
+    rw [show K + j = j + K from by omega, Function.iterate_add_apply]; exact hj⟩
 
 /-- Once a prime q divides σₖ(n) for infinitely many k, it eventually always divides.
     This is the "persistence" step: once q enters, exits become impossible.
