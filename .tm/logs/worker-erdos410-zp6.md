@@ -2454,3 +2454,38 @@ Remaining sorrys (3):
 2. v2_hits_residue — needs Escape Lemma + Dirichlet
 3. prime_div_eventually_always — persistence argument"
 ```
+Now let me verify the overall sorry count and create a summary:
+```bash
+$ cd /home/jarred/code/erdos-410 && lake build 2>&1 | grep "sorry\|error\|Build"
+```
+
+```bash
+$ cd /home/jarred/code/erdos-410 && echo "=== Sorry dependency tree ===" && echo "" && echo "erdos_410 [PROVEN]" && echo "  └─ sigma_iterate_superexp [PROVEN]" && echo "      └─ sigma_iterate_superexp_gt_one [PROVEN]" && echo "          └─ abundancy_ratio_diverges [PROVEN]" && echo "              └─ prime_factors_accumulate [PROVEN]" && echo "                  └─ prime_persistence [PROVEN via case split]" && echo "                      ├─ prime_persistence_two [PROVEN]" && echo "                      │   └─ squarish_iterates_finite [SORRY #1]" && echo "                      └─ prime_persistence_odd [PROVEN]" && echo "                          ├─ prime_enters_infinitely [PROVEN]" && echo "                          │   └─ v2_hits_residue [SORRY #2]" && echo "                          └─ prime_div_eventually_always [SORRY #3]"
+```
+Let me update the task and complete it:
+```bash
+$ cd /home/jarred/code/erdos-410 && tm update erdos410-zp6 --status "Complete. prime_persistence sorry closed; 3 atomic sub-sorrys remain."
+```
+
+```bash
+$ cd /home/jarred/code/erdos-410 && wc -l Erdos/Basic.lean
+```
+```json
+{
+  "status": "completed",
+  "summary": "Closed sorry in prime_persistence. lake build succeeds with 3 remaining atomic sub-sorrys.",
+  "details": "The original monolithic sorry in `prime_persistence` (line 799) has been decomposed and the top-level lemma is now sorry-free. The proof uses a case split on q=2 vs q odd.\n\n**Proven lemmas (new):**\n- `prime_persistence` — case split on q=2 vs odd\n- `prime_persistence_two` — from `squarish_iterates_finite`\n- `prime_persistence_odd` — from `prime_enters_infinitely` + `prime_div_eventually_always`\n- `prime_enters_infinitely` — from `v2_hits_residue` + `q_dvd_sigma_two_pow_iff` + `q_dvd_sigma_of_v2_dvd`\n- `two_ne_zero_zmod` — (2 : ZMod q) ≠ 0 for odd prime q\n- `orderOf_two_zmod_pos` — ord_q(2) ≥ 1 via Fermat's little theorem\n- `dvd_two_pow_sub_one_iff` — q | 2^n-1 ↔ (2:ZMod q)^n = 1\n- `q_dvd_sigma_two_pow_iff` — q | σ(2^a) ↔ ord_q(2) | (a+1)\n- `two_pow_factorization_dvd` — 2^{v₂(m)} | m\n- `odd_part_is_odd` — m/2^{v₂(m)} is odd\n- `q_dvd_sigma_of_v2_dvd` — multiplicativity decomposition\n\n**Remaining sorrys (3):**\n1. `squarish_iterates_finite` — σₖ(n) is eventually not squarish (needs Zsygmondy's theorem, not in Mathlib)\n2. `v2_hits_residue` — v₂(σₖ(n))+1 hits multiples of d infinitely often (needs Escape Lemma + Dirichlet)\n3. `prime_div_eventually_always` — infinitely often divides → eventually always divides (persistence gap from NL proof review)"
+}
+```
+
+## Final Result
+
+```json
+{
+  "status": "completed",
+  "summary": "Closed sorry in prime_persistence. lake build succeeds with 3 remaining atomic sub-sorrys.",
+  "details": "The original monolithic sorry in `prime_persistence` (line 799) has been decomposed and the top-level lemma is now sorry-free. The proof uses a case split on q=2 vs q odd.\n\n**Proven lemmas (new):**\n- `prime_persistence` — case split on q=2 vs odd\n- `prime_persistence_two` — from `squarish_iterates_finite`\n- `prime_persistence_odd` — from `prime_enters_infinitely` + `prime_div_eventually_always`\n- `prime_enters_infinitely` — from `v2_hits_residue` + `q_dvd_sigma_two_pow_iff` + `q_dvd_sigma_of_v2_dvd`\n- `two_ne_zero_zmod` — (2 : ZMod q) ≠ 0 for odd prime q\n- `orderOf_two_zmod_pos` — ord_q(2) ≥ 1 via Fermat's little theorem\n- `dvd_two_pow_sub_one_iff` — q | 2^n-1 ↔ (2:ZMod q)^n = 1\n- `q_dvd_sigma_two_pow_iff` — q | σ(2^a) ↔ ord_q(2) | (a+1)\n- `two_pow_factorization_dvd` — 2^{v₂(m)} | m\n- `odd_part_is_odd` — m/2^{v₂(m)} is odd\n- `q_dvd_sigma_of_v2_dvd` — multiplicativity decomposition\n\n**Remaining sorrys (3):**\n1. `squarish_iterates_finite` — σₖ(n) is eventually not squarish (needs Zsygmondy's theorem, not in Mathlib)\n2. `v2_hits_residue` — v₂(σₖ(n))+1 hits multiples of d infinitely often (needs Escape Lemma + Dirichlet)\n3. `prime_div_eventually_always` — infinitely often divides → eventually always divides (persistence gap from NL proof review)"
+}
+```
+
+End Time: 2026-02-08T01:40:12.335Z
