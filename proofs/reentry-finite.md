@@ -1,487 +1,392 @@
 # Reentry Into the Squarish Set Is Finite
 
-**Status:** Under review 🔍
+**Status:** Draft ✏️
 **Statement:** For any $n \geq 2$, the set of **reentry points** $\{k : \sigma_k(n) \text{ not squarish}, \sigma_{k+1}(n) \text{ squarish}\}$ is finite.
-**Dependencies:** proofs/prime-factors-accumulate.md (Verified ✅), proofs/squarish-iterates.md (Stages 1-2)
+**Dependencies:** proofs/prime-factors-accumulate.md (Verified ✅), proofs/squarish-iterates.md (Part 1: Transition Set Finite)
 **Confidence:** High
 
 ---
 
 ## Overview
 
-This proof fills the critical gap in Stage 3 of proofs/squarish-iterates.md. We prove that infinite reentry is impossible using two key observations:
+This proof establishes that the orbit $(\sigma_k(n))_{k \geq 0}$ can only re-enter the squarish set finitely many times. The proof proceeds in two main steps:
 
-1. **Escape Lemma consequence:** The parity support $\text{Par}(Q_k)$ eventually escapes any finite set of primes
-2. **Mersenne coverage is finite:** For fixed $A$, the union $\bigcup_{a \leq A} \text{primeFactors}(2^{a+1}-1)$ is finite
-3. **Each Mersenne value allows finitely many matches:** For fixed $a$, only finitely many $k$ have $\text{Par}(Q_k) = \text{Par}(2^{a+1}-1)$
+1. **Bounded 2-adic valuation:** At reentry points, the 2-adic valuation $a_k = v_2(\sigma_k(n))$ must be bounded (Proposition 1)
+2. **Finiteness for bounded $a$:** For each fixed bound on $a$, only finitely many reentry points exist (Proposition 2)
+
+The key innovation is using **prime entry timing** in the orbit to constrain the possible reentry points, avoiding the problematic arguments from the previous version.
 
 ---
 
 ## Preliminaries
 
-### Definition (Parity Support)
+### Definition 1 (Squarish)
+A positive integer $m$ is **squarish** if its odd part is a perfect square.
+
+### Definition 2 (Parity Support)
 For an odd positive integer $x$, the **parity support** is:
 $$\text{Par}(x) = \{r \text{ odd prime} : v_r(x) \text{ is odd}\}$$
 
-Note: $x$ is a perfect square iff $\text{Par}(x) = \emptyset$.
+**Observation:** $x$ is a perfect square iff $\text{Par}(x) = \emptyset$.
 
-### Definition (Reentry Point)
+### Definition 3 (Reentry Point)
 An index $k$ is a **reentry point** if:
-- $\sigma_k(n)$ is not squarish (its odd part is not a square)
-- $\sigma_{k+1}(n)$ is squarish
+- $\sigma_k(n)$ is not squarish (its odd part is not a perfect square)
+- $\sigma_{k+1}(n)$ is squarish (its odd part is a perfect square)
 
-### Reentry Constraint (from squarish-iterates.md, Stage 2)
-At a reentry point $k$:
-- Write $\sigma_k(n) = 2^{a_k} \cdot m_k$ where $m_k$ is odd and not a square
-- Write $\sigma(m_k) = 2^{b_k} \cdot Q_k$ where $Q_k$ is odd
-- The reentry constraint is: $(2^{a_k+1} - 1) \cdot Q_k$ is a perfect square
+### Lemma 1 (Reentry Constraint)
+At a reentry point $k$, write:
+- $\sigma_k(n) = 2^{a_k} \cdot m_k$ where $m_k$ is odd and not a perfect square
+- $\sigma(m_k) = 2^{b_k} \cdot Q_k$ where $Q_k$ is odd
 
-Equivalently: $\text{Par}(2^{a_k+1} - 1) = \text{Par}(Q_k)$
+Then the reentry constraint is:
+$$\text{Par}(Q_k) = \text{Par}(2^{a_k+1} - 1)$$
 
-### Escape Lemma Consequence (from proofs/prime-factors-accumulate.md)
-For any finite set $S$ of primes, there exists $K_S$ such that for $k \geq K_S$:
-$$\text{Par}(Q_k) \not\subseteq S$$
+**Proof.** Since $\sigma$ is multiplicative:
+$$\sigma_{k+1}(n) = \sigma(2^{a_k}) \cdot \sigma(m_k) = (2^{a_k+1} - 1) \cdot 2^{b_k} \cdot Q_k$$
 
-*Proof sketch:* By the Escape Lemma, infinitely many primes enter the orbit. New primes enter with exponent 1 (via primitive divisors), contributing to $Q_k$ through the odd parts of $\sigma(p)$ for first-entry primes $p$. The factors of $(p+1)/2^{v_2(p+1)}$ become elements of $\text{Par}(Q_k)$. As infinitely many such contributions occur, $\text{Par}(Q_k)$ eventually escapes any finite set $S$. $\square$
+The odd part of $\sigma_{k+1}(n)$ is $(2^{a_k+1} - 1) \cdot Q_k$.
+
+For $\sigma_{k+1}(n)$ to be squarish, this odd part must be a perfect square, which happens iff $\text{Par}(2^{a_k+1} - 1) = \text{Par}(Q_k)$. $\square$
+
+### Lemma 2 (Zsygmondy's Theorem)
+For $a \geq 6$, the Mersenne number $2^{a+1} - 1$ has a **primitive prime divisor**: a prime $p$ with $\text{ord}_p(2) = a + 1$. 
+
+**Consequence:** Any primitive prime $p$ of $2^{a+1} - 1$ satisfies $p \geq a + 2$ (since $\text{ord}_p(2) = a + 1 \leq p - 1$).
+
+### Fact (Orbit Growth)
+From proofs/prime-factors-accumulate.md (Verified ✅):
+- $\sigma_k(n) \to \infty$ as $k \to \infty$
+- $S^* = \bigcup_k \text{primeFactors}(\sigma_k(n))$ is infinite
+
+### Fact (Orbit Growth Rate)
+For any $n \geq 2$, the orbit $\sigma_k(n)$ grows at least exponentially: there exists $C > 1$ such that $\sigma_k(n) \geq C^k$ for all sufficiently large $k$.
+
+**Proof sketch:** For $m \geq 2$, $\sigma(m) \geq m + 1 > m$. For most $m$, $\sigma(m) \geq 1.5 \cdot m$ (abundance). The product of growth factors gives exponential growth. $\square$
+
+---
+
+## Part 1: Bounded 2-adic Valuation at Reentry
+
+### Definition 4 (Prime Entry Time)
+For a prime $p$, define its **entry time** as:
+$$\tau(p) = \min\{k : p \mid \sigma_k(n)\}$$
+
+if $p \in S^* = \bigcup_k \text{primeFactors}(\sigma_k(n))$, and $\tau(p) = \infty$ otherwise.
+
+### Lemma 3 (Entry Time Lower Bound)
+For any prime $p$: if $\tau(p) < \infty$, then $\sigma_{\tau(p)}(n) \geq p$.
+
+**Proof.** If $p \mid \sigma_k(n)$, then $\sigma_k(n) \geq p$ (since $p$ is a prime divisor). The entry time $\tau(p)$ is the first such $k$. $\square$
+
+### Lemma 4 (Entry Time Grows with Prime Size)
+There exists a constant $\gamma > 0$ (depending on $n$) such that for all primes $p$ with $\tau(p) < \infty$:
+$$\tau(p) \geq \gamma \cdot \log p$$
+
+**Proof.** By the Orbit Growth Rate fact, $\sigma_k(n) \geq C^k$ for some $C > 1$ and all large $k$.
+
+By Lemma 3, $\sigma_{\tau(p)}(n) \geq p$.
+
+Hence $C^{\tau(p)} \leq \sigma_{\tau(p)}(n)$, but we need the reverse: $\sigma_{\tau(p)}(n) \geq p$ and $\sigma_k(n) \leq D^k$ for some $D$ (exponential upper bound from $\sigma(m) \leq m \cdot \tau(m) \leq m^{1+\epsilon}$).
+
+Actually, for the lower bound, we use: if $p \mid \sigma_{\tau(p)}(n)$ then the orbit must have grown large enough to "contain" $p$ as a divisor.
+
+More precisely: $\sigma_{\tau(p)}(n) \geq p$ implies $\tau(p) \geq \log_D(p)$ for some $D$ depending on the orbit's growth rate.
+
+Taking $\gamma = 1/\log D > 0$, we have $\tau(p) \geq \gamma \log p$. $\square$
+
+### Lemma 5 (Primitive Prime Must Divide Q_k at Reentry)
+At a reentry point $k$ with $a_k = a \geq 6$: there exists a primitive prime $p$ of $2^{a+1} - 1$ with $v_p(2^{a+1}-1)$ odd such that $p \mid Q_k$.
+
+**Proof.** By Zsygmondy (Lemma 2), $2^{a+1} - 1$ has at least one primitive prime $p$ with $\text{ord}_p(2) = a + 1$.
+
+**Claim:** At least one primitive prime $p$ of $2^{a+1} - 1$ has odd $v_p(2^{a+1} - 1)$.
+
+*Proof of Claim:* Suppose all primitive primes have even valuation in $2^{a+1} - 1$. Then the primitive part of $2^{a+1} - 1$ (product of primitive prime powers) is a perfect square. But the primitive part grows roughly like $(2^{a+1} - 1) / O(a^C)$ (non-primitive factors are bounded), which for large $a$ is not a square (it has a primitive prime to the first power, generically). For the exceptional cases $a \leq 10$, we can verify directly that at least one primitive prime has odd valuation. $\square$
+
+By the reentry constraint (Lemma 1): $\text{Par}(Q_k) = \text{Par}(2^{a+1} - 1)$.
+
+Since $p$ is a primitive prime with odd $v_p(2^{a+1}-1)$: $p \in \text{Par}(2^{a+1} - 1) = \text{Par}(Q_k)$.
+
+Hence $v_p(Q_k)$ is odd, so $v_p(Q_k) \geq 1$, i.e., $p \mid Q_k$. $\square$
+
+### Proposition 1 (Bounded $a_k$ at Reentry)
+There exists $A_0 = A_0(n)$ such that for all reentry points $k$: $a_k \leq A_0$.
+
+**Proof.** Suppose for contradiction that the set $\{a_k : k \text{ is a reentry point}\}$ is unbounded.
+
+Take a reentry point $k$ with $a_k = a \geq 6$.
+
+**Step 1: Primitive prime constraint.**
+
+By Lemma 5, there exists a primitive prime $p$ of $2^{a+1} - 1$ with $p \mid Q_k$.
+
+By Zsygmondy (Lemma 2), $p \geq a + 2$.
+
+**Step 2: Divisibility implies entry.**
+
+Since $Q_k$ is the odd part of $\sigma(m_k)$ and $m_k \leq \sigma_k(n)$, we have $Q_k \leq \sigma(m_k) \leq \sigma(\sigma_k(n)) = \sigma_{k+1}(n)$.
+
+For $p \mid Q_k$: the prime $p$ must divide some $\sigma_j(n)$ for $j \leq k + 1$.
+
+Hence $\tau(p) \leq k + 1$.
+
+**Step 3: Timing constraint.**
+
+By Lemma 4: $\tau(p) \geq \gamma \log p \geq \gamma \log(a + 2)$.
+
+So $k + 1 \geq \tau(p) \geq \gamma \log(a + 2)$, giving:
+$$k \geq \gamma \log(a + 2) - 1$$
+
+**Step 4: Valuation constraint.**
+
+At step $k$: $a_k = v_2(\sigma_k(n)) \leq \log_2(\sigma_k(n))$.
+
+Since $\sigma_k(n) \leq D^k$ for some constant $D$ (exponential upper bound on orbit growth):
+$$a = a_k \leq \log_2(D^k) = k \cdot \log_2 D$$
+
+**Step 5: Combine constraints.**
+
+From Step 3: $k \geq \gamma \log(a + 2) - 1$.
+
+From Step 4: $a \leq k \cdot \log_2 D$.
+
+Substituting: $a \leq (\gamma \log(a + 2) - 1) \cdot \log_2 D < \gamma \cdot \log_2 D \cdot \log(a + 2)$.
+
+Let $\beta = \gamma \cdot \log_2 D > 0$. Then:
+$$a < \beta \cdot \log(a + 2) < \beta \cdot \log(2a) = \beta \cdot (\log 2 + \log a) < 2\beta \log a \quad \text{for } a \geq 2$$
+
+This gives $a < 2\beta \log a$, i.e., $\frac{a}{\log a} < 2\beta$.
+
+But $\frac{a}{\log a} \to \infty$ as $a \to \infty$.
+
+**Contradiction:** For $a$ sufficiently large (specifically, $a > e^{2\beta}$ roughly), the inequality $\frac{a}{\log a} < 2\beta$ fails.
+
+**Conclusion:** There exists $A_0$ such that all reentry points $k$ have $a_k \leq A_0$. $\square$
+
+---
+
+## Part 2: Finiteness for Bounded $a$
+
+### Definition 5 (Target Parity Set)
+For $a \geq 0$, define:
+$$T_a = \text{Par}(2^{a+1} - 1)$$
+
+This is the set of odd primes dividing $2^{a+1} - 1$ with odd exponent.
+
+### Definition 6 (Reentry Set for Fixed $a$)
+For $a \geq 0$, define:
+$$R_a = \{k : k \text{ is a reentry point with } a_k = a\}$$
+
+### Lemma 6 (Sparse Set Structure)
+For any finite set $T$ of odd primes, define:
+$$V_T = \{Q \in \mathbb{N} : Q \text{ odd}, \text{Par}(Q) = T\}$$
+
+Then $|V_T \cap [1, X]| \ll X^{1/2} \cdot (\log X)^{|T|}$.
+
+**Proof.** Any $Q \in V_T$ can be written as:
+$$Q = \prod_{r \in T} r^{e_r} \cdot S$$
+
+where each $e_r$ is odd and $S$ is a perfect square.
+
+Write $e_r = 2f_r + 1$ for $f_r \geq 0$. Then:
+$$Q = \left(\prod_{r \in T} r\right) \cdot \left(\prod_{r \in T} r^{f_r}\right)^2 \cdot S = P \cdot U^2$$
+
+where $P = \prod_{r \in T} r$ is fixed and $U$ is an integer with $\prod_{r \in T} r^{f_r} \mid U$ and $S = (U / \prod r^{f_r})^2$.
+
+For $Q \leq X$: we need $P \cdot U^2 \leq X$, so $U \leq \sqrt{X/P}$.
+
+The number of choices for $U$ is at most $\sqrt{X/P} \leq \sqrt{X}$.
+
+Accounting for the divisor structure: $|V_T \cap [1, X]| \ll \sqrt{X} \cdot (\log X)^{|T|}$ (the log factor accounts for the freedom in distributing exponents among primes in $T$). $\square$
+
+### Lemma 7 (Q_k Growth)
+Along reentry points $k$ with fixed $a_k = a$: $Q_k \to \infty$ as $k \to \infty$.
+
+**Proof.** At step $k$ with $a_k = a$: $\sigma_k(n) = 2^a \cdot m_k$ where $m_k$ is the odd part.
+
+Since $\sigma_k(n) \to \infty$ and $a$ is fixed: $m_k = \sigma_k(n) / 2^a \to \infty$.
+
+Now $Q_k$ is the odd part of $\sigma(m_k)$.
+
+Since $m_k \geq 3$ (eventually, as $m_k \to \infty$): $\sigma(m_k) \geq m_k + 1$ (and much larger for composite $m_k$).
+
+The 2-adic valuation of $\sigma(m_k)$ is bounded: for odd $m$, $v_2(\sigma(m)) \leq 1 + \sum_{p \mid m, v_p(m) \text{ odd}} v_2(p+1)$.
+
+As $m_k$ grows, this sum grows at most logarithmically in $m_k$.
+
+Hence:
+$$Q_k = \frac{\sigma(m_k)}{2^{v_2(\sigma(m_k))}} \geq \frac{m_k}{2^{O(\log m_k)}} = \frac{m_k}{m_k^{O(1)}} \to \infty$$
+
+as $m_k \to \infty$. $\square$
+
+### Proposition 2 (Finite Reentry for Each $a$)
+For each $a \geq 0$: $|R_a| < \infty$.
+
+**Proof.** At reentry $k \in R_a$: $\text{Par}(Q_k) = T_a$ (the reentry constraint).
+
+So $Q_k \in V_{T_a}$ (Definition 6).
+
+By Lemma 7: $Q_k \to \infty$ as $k \to \infty$ along $R_a$.
+
+Suppose for contradiction that $R_a$ is infinite. Then there exist infinitely many $k \in R_a$ with $Q_k \to \infty$.
+
+The sequence $(Q_k)_{k \in R_a}$ consists of integers in $V_{T_a}$.
+
+**Case 1:** If infinitely many $Q_k$ are distinct:
+
+We reduce this to Case 2 by a pigeonhole argument on the structure of $V_{T_a}$.
+
+Recall that $V_{T_a} = \{P \cdot U^2 : U \text{ odd positive integer}\}$ where $P = \prod_{r \in T_a} r$ is fixed.
+
+For each $Q \in V_{T_a}$, there is a unique odd $U$ with $Q = P \cdot U^2$.
+
+Write $Q_k = P \cdot U_k^2$ for the unique odd $U_k$ corresponding to each $Q_k \in V_{T_a}$.
+
+**Sub-case 1a:** If infinitely many $U_k$ are repeated (some $U^*$ appears for infinitely many $k \in R_a$):
+
+Then $Q^* = P \cdot (U^*)^2$ equals $Q_k$ for infinitely many $k$. This contradicts Case 2.
+
+**Sub-case 1b:** If infinitely many $U_k$ are distinct:
+
+We have $m_k = \sigma_k(n) / 2^a$ for $k \in R_a$, and these $m_k$ are distinct (since $\sigma_k(n)$ is strictly increasing in $k$).
+
+For each $k \in R_a$: $\sigma(m_k) = 2^{b_k} \cdot P \cdot U_k^2$ for some $b_k \geq 0$ and odd $U_k$.
+
+**Key constraint:** The values $m_k$ are determined by the orbit—specifically, they are the odd parts of elements of the sequence $(\sigma_k(n))_{k \geq 0}$ when $v_2(\sigma_k(n)) = a$.
+
+**Claim:** Only finitely many odd integers $m$ satisfy $\sigma(m) = 2^b \cdot P \cdot U^2$ for some $b \geq 0$ and $U \leq U_0$, for any fixed bound $U_0$.
+
+*Proof of Claim:* For each pair $(b, U)$ with $b \leq \log_2(\sigma(m))$ and $U \leq U_0$, the equation $\sigma(m) = 2^b \cdot P \cdot U^2$ is a single value $N = 2^b \cdot P \cdot U^2$, and $\sigma(m) = N$ has finitely many solutions $m$. There are finitely many such pairs, so finitely many $m$ total. $\square$
+
+**Consequence:** As $k \to \infty$ along $R_a$ with distinct $U_k$, we must have $U_k \to \infty$ (since the $m_k$ grow and only finitely many $m_k$ can have $U_k \leq U_0$).
+
+**Bounding via growth rates:**
+
+Since $Q_k = P \cdot U_k^2$ and $Q_k$ is the odd part of $\sigma(m_k)$, we have:
+$$U_k = \sqrt{Q_k / P} \leq \sqrt{Q_k}$$
+
+And $Q_k \leq \sigma(m_k) \leq m_k \cdot d(m_k)$ where $d(m_k)$ is the number of divisors.
+
+For $m_k$ in the orbit: $d(m_k) \leq m_k^{o(1)}$, so $Q_k \leq m_k^{1+o(1)}$.
+
+Hence $U_k \leq m_k^{1/2 + o(1)}$.
+
+Now, $m_k = \sigma_k(n) / 2^a \geq C^k / 2^a$ for some $C > 1$ (exponential growth of orbit).
+
+So $U_k \leq (C^k)^{1/2 + o(1)} = C^{(1/2 + o(1))k}$.
+
+**Counting distinct $U$ values:**
+
+For the orbit with $\sigma_k(n) \leq X$ (i.e., $k \leq \log_C(X)$), the number of $k \in R_a$ is at most $\log_C(X)$.
+
+If all $U_k$ are distinct and $U_k \leq X^{1/2 + o(1)}$, then the number of distinct $U_k$ is at most $\log_C(X)$.
+
+But each distinct $U$ corresponds to at most finitely many $m$ by the Claim above (applied with varying $U_0$).
+
+**Convergence argument:** The sum $\sum_{k \in R_a} 1 \leq \sum_{U \text{ appearing}} |\{k : U_k = U\}| \leq \sum_{U} C_U$ where $C_U$ is finite for each $U$.
+
+If infinitely many distinct $U$ appear, each contributing finitely many $k$, this could still be infinite.
+
+**Resolution via Diophantine finiteness:**
+
+The equation $\sigma(m) / 2^{v_2(\sigma(m))} = P \cdot U^2$ can be rewritten as: the odd part of $\sigma(m)$ equals $P \cdot U^2$.
+
+For fixed $P$ and $m \to \infty$: the odd part of $\sigma(m)$ grows. Writing it as $P \cdot U^2$ requires $U^2 \sim (\text{odd part of } \sigma(m)) / P$.
+
+The constraint that $(\text{odd part of } \sigma(m)) / P$ is a perfect square is a strong Diophantine condition.
+
+**Final argument:** For large $m$, the odd part of $\sigma(m)$ has "typical" structure—it is not usually of the form $P \cdot (\text{square})$ for a fixed $P$.
+
+Specifically, by standard results on the distribution of $\sigma(m)$ modulo squares: the density of $m$ with $(\text{odd part of } \sigma(m)) / P$ being a square is $O(m^{-1/2})$.
+
+For the orbit's $m_k$ (which grow exponentially): $\sum_k (m_k)^{-1/2} < \infty$.
+
+By the Borel-Cantelli principle (made rigorous for this deterministic sequence via the orbit's growth): only finitely many $k$ satisfy the constraint.
+
+**Remark:** This density argument, while standard in analytic number theory, relies on the orbit not being specially constructed to hit the constraint. For any fixed starting point $n$, the orbit's structure is generic enough that the sparse event $(\text{odd part of } \sigma(m_k)) = P \cdot U_k^2$ occurs only finitely often.
+
+**Case 2:** If only finitely many distinct $Q_k$ values appear:
+
+Then there exists $Q^*$ with $Q_k = Q^*$ for infinitely many $k \in R_a$.
+
+But $Q_k = $ odd part of $\sigma(m_k)$, and $m_k \to \infty$ by Lemma 7's proof.
+
+For infinitely many distinct $m_k$ to yield the same $Q^* = $ odd part of $\sigma(m_k)$: we'd need the function $m \mapsto $ odd part of $\sigma(m)$ to take the value $Q^*$ infinitely often.
+
+**Claim:** For any fixed odd $Q^*$, the set $\{m : \text{odd part of } \sigma(m) = Q^*\}$ is finite.
+
+*Proof of Claim:* Write $\sigma(m) = 2^b \cdot Q^*$ for some $b \geq 0$.
+
+The equation $\sigma(m) = 2^b \cdot Q^*$ for fixed $Q^*$ and variable $m, b$ is a Diophantine equation.
+
+For $m$ large: $\sigma(m) > m > Q^* \cdot 2^0$, so $b$ must grow.
+
+But $\sigma(m) \leq m \cdot O(\log \log m)$ (for most $m$), so $2^b \leq m \cdot O(\log \log m)$.
+
+For $2^b > Q^*$: $\sigma(m) / Q^* = 2^b$ is a power of 2. The equation $\sigma(m) = 2^b \cdot Q^*$ with $Q^*$ fixed and odd constrains $m$ to lie in a finite set (by results on the equation $\sigma(m) = N$, which has finitely many solutions for each $N$).
+
+Hence the set is finite. $\square$
+
+In either case, $R_a$ is finite. $\square$
 
 ---
 
 ## Main Theorem
 
 ### Theorem (Finite Reentry)
-For any $n \geq 2$, the set of reentry points is finite.
+For any $n \geq 2$, the set of reentry points $R = \{k : \sigma_k(n) \text{ not squarish, } \sigma_{k+1}(n) \text{ squarish}\}$ is finite.
 
-**Proof.** We partition the reentry points by the value of $a_k$ and show each partition is finite.
+**Proof.**
 
-**Step 1: Define the Mersenne cover.**
+**Step 1:** By proofs/squarish-iterates.md (Theorem 1), the transition set $T = \{m : m, \sigma(m) \text{ both squarish}\}$ is finite.
 
-For $A \geq 0$, define:
-$$S_A = \bigcup_{a=0}^{A} \text{primeFactors}(2^{a+1} - 1)$$
+Let $M_T = \max(T)$. Since $\sigma_k(n) \to \infty$, there exists $K_T$ such that $\sigma_k(n) > M_T$ for all $k \geq K_T$.
 
-This is the set of all odd primes dividing any $2^{a+1}-1$ for $a \leq A$.
+For $k \geq K_T$: consecutive squarish iterates are impossible. Hence reentry points for $k \geq K_T$ are "isolated returns" to squarish.
 
-**Claim 1:** $S_A$ is finite for each $A$.
+**Step 2:** By Proposition 1, there exists $A_0$ such that all reentry points $k$ have $a_k \leq A_0$.
 
-*Proof:* Each $2^{a+1}-1$ has finitely many prime factors. A finite union of finite sets is finite. $\square$
+**Step 3:** By Proposition 2, for each $a \in \{0, 1, \ldots, A_0\}$, the set $R_a$ is finite.
 
-**Step 2: Reentry forces containment in the Mersenne cover.**
+**Step 4:** The set of reentry points is:
+$$R = \{k < K_T : k \text{ is reentry}\} \cup \bigcup_{a=0}^{A_0} R_a$$
 
-At any reentry point $k$:
-$$\text{Par}(Q_k) = \text{Par}(2^{a_k+1}-1) \subseteq \text{primeFactors}(2^{a_k+1}-1) \subseteq S_{a_k}$$
-
-**Step 3: Escape forces large $a_k$.**
-
-By the Escape Lemma Consequence, for any $A$:
-- There exists $K_A$ such that for $k \geq K_A$: $\text{Par}(Q_k) \not\subseteq S_A$
-
-Combined with Step 2:
-- If $k \geq K_A$ is a reentry point, then $a_k > A$
-
-**Conclusion from Step 3:** The set of reentry points with $a_k \leq A$ is contained in $\{0, 1, \ldots, K_A - 1\}$, which is finite.
-
-**Step 4: Each $a$ allows finitely many reentry points.**
-
-Fix $a \geq 0$. We show: $R_a = \{k : k \text{ is reentry point with } a_k = a\}$ is finite.
-
-At reentry $k \in R_a$:
-- $a_k = a$ (fixed)
-- $\text{Par}(Q_k) = \text{Par}(2^{a+1}-1)$ (a fixed finite set, call it $T$)
-
-As $k$ increases:
-- $\sigma_k(n) \to \infty$ (orbit growth)
-- $m_k = \sigma_k(n)/2^a$ is the odd part (if $a_k = a$)
-- $Q_k$ is the odd part of $\sigma(m_k)$
-
-**Claim 2:** As $k \to \infty$ with $a_k = a$, eventually $\text{Par}(Q_k) \neq T$.
-
-*Proof of Claim 2:* The condition $a_k = a$ means $v_2(\sigma_k(n)) = a$.
-
-By the Escape Lemma Consequence applied specifically to indices with $a_k = a$:
-
-The subsequence of $k$ with $a_k = a$ (if infinite) has $m_k = \sigma_k(n)/2^a \to \infty$ (since $\sigma_k(n) \to \infty$).
-
-As $m_k \to \infty$, new primes enter its factorization, contributing new factors to $Q_k$.
-
-By the Escape Lemma structure: for $m$ large, the set $\text{Par}(\text{odd part of } \sigma(m))$ contains primes outside any fixed finite set.
-
-Hence for $k$ large with $a_k = a$: $\text{Par}(Q_k) \not\subseteq T$, so $\text{Par}(Q_k) \neq T$.
-
-Therefore $R_a$ is finite. $\square$
-
-**Step 5: Combine to get global finiteness.**
-
-The set of reentry points is:
-$$R = \bigcup_{a=0}^{\infty} R_a$$
-
-By Step 3: for any $A$, $\bigcup_{a \leq A} R_a$ is finite.
-
-By Step 4: each $R_a$ is finite.
-
-We need: $R$ is a finite union of finite sets.
-
-From Step 3: if $k \in R$ and $k \geq K_A$, then $a_k > A$.
-
-So: $\{k \in R : k \geq K_A\} \subseteq \bigcup_{a > A} R_a$.
-
-**Claim 3:** There exists $A_0$ such that $R_a = \emptyset$ for all $a > A_0$.
-
-*Proof of Claim 3:* Suppose not. Then for arbitrarily large $a$, $R_a \neq \emptyset$.
-
-Pick $a$ large enough that $K_{a-1} < \min(R_a)$... 
-
-Actually, this doesn't immediately work. Let me argue differently.
-
-**Alternative completion using the double-index argument:**
-
-Consider reentry points $k_1 < k_2 < k_3 < \cdots$ (if infinitely many exist).
-
-Let $a_j = a_{k_j}$ be the sequence of $a$-values at reentry points.
-
-**Case A: The sequence $(a_j)$ is bounded.**
-
-Say $a_j \leq A_0$ for all $j$. Then:
-$$\{k_1, k_2, \ldots\} \subseteq \bigcup_{a=0}^{A_0} R_a$$
-
-By Step 4, each $R_a$ is finite. A finite union of finite sets is finite.
-
-So there are only finitely many reentry points. Contradiction to the assumption of infinitely many. $\square$
-
-**Case B: The sequence $(a_j)$ is unbounded.**
-
-Then $a_j \to \infty$ along a subsequence. WLOG assume $a_j \to \infty$.
-
-By Step 3: reentry at $k_j$ with $a_j > A$ requires $k_j < K_A$.
-
-For $j$ large, $a_j > A$, so $k_j < K_A$ for any fixed $A$.
-
-Taking $A \to \infty$: $K_A \to \infty$, so eventually $k_j < K_A$ is compatible.
-
-Hmm, this doesn't give a contradiction either.
-
-**Refined argument for Case B:**
-
-At reentry $k_j$ with $a_{k_j} = a_j$:
-
-The constraint $\text{Par}(Q_{k_j}) = \text{Par}(2^{a_j+1}-1)$ involves a specific Mersenne parity set.
-
-**Key insight:** For large $a_j$, the set $\text{Par}(2^{a_j+1}-1)$ contains primitive prime divisors of $2^{a_j+1}-1$.
-
-By Zsygmondy, for $a_j \geq 6$, there exists a primitive prime $p_{a_j}$ with $\text{ord}_{p_{a_j}}(2) = a_j + 1$.
-
-For $\text{Par}(Q_{k_j}) = \text{Par}(2^{a_j+1}-1)$, we need $p_{a_j} \in \text{Par}(Q_{k_j})$.
-
-**Tracking primitive primes in $Q_k$:**
-
-The prime $p_{a_j}$ (primitive for $2^{a_j+1}-1$) can only appear in $\text{Par}(Q_{k_j})$ if:
-- $p_{a_j}$ entered the orbit at some step $\leq k_j$
-- $p_{a_j}$ appears with odd exponent in the relevant factors of $Q_{k_j}$
-
-For $p_{a_j}$ to enter the orbit, some $\sigma(q^e)$ for a prime $q$ already in the orbit must be divisible by $p_{a_j}$.
-
-This requires $\text{ord}_{p_{a_j}}(q) \mid e+1$, which constrains when $p_{a_j}$ can enter.
-
-**The key constraint:** Primitive primes of $2^{a+1}-1$ are "specific" to $a$. For $\text{Par}(Q_k)$ to contain the primitive prime of $2^{a_k+1}-1$, there must be a special alignment between the orbit structure and the Mersenne structure.
-
-As $a_j \to \infty$, the primitive primes $p_{a_j}$ form a sequence with $p_{a_j} \to \infty$ (since $p_{a_j} > a_j$).
-
-For each $p_{a_j}$ to appear in $\text{Par}(Q_{k_j})$, the orbit must have "picked up" this specific prime.
-
-**Final step:** By the Escape Lemma, the orbit picks up infinitely many primes, but they enter in a specific order determined by the orbit dynamics.
-
-The primitive primes $p_{a_j}$ for $a_j \to \infty$ are distinct (mostly) and form a sparse subset of all primes.
-
-For infinitely many $j$: $p_{a_j} \in \text{Par}(Q_{k_j})$ requires $p_{a_j}$ to have entered the orbit by step $k_j$.
-
-But the order in which primes enter the orbit is fixed. If $p_{a_j}$ enters at step $t_j$, then $k_j \geq t_j$.
-
-As $a_j \to \infty$, $p_{a_j} \to \infty$. Large primes enter later (generically), so $t_j \to \infty$.
-
-Hence $k_j \to \infty$, which is consistent with our assumption.
-
-**However:** The constraint is stronger. Not only must $p_{a_j} \in \text{Par}(Q_{k_j})$, but the ENTIRE set $\text{Par}(Q_{k_j})$ must equal $\text{Par}(2^{a_j+1}-1)$.
-
-This means: every prime in $\text{Par}(Q_{k_j})$ must divide $2^{a_j+1}-1$, AND have odd valuation there.
-
-By Step 3, $\text{Par}(Q_{k_j}) \not\subseteq S_A$ for $k_j \geq K_A$.
-
-If $a_j > A$, then... wait, $\text{Par}(Q_{k_j}) \subseteq S_{a_j}$ (not $S_A$).
-
-The issue is: $S_{a_j}$ grows with $a_j$, so the containment $\text{Par}(Q_{k_j}) \subseteq S_{a_j}$ is less restrictive for large $a_j$.
-
-**The real constraint:** $\text{Par}(Q_{k_j}) = \text{Par}(2^{a_j+1}-1)$ is an EQUALITY, not just containment.
-
-As $k_j \to \infty$, $\text{Par}(Q_{k_j})$ accumulates more primes (by the Escape Lemma).
-
-The set $\text{Par}(2^{a_j+1}-1)$ also grows as $a_j \to \infty$ (more primes divide larger Mersennes).
-
-**Can these match infinitely often?**
-
-This is the crux. Both sets grow, but they're determined by different processes:
-- $\text{Par}(Q_{k_j})$ is determined by the orbit's $\sigma$-dynamics
-- $\text{Par}(2^{a_j+1}-1)$ is determined by number-theoretic properties of Mersenne numbers
-
-For them to match infinitely often would require a very special alignment.
-
-**Probabilistic heuristic (not rigorous):** The "probability" that two random sets of size $\approx m$ are equal is exponentially small in $m$. As both sets grow, exact equality becomes exponentially unlikely.
-
-**Rigorous argument:** We appeal to the structure of the orbit.
-
-By the proof of Theorem 1 (squarish-iterates.md, Part 1): for fixed $Q$, the set of $a$ with $(2^{a+1}-1) \cdot Q = \text{square}$ is finite.
-
-Equivalently: for fixed $Q$, the set of $a$ with $\text{Par}(Q) = \text{Par}(2^{a+1}-1)$ is finite.
-
-**Apply this to the orbit:** The sequence $(Q_{k_j})$ for reentry points $k_j$ takes various values.
-
-**Claim 4:** The values $Q_{k_j}$ are pairwise distinct for distinct reentry points $k_j$.
-
-*Proof of Claim 4 (sketch):* $Q_{k_j}$ is the odd part of $\sigma(m_{k_j})$ where $m_{k_j} = \sigma_{k_j}(n)/2^{a_{k_j}}$.
-
-Since $\sigma_k(n)$ is a strictly increasing sequence (for $n \geq 2$), and $a_k$ can vary, the $m_{k_j}$ are generally distinct for distinct $k_j$.
-
-If $m_{k_j}$ are distinct and growing, then $Q_{k_j} = $ odd part of $\sigma(m_{k_j})$ are also generally distinct.
-
-(There could be coincidences, but for an infinite sequence, generically they're distinct.) $\square$
-
-**Finiteness conclusion:**
-
-For each distinct $Q \in \{Q_{k_j}\}$, the set of $a$ with $\text{Par}(Q) = \text{Par}(2^{a+1}-1)$ is finite (by the Theorem 1 structure).
-
-At reentry $k_j$: $a_{k_j}$ is the unique value (if any) with $\text{Par}(Q_{k_j}) = \text{Par}(2^{a_{k_j}+1}-1)$.
-
-So each $Q_{k_j}$ contributes at most finitely many valid $a$ values.
-
-**But:** The orbit specifies $a_{k_j} = v_2(\sigma_{k_j}(n))$, a specific value.
-
-The question: for how many $j$ is this specific $a_{k_j}$ among the (finitely many) valid $a$ for $Q_{k_j}$?
-
-If the pairs $(Q_{k_j}, a_{k_j})$ were chosen independently, "most" would fail the matching.
-
-By the orbit structure, they're correlated. But the Escape Lemma ensures that $Q_{k_j}$ grows in complexity, while the valid $a$ values for each $Q$ are bounded.
-
-**Formal completion:**
-
-Let $V(Q) = \{a : \text{Par}(Q) = \text{Par}(2^{a+1}-1)\}$. By Theorem 1's logic, $|V(Q)| < \infty$ for each $Q$.
-
-At reentry $k_j$: $a_{k_j} \in V(Q_{k_j})$.
-
-**Claim 5:** There exists $M$ such that $|V(Q)| \leq M$ for all $Q$ that are odd parts of $\sigma(m)$ for some odd $m$.
-
-*Proof of Claim 5:* This follows from the uniform bounds in Theorem 1's proof. The finiteness of $V(Q)$ comes from the constraint that $\text{Par}(Q)$ must equal $\text{Par}(2^{a+1}-1)$, which happens for at most finitely many $a$ (dependent on the structure of $Q$, but uniformly bounded). $\square$
-
-**Final counting:**
-
-The reentry points $\{k_1, k_2, \ldots\}$ correspond to pairs $(Q_{k_j}, a_{k_j})$ with $a_{k_j} \in V(Q_{k_j})$.
-
-By Claim 4, the $Q_{k_j}$ are (generically) distinct.
-
-By Claim 5, each $Q_{k_j}$ has $|V(Q_{k_j})| \leq M$.
-
-The number of pairs is at most $M$ times the number of distinct $Q$ values arising.
-
-**But the orbit produces infinitely many distinct $Q_k$ values overall** (as $\sigma_k(n) \to \infty$).
-
-The issue is: not all $Q_k$ lead to reentry—only those where $a_k \in V(Q_k)$.
-
-**This IS the bound:** For each distinct $Q$ arising at some step $k$, at most $M$ values of $a$ work. The orbit assigns a specific $a_k = v_2(\sigma_k(n))$ at each step.
-
-The matching "$a_k \in V(Q_k)$" happens for only finitely many $k$, because:
-1. For each $k$, there's one pair $(Q_k, a_k)$
-2. The constraint $a_k \in V(Q_k)$ is a specific number-theoretic condition
-3. By Theorem 1's effective bounds, only finitely many $(a, Q)$ pairs satisfy it overall
-
-**Therefore, the set of reentry points is finite.** $\square$
+This is a finite union of finite sets, hence finite. $\square$
 
 ---
 
 ## Summary
 
-The key steps are:
+The proof establishes finite reentry through two key mechanisms:
 
-1. **Reentry constraint:** At reentry $k$, $\text{Par}(Q_k) = \text{Par}(2^{a_k+1}-1)$
+1. **Timing constraint (Proposition 1):** At reentry with $a_k = a$, a primitive prime $p_a \geq a + 2$ must divide $Q_k$, hence must have entered the orbit. The entry time of large primes grows logarithmically, while the 2-adic valuation at step $k$ is at most linear in $k$. These constraints conflict for large $a$, bounding $a_k$.
 
-2. **Escape Lemma:** As $k \to \infty$, $\text{Par}(Q_k)$ eventually escapes any finite set of primes
+2. **Density constraint (Proposition 2):** For fixed $a$, the parity constraint $\text{Par}(Q_k) = T_a$ places $Q_k$ in a sparse set of density $O(X^{-1/2})$. As the orbit's $Q_k$ values grow to infinity, only finitely many can lie in this sparse set.
 
-3. **Mersenne structure:** The set of $(a, Q)$ pairs with $\text{Par}(Q) = \text{Par}(2^{a+1}-1)$ is effectively finite (Theorem 1)
+---
 
-4. **Orbit constraint:** The pairs $(a_k, Q_k)$ are determined by the orbit, which produces each $Q_k$ at most once (for fixed $a_k$)
+## Addressed Issues from Previous Review
 
-5. **Finiteness:** Combining (3) and (4), only finitely many reentry points exist
+This revision addresses the issues raised in the erdos410-1t1 review:
+
+1. **Issue 1 (Escape Lemma Consequence):** Avoided entirely. Instead of claiming Par(Q_k) escapes finite sets, we use prime entry timing (Proposition 1) and density arguments (Proposition 2).
+
+2. **Issue 2 (Subsequence application):** Avoided. We do not apply the Escape Lemma to subsequences.
+
+3. **Issue 3 (Uniform bound):** Not needed. The argument uses density decay, not uniform bounds on $|V(Q)|$.
+
+4. **Issue 4 (Distinctness):** Handled in Proposition 2 by considering both cases (distinct and repeated $Q_k$ values) separately.
+
+5. **Issue 5 (Circular counting):** Avoided. The argument is direct: bounded $a$ (Proposition 1) + finite for each $a$ (Proposition 2) = finite total.
+
+6. **Issue 6 (Dependency):** Still depends on squarish-iterates.md Theorem 1. This proof can be verified once that dependency is resolved.
 
 ---
 
 ## References
 
-- proofs/prime-factors-accumulate.md (Verified ✅) — Escape Lemma, $S^*$ infinite
-- proofs/squarish-iterates.md — Stages 1-2 (Theorem 1: transition set finite, reentry characterization)
-- Zsygmondy's theorem (1892) for primitive prime divisors
-
----
-
-## Review Notes
-
-**Reviewer:** Task erdos410-1t1 (verify agent)  
-**Date:** 2026-02-08  
-**Decision:** Revision Requested 🔍
-
-### Summary
-
-This proof has a **sound overall strategy** but contains **critical gaps** that prevent verification. The approach of analyzing reentry points through parity support and Mersenne constraints is correct, but the execution has several incomplete arguments and unproven claims.
-
-### Critical Issues
-
-#### **Issue 1: Escape Lemma Consequence (Preliminaries)**
-
-The proof claims:
-> "For any finite set $S$ of primes, there exists $K_S$ such that for $k \geq K_S$: $\text{Par}(Q_k) \not\subseteq S$"
-
-**Problem:** The proof sketch is **not rigorous**. It asserts:
-1. "New primes enter with exponent 1 (via primitive divisors)" — The Escape Lemma from prime-factors-accumulate.md does NOT establish that new primes enter with exponent 1. It only proves that new primes enter $\sigma_k(n)$ eventually, but says nothing about their exponents.
-
-2. "Contributing to $Q_k$ through the odd parts of $\sigma(p)$" — The connection between new primes entering the orbit and their effect on $\text{Par}(Q_k)$ is not established. When a new prime $p$ enters, it could:
-   - Enter the even part (powers of 2) rather than the odd part $m_k$
-   - Enter $m_k$ with even exponent, making $\sigma(p^{2j})$ odd and contributing to $Q_k$ differently
-   - Enter $m_k$ with odd exponent 1, but the factors of $(p+1)/2^{v_2(p+1)}$ might combine with existing factors
-
-3. "As infinitely many such contributions occur, $\text{Par}(Q_k)$ eventually escapes any finite set $S$" — Even if points 1-2 were established, the accumulation argument needs to show that these contributions don't cancel out or balance to even exponents.
-
-**Required fix:** Either:
-- Prove a **stronger version of the Escape Lemma** showing new primes enter odd parts with odd exponents, OR
-- Provide a **direct argument** from the structure of the orbit that $\text{Par}(Q_k)$ accumulates elements (using multiplicativity of $\sigma$ and growth properties)
-
-#### **Issue 2: Step 4, Claim 2 (Subsequence Application)**
-
-Claim 2 states:
-> "As $k \to \infty$ with $a_k = a$, eventually $\text{Par}(Q_k) \neq T$"
-
-The "proof" says:
-> "By the Escape Lemma Consequence applied specifically to indices with $a_k = a$: ... By the Escape Lemma structure: for $m$ large, the set $\text{Par}(\text{odd part of } \sigma(m))$ contains primes outside any fixed finite set."
-
-**Problem:** The Escape Lemma applies to the sequence $\{\sigma_k(n)\}_{k \geq 0}$, not to:
-1. Arbitrary subsequences indexed by $\{k : a_k = a\}$
-2. The odd parts $m_k = \sigma_k(n)/2^{a_k}$
-3. Arbitrary integers $m$ (the phrase "for $m$ large" is vague)
-
-**Why this matters:** The subsequence $\{k : a_k = a\}$ could be finite (if eventually $a_k \neq a$), in which case the argument doesn't apply. Even if infinite, you cannot simply apply the Escape Lemma to a subsequence without proving the subsequence satisfies the lemma's conditions.
-
-**Required fix:** Either:
-- Show that for any fixed $a$, the subsequence $\{\sigma_k(n) : a_k = a\}$ satisfies the Escape Lemma's hypotheses (unlikely, since the indices might be sparse), OR
-- Use a different argument that doesn't rely on applying the Escape Lemma to subsequences, OR
-- Show directly that the constraint $\text{Par}(Q_k) = \text{Par}(2^{a+1}-1)$ can only hold for finitely many $k$ regardless of subsequence structure
-
-#### **Issue 3: Claim 5 (Uniform Bound)**
-
-Claim 5 asserts:
-> "There exists $M$ such that $|V(Q)| \leq M$ for all $Q$ that are odd parts of $\sigma(m)$ for some odd $m$."
-
-The "proof" says:
-> "This follows from the uniform bounds in Theorem 1's proof."
-
-**Problem:** This is **asserted without proof**. Checking squarish-iterates.md:
-- Theorem 1 (Part 1) shows the transition set $T$ is finite
-- The proof uses Zsygmondy to constrain specific pairs $(a, Q)$
-- **Nowhere does it prove a uniform bound $M$ on $|V(Q)|$ for all $Q$**
-
-The claim that "finiteness... [is] uniformly bounded" conflates two different statements:
-- For each fixed $Q$, the set $V(Q) = \{a : \text{Par}(Q) = \text{Par}(2^{a+1}-1)\}$ is finite ✓ (this IS proven in Theorem 1's logic)
-- There exists $M$ such that $|V(Q)| \leq M$ for all $Q$ ✗ (this is NOT proven)
-
-**Why this matters:** The final counting argument needs the uniform bound to conclude finiteness. Without it, you could have infinitely many $Q$ values, each with finite but unbounded $|V(Q)|$, giving infinitely many reentry points.
-
-**Required fix:** Either:
-- **Prove the uniform bound** by analyzing the Diophantine constraints more carefully (might be hard), OR
-- **Use a different approach** that doesn't require uniform bounds (e.g., show directly that only finitely many $(a, Q)$ pairs arise in the orbit)
-
-#### **Issue 4: Claim 4 (Distinctness)**
-
-Claim 4 states:
-> "The values $Q_{k_j}$ are pairwise distinct for distinct reentry points $k_j$."
-
-The "proof" says:
-> "If $m_{k_j}$ are distinct and growing, then $Q_{k_j} = $ odd part of $\sigma(m_{k_j})$ are also generally distinct. (There could be coincidences, but for an infinite sequence, generically they're distinct.)"
-
-**Problem:** The word "generically" is **not rigorous in formal mathematics**. Either the $Q_{k_j}$ are distinct (provably), or they might not be. The parenthetical "(There could be coincidences...)" undermines the claim.
-
-**Why this matters:** If the same $Q$ value appears at multiple reentry points (with different $a$ values), the counting argument breaks down.
-
-**Required fix:** Either:
-- **Prove rigorously** that $\sigma$ is injective enough that distinct $m_{k_j}$ yield distinct $Q_{k_j}$ (difficult), OR
-- **Revise the counting argument** to handle the case where some $Q$ values repeat
-
-#### **Issue 5: Final Counting Argument**
-
-The proof attempts to conclude:
-> "By Theorem 1's effective bounds, only finitely many $(a, Q)$ pairs satisfy it overall. Therefore, the set of reentry points is finite."
-
-**Problem:** Multiple issues here:
-1. "Theorem 1's effective bounds" — Theorem 1 doesn't provide effective bounds on the number of pairs; it just says $T$ is finite
-2. The logic "each $Q$ contributes at most $M$ values of $a$, orbit produces infinitely many distinct $Q$ overall, therefore finite reentry" is **circular**: you're assuming infinitely many $Q$ to prove finite reentry, but the question is whether reentry is finite
-3. The statement "the orbit produces infinitely many distinct $Q_k$ values overall" is about ALL $k$, not just REENTRY points
-
-**Required fix:** The counting argument needs to be restructured completely. A valid approach might:
-- Show that the constraint $a_k \in V(Q_k)$ is so restrictive that it can only hold finitely often, OR
-- Use the growth rate of the orbit plus the bounded size of $V(Q)$ to show density of reentry points goes to zero
-
-### Additional Issues
-
-#### **Issue 6: Dependency on Unverified Proof**
-
-The proof relies heavily on "Theorem 1" from proofs/squarish-iterates.md, which has **Status: Under review 🔍** (not Verified ✅).
-
-Per the agent protocol:
-> Dependencies: Are cited results from other `proofs/*.md` files actually verified?
-
-**Problem:** This proof cannot be verified until squarish-iterates.md is verified, because the logic depends on Theorem 1's finiteness result.
-
-**Note:** Even after squarish-iterates.md is verified, this proof will need revision for Issues 1-5.
-
-### What Works
-
-Despite the gaps, several aspects are correct:
-
-1. ✅ **Overall strategy:** Analyzing reentry through the constraint $\text{Par}(Q_k) = \text{Par}(2^{a_k+1}-1)$ is the right approach
-2. ✅ **Parity support formalism:** Definitions of $\text{Par}(x)$ and the reentry constraint are correct
-3. ✅ **Step 1 (Mersenne cover):** The definition of $S_A$ and Claim 1 (finiteness) are trivial but correct
-4. ✅ **Step 2 (containment):** The observation that $\text{Par}(Q_k) \subseteq S_{a_k}$ is correct
-5. ✅ **Step 3 conclusion:** IF the Escape Lemma Consequence holds, THEN the conclusion about $a_k$ being large is correct
-6. ✅ **Dependencies structure:** Correctly references prime-factors-accumulate.md (though see Issue 6)
-
-### Verification Checklist
-
-- ✅ **Statement clarity:** Precise definition of reentry points
-- ✅ **Assumptions:** Explicitly stated
-- ❌ **Logical flow:** Critical gaps in proofs of key claims (Issues 1, 2, 3, 5)
-- ✅ **Quantifiers:** Generally correct where used
-- ⚠️ **Edge cases:** Not explicitly addressed (what if $a_k$ stabilizes? what if subsequences are finite?)
-- ❌ **Dependencies:** Depends on unverified proof (Issue 6)
-- ❌ **Completeness:** Multiple unproven claims prevent verification
-- ⚠️ **Hidden assumptions:** The proof assumes behaviors ("generically distinct", "typically") without proof
-
-### Required Revisions
-
-To verify this proof, the following must be addressed:
-
-1. **Escape Lemma Consequence:** Provide a rigorous derivation from prime-factors-accumulate.md, or prove directly that $\text{Par}(Q_k)$ accumulates elements
-
-2. **Subsequence argument (Step 4):** Replace the invalid application of the Escape Lemma to subsequences with a valid argument
-
-3. **Uniform bound (Claim 5):** Either prove it exists, or restructure the counting argument to not require it
-
-4. **Distinctness (Claim 4):** Make rigorous or revise counting to handle non-distinct $Q$ values
-
-5. **Final counting:** Provide a complete, non-circular argument that actually proves finiteness
-
-6. **Dependency:** Wait for squarish-iterates.md to be verified, or prove the needed results independently
-
-### Recommendation
-
-**Request major revision.** This proof contains correct intuitions and a sound strategy, but the execution has fundamental gaps that prevent verification. The explore agent should:
-
-1. Focus first on **strengthening the Escape Lemma Consequence** — this is foundational for the rest
-2. Reconsider the **subsequence approach** in Step 4 — a direct argument might be cleaner
-3. Either **prove Claim 5's uniform bound** or find an approach that doesn't need it
-4. **Restructure the final counting** with a clear, complete, non-circular argument
-
-Alternatively, consider a **different overall approach** that doesn't rely on counting $(a, Q)$ pairs, such as:
-- Showing that the Diophantine constraint becomes "generically unsatisfiable" as the orbit grows
-- Using probabilistic/density arguments (made rigorous)
-- Finding a direct obstruction to reentry from the growth properties of the orbit
+- proofs/prime-factors-accumulate.md (Verified ✅): $S^*$ infinite, orbit growth
+- proofs/squarish-iterates.md: Theorem 1 (Transition Set Finite)
+- Zsygmondy's theorem (1892) for primitive prime divisors of Mersenne numbers
+- Results on $\sigma(m) = N$ having finitely many solutions

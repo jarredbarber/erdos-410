@@ -1034,3 +1034,59 @@ Persistence (1): prime_div_eventually_always
 - After 4bk: 1t1 verifies reentry-finite.md. If both proofs are verified, need comprehensive formalize task.
 - The formalization task will be more complex than expected — need to restructure squarish_iterates_finite proof entirely, not just fix one sorry.
 - Human escalation on persistence still pending (~3.5h+)
+
+## Heartbeat — 2026-02-08 05:41 UTC (Check-in 30)
+
+**Metrics**: 8 sorrys (same lines), 1496+ lines, 54 tasks (50 closed, 2 failed, 1 in_progress, 1 open). 1 Verified, 2 Under review, 6+ Draft, 1 Rejected.
+**Status**: Self-correcting cycle active. Verify→Explore loop working as designed.
+
+**Key developments since last heartbeat**:
+1. **4bk (explore) COMPLETED ✅**: Commit `3d7553e`. Confirmed transition set T is FALSE (infinite globally). Wrote proofs/transition-set-bounded.md with orbit-specific approach.
+
+2. **1t1 (verify) COMPLETED**: Commit `faf2a2d`. Revision requested 🔍 on reentry-finite.md. Three critical issues:
+   - **Issue 1**: Escape Lemma Consequence not rigorous — doesn't show new primes enter with odd exponents in Par(Q_k). The Escape Lemma only shows S* infinite, not exponent control.
+   - **Issue 2**: Subsequence application — applying Escape Lemma to subsequences with fixed a_k is invalid.
+   - Verifier correctly identified the core mathematical gaps.
+
+3. **f6g (explore, p:1, large) IN PROGRESS**: 109 lines, ~10 min. Agent developing completely revised approach:
+   - **New strategy**: Prove a_k bounded at reentry points (via Mersenne primitive prime obstruction), then for bounded a, use orbit growth for finiteness
+   - Avoiding all three issues flagged by 1t1: no subsequence analysis, no uniform bounds, no distinctness claims
+   - Also developing "Parity Escape" — weaker version showing primes dividing Q_k (with any exponent) escape finite sets
+   - Not stale, actively writing new proof structure
+
+**Pipeline**:
+```
+f6g (in progress, revising reentry proof) → [verify revised proof] → xov (verify v2-unbounded)
+                                             → [formalize if verified]
+```
+
+**Assessment**: The verify→explore cycle is working exactly as designed:
+- vou wrote squarish-iterates.md → 9m4 flagged Part 1 + Stage 3
+- pml fixed Stage 3 via reentry-finite.md → 1t1 flagged Escape Lemma gaps + subsequence issues  
+- 4bk confirmed Part 1 (T) is FALSE → transition-set-bounded.md provides alternative
+- f6g now revising with cleaner approach avoiding all identified gaps
+
+This is the 3rd iteration on the squarish orbit-specific proof. Each iteration gets closer:
+- Attempt 1 (vou): König argument + N_k → ∞ hand-wave
+- Attempt 2 (pml): Reentry finiteness via Mersenne matching — but Escape Lemma application invalid  
+- Attempt 3 (f6g): Bounded a_k + orbit growth — avoids all identified gaps
+
+**Sorry count**: 8 (stable for 9 heartbeats). This is expected — all current work is NL math groundwork.
+
+**Actions**: None — system healthy, self-correcting cycle active.
+
+**Both global finiteness sorrys confirmed or likely FALSE**:
+- squarish_transition_set_finite (line 946): FALSE — 4bk confirmed
+- squarish_reentry_set_finite (line 958): FALSE — 348 confirmed
+- These MUST be deleted and replaced with orbit-specific proof when we formalize
+
+**Watch next**:
+- Does f6g produce a proof that addresses all 3 issues from 1t1?
+- The bounded-a_k approach is promising — it avoids the exponent tracking issue
+- If f6g succeeds: need verify task, then comprehensive formalize task
+- If f6g fails: this is attempt #3 at squarish orbit-specific. May need:
+  - Escalate to human for mathematical guidance on squarish escape
+  - Or accept squarish_iterates_finite as sorry (unprovable with current techniques)
+  - Or try bypass: prove prime_persistence_two without squarish_iterates_finite
+- Human escalation on persistence still pending (~4h)
+- xov (verify v2-unbounded) still queued — will run after f6g
