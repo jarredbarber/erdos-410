@@ -1149,3 +1149,58 @@ Persistence (1): prime_div_eventually_always (5+ failed, human escalation ~4h pe
 - Does n86 approve revised reentry-finite? Prop 2 Case 1b is the likely sticking point.
 - After both: formalize tasks for squarish restructure + v2_iterate_unbounded
 - Human response on persistence (sorry #8)
+
+## Heartbeat — 2026-02-08 06:27 UTC (Check-in 32)
+
+**Metrics**: 8 sorrys (same lines), 1496 lines, 59 tasks (54 closed, 2 failed, 1 in_progress, 2 open). 1 Verified proof, 4 Under review, 4 Draft, 1 Rejected. 11 files in proofs/.
+**Status**: Self-correcting cycle active. Verify→explore producing targeted surgical fixes.
+
+**Key developments since last heartbeat**:
+1. **n86 (verify) COMPLETED**: Reviewed f6g's revised reentry-finite.md → Revision requested 🔍 with 3 issues:
+   - **Issue 1**: Lemma 5 — circular reasoning about primitive prime with odd valuation → tyx fixing
+   - **Issue 2**: Prop 2 Case 1b — density argument not rigorous (Borel-Cantelli on deterministic sequences) → iwu fixing
+   - **Issue 3**: Dependency blocker — squarish-iterates.md Theorem 1 (T finite) is FALSE globally (4bk proved)
+   - ✅ Prop 1 logic valid, Case 2 correct, overall strategy sound
+   - Created targeted follow-up tasks tyx and iwu
+
+2. **ri3 (explore) COMPLETED**: Strengthened v2-unbounded.md Lemma 5 (Chebotarev + Kummer) and Lemma 6 (cyclotomic). Commit `e1c3001`. Solid work.
+
+3. **tyx (explore, p:1, small) IN PROGRESS**: ~16 min, fixing Lemma 5 of reentry-finite.md. Not stale.
+
+4. **k8v (verify, p:2) OPEN**: Unblocked (ri3 closed). Will run after tyx and iwu.
+
+**Pipeline**:
+```
+tyx (in progress, Lemma 5 fix) → iwu (open, Case 1b fix) → k8v (verify v2-unbounded)
+```
+
+**Squarish orbit proof iteration tracker (NOW AT 4)**:
+- Attempt 1 (vou → 9m4): König + N_k hand-wave → 2 areas flagged
+- Attempt 2 (pml → 1t1): Escape Lemma + Mersenne → 3 critical issues
+- Attempt 3 (f6g → n86): Entry timing + density → 3 gaps (Lemma 5, Case 1b, T dep)
+- Attempt 4 (tyx + iwu): Surgical fixes to Lemma 5 + Case 1b. Narrowest scope yet.
+
+**⚠️ CRITICAL STRUCTURAL ISSUE**: reentry-finite.md Main Theorem Step 1 depends on squarish-iterates.md "Theorem 1: T finite globally" — which is FALSE (4bk proved). Even if tyx and iwu succeed, this dependency remains invalid. squarish-iterates-v2.md (Draft) has orbit-specific version but is unverified. Needs separate resolution after tyx+iwu.
+
+**3-strike rule assessment**: We're on iteration 4 of the squarish proof. The sub-issues are different each time (not the same gap). Pattern:
+- Prop 1 (bounded a_k): CONSISTENTLY WORKS across all attempts
+- Case 2 (repeated Q): CONSISTENTLY WORKS
+- Case 1b (distinct Q density): CONSISTENTLY FAILS — this is the meeting point that needs moving
+- T dependency: Discovered false at iteration 3-4
+If iwu fails on Case 1b again: **redesign**. Options:
+  (a) Accept Case 1b as sorry in Lean (make it an explicit sorry)
+  (b) Restructure: prove only Case 2 + show Case 1 can't happen (Q_k eventually repeats?)
+  (c) Completely different approach to squarish_iterates_finite
+
+**v2 chain**: ri3's Chebotarev-based fix is solid. k8v should approve. If verified → formalize task for v2_iterate_unbounded. Good progress track.
+
+**Actions**: None — system healthy, pipeline flowing, targeted fixes in progress.
+
+**Sorry count**: 8 (stable for 12 heartbeats). Expected — need verified NL proofs before sorry count can move.
+
+**Watch next**:
+- Does tyx fix Lemma 5 rigorously? (Small task, should succeed — the claim is likely true)
+- Does iwu fix Case 1b? (Harder — persistent failure point across iterations. If fails: redesign)
+- Does k8v approve v2-unbounded? (Likely yes given ri3's thorough Chebotarev fix)
+- After tyx+iwu: still need to fix T dependency (Step 1 of Main Theorem). Plan: create task to merge reentry-finite + transition-set-corrected into single orbit-specific squarish_iterates_finite proof.
+- Human escalation on persistence: still pending ~4.5h. No response.
