@@ -1,9 +1,10 @@
 # Every Prime Eventually Always Divides σ_k(n)
 
-**Status:** Draft ✏️
+**Status:** Under review 🔍
 **Statement:** For any prime $q$ and any $n \geq 2$, there exists $K_q$ such that $q \mid \sigma_k(n)$ for all $k \geq K_q$.
 **Dependencies:** proofs/prime-factors-accumulate.md (for $\sigma_k(n) \to \infty$)
 **Confidence:** High
+**Reviewed by:** erdos410-opj
 
 ## Overview
 
@@ -308,3 +309,116 @@ Neither gap is fundamental; both could be closed with more detailed case analysi
 - proofs/prime-factors-accumulate.md (Escape Lemma, $\sigma_k(n) \to \infty$)
 - proofs/bridge-to-tendsto.md (partial progress, equivalence of reciprocal sum and super-exponential growth)
 - Zsygmondy's theorem (1892) / Bang's theorem (1886) for primitive prime divisors
+
+---
+
+## Review Notes
+
+**Reviewer:** Task erdos410-opj (verify agent)  
+**Date:** 2026-02-08  
+**Decision:** Revision Requested 🔍
+
+### Overall Assessment
+
+This proof contains the right high-level strategy and several correct components, but has **critical gaps** in the arguments that prevent verification at this time. The core ideas are sound, and with targeted revisions, this can become a complete proof.
+
+**Strengths:**
+- ✅ Excellent modular structure (lemmas building to theorems)
+- ✅ Correct identification and correction of error in Lemma 4 (q|(p-1) case)
+- ✅ Valid use of Zsygmondy's theorem for primitive prime divisors
+- ✅ Correct derivation of Corollary (Reciprocal Sum Divergence) from Prime Persistence
+- ✅ Dependencies used correctly
+- ✅ Honest acknowledgment of weak points in final "Gap Assessment"
+
+**Critical Issues Requiring Revision:**
+
+### Issue 1: Lemma 3 (Primitive Divisors Have Odd Valuation) — INCOMPLETE
+
+**Problem:** The proof claims $v_p(2^a - 1) = 1$ for primitive prime divisors, then hedges about Wieferich primes, then says "it suffices that it's finite." This is inconsistent.
+
+**Why it matters:** Step 2 of Theorem 1 relies on $v_p(2^{a+1}-1)$ being **odd** to force a parity constraint on $\sigma(t_k^2)$. If $v_p$ could be even, the perfect square constraint is automatically satisfied for that prime, breaking the argument.
+
+**Required fix:**
+- **Option A:** Prove that for primitive primes $p \mid 2^a - 1$ with $a \geq 7$, we have $v_p(2^a - 1)$ is odd (possibly excluding the two known Wieferich primes 1093 and 3511, which can be handled separately)
+- **Option B:** Restructure the argument to handle both odd and even valuations, showing that the constraints still force finitely many squarish iterates
+
+### Issue 2: Theorem 1, Step 3 (Iterated Constraints) — INCOMPLETE
+
+**Problem:** The "Key observation" proves that for a **fixed** odd integer $t$, only finitely many values of $a$ make $(2^{a+1}-1) \cdot \sigma(t^2)$ a perfect square. However, in the actual sequence $\sigma_k(n) = 2^{a_k} t_k^2$, **both** $a_k$ and $t_k$ vary.
+
+**Why it matters:** The proof needs to show that the sequence $(\sigma_k(n))$ can't keep landing on $(a, t)$ pairs where the transition produces a perfect square. The current argument only constrains the $a$ values for each fixed $t$.
+
+**Required fix:** Provide a rigorous argument that combines:
+- The constraint on $a$ for each fixed $t$ (already proven)
+- The growth of $t_k$ (from $\sigma_k(n) \to \infty$)
+- A counting or density argument showing these constraints can't all be satisfied simultaneously as the sequence evolves
+
+### Issue 3: Lemma 5 (2-adic Valuation Hits Residue 0 mod d) — INCOMPLETE
+
+**Problem:** The proof shows that $v_2(\sigma_k(n)) + 1 \mod d$ is **not eventually constant** (visits at least 2 distinct values infinitely often). But it doesn't prove that **residue 0** is hit infinitely often.
+
+**Why it matters:** Theorem 2, Step 1 requires $d \mid (v_2(\sigma_k(n)) + 1)$ for infinitely many $k$ (i.e., residue 0 is hit infinitely often). If the sequence only alternates between residues 1 and 2, for example, residue 0 is never hit.
+
+**Current claim:** "For our purposes, it suffices that residue 0 mod d is hit infinitely often, which follows from the non-constancy."
+
+**This is false:** Non-constancy does NOT imply hitting 0.
+
+**Required fix:**
+- **Option A:** Prove that the sequence $v_2(\sigma_k(n)) + 1 \mod d$ actually visits residue 0 infinitely often (may require analyzing the dynamics of $v_2(\sigma(2^a \cdot m))$ more carefully)
+- **Option B:** Restructure Theorem 2 to work with whatever residues ARE hit infinitely often (more complex but possible)
+
+### Issue 4: Theorem 2, Step 5 (Density Argument for Permanence) — NOT JUSTIFIED
+
+**Problem:** The proof claims: "Among even integers $m$ with $m \to \infty$, the fraction satisfying $q \nmid \sigma(m)$ tends to 0." This is a **very strong** and **non-trivial** number-theoretic claim that is stated without proof.
+
+**Why it matters:** This is the KEY step that bridges from "q divides infinitely often" to "q divides eventually always." Without this, the proof doesn't establish Prime Persistence.
+
+**Current justification:** "With probability 1/d, the 2-adic contribution gives $q \mid \sigma(m)$" — but $\sigma_k(n)$ is a deterministic sequence, not a random sample, so probabilistic arguments don't directly apply.
+
+**Required fix:**
+- **Option A:** Provide a rigorous counting or density argument showing that the set $\{m \in \mathbb{N} : m \text{ even}, q \nmid \sigma(m)\}$ is "thin" in a precise sense, and that $\sigma_k(n) \to \infty$ with growth constraints forces exiting this set eventually
+- **Option B:** Use a different approach, such as tracking the $q$-adic valuation $v_q(\sigma_k(n))$ and showing it eventually becomes permanently positive (may require the full strength of prime-factors-accumulate.md)
+
+### What IS Solid (Can Be Used As-Is):
+
+1. ✅ **Lemma 1 (Parity of σ):** Correct and rigorous. The characterization of squarish numbers is sound.
+
+2. ✅ **Lemma 2 (Mersenne Primitive Divisors):** Correct citation of Zsygmondy's theorem with proper exceptions noted.
+
+3. ✅ **Lemma 4 (Divisibility Criterion for σ(p^a)):** The correction is **correct**. The case split on $q \mid (p-1)$ vs. $q \nmid (p-1)$ is properly handled.
+
+4. ✅ **Corollary (Reciprocal Sum Divergence):** The logic is **completely correct**. Given Prime Persistence, the derivation of $\lim_{k \to \infty} \sum_{p \mid \sigma_k(n)} 1/p = \infty$ follows rigorously from the divergence of $\sum 1/p$.
+
+5. ✅ **Theorem 1, Steps 1-2:** The setup (consecutive squarish iterates, growth forces large parameters) is sound.
+
+6. ✅ **Theorem 1, Step 4 (Dichotomy):** The observation that either $a_k$ is bounded (forcing $t_k \to \infty$) or $a_k \to \infty$ is valid. However, the conclusion needs the fixes from Issues 1-2.
+
+7. ✅ **Theorem 2, Steps 1-3:** The entry of $q$ into the factorization is correctly argued (modulo Issue 3's fix).
+
+### Recommendations
+
+**Priority Order for Revisions:**
+1. **Issue 4 (Step 5 density)** — This is the most critical gap and the hardest to fix
+2. **Issue 3 (Lemma 5 residue 0)** — Needed for Step 1 to work
+3. **Issue 2 (varying pairs)** — Needed for Theorem 1 to be complete
+4. **Issue 1 (odd valuation)** — Can potentially work around this if Issue 2 is fixed differently
+
+**Possible Alternative Approach:**
+If the density argument (Issue 4) proves too difficult, consider:
+- Using the Escape Lemma more directly to show $v_q(\sigma_k(n))$ grows unboundedly
+- Showing that once $v_q(\sigma_k(n)) \geq 1$, it can only drop to 0 finitely many times
+- Combining with the 2-adic structure to establish permanence
+
+**Assessment for Formalization:**
+Do NOT formalize this proof in Lean until Issues 3 and 4 are resolved. The current version would require axiomatizing the unproven density claim, which is unacceptable.
+
+### Verdict
+
+This proof represents **significant progress** toward establishing Prime Persistence, which is indeed the KEY result for closing the project's sorry. However, the gaps listed above prevent verification in its current form.
+
+**Next Steps:**
+1. Address Issues 3 and 4 (Lemma 5 and density argument) as these are prerequisites for Theorem 2
+2. Address Issues 1 and 2 to complete Theorem 1
+3. Once all four issues are resolved, re-submit for verification
+
+I am marking this as **Under Review 🔍** and creating a follow-up task for revisions.

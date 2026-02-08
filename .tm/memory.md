@@ -281,3 +281,49 @@ Items 3+4 are "just plumbing" once 1+2 are done. The real frontier is 1+2.
 - Does it address PERSISTENCE (once q divides, it stays) or just APPEARANCE (q divides eventually)?
 - If q0l succeeds: need verify task for prime-persistence.md, then formalize task for prime_factors_accumulate.
 - If q0l fails: 2nd attempt threshold. Consider breaking into q=2 case (easier, already partially proved) vs general q case.
+
+## Heartbeat — 2026-02-08 00:32 UTC (Check-in 12)
+
+**Metrics**: 1 sorry (line 791), 937 lines, 34 tasks (32 closed, 1 in_progress, 1 open). 4 proofs in proofs/ (1 Verified, 3 Draft).
+**Status**: MAJOR PROGRESS — Prime Persistence proof delivered. Pipeline rebuilt.
+
+**Observations**:
+1. **q0l (explore) COMPLETED ✅**: Produced proofs/prime-persistence.md (16KB, Draft). This is the mathematical core — proves every prime q eventually permanently divides σ_k(n). Two-part proof:
+   - q=2: Squarish iterates finite via Zsygmondy's theorem on primitive prime divisors
+   - Odd q: 2-adic valuation + multiplicative orders mod q → q enters, then density argument for permanence
+   - Corollary: ∑_{p|σ_k(n)} 1/p → ∞ (exactly what prime_factors_accumulate needs)
+
+2. **rx2 (verify) FAILED**: JSON parse error (not mathematical). Reviewed bridge-to-tendsto.md, found gaps, but bridge proof is now superseded by prime-persistence.md. Closed.
+
+3. **Backlog was EMPTY** — worker idle. Critical intervention needed.
+
+**Gaps in prime-persistence.md** (my assessment):
+- Lemma 3 (v_p(2^a-1) is odd for primitive p): Hedges with Wieferich primes, not fully rigorous
+- Lemma 5 (residue equidistribution): "Chaotic mixing" is hand-wavy. Only needs residue 0 mod d hit infinitely often.
+- Theorem 2, Step 5 (density → permanence): Weakest part. "Thin set visited finitely often" not proved.
+- Overall: Structure is sound, most steps correct, but 2-3 gaps need tightening.
+
+**Actions**:
+1. Closed rx2 (superseded, JSON parse failure)
+2. Created **opj** (verify, p:1): Review prime-persistence.md with specific focus areas
+3. Created **xck** (formalize, p:0, depends on opj): Close prime_factors_accumulate sorry
+   - Includes decomposition strategy: declare prime_persistence lemma with sorry, use it to close prime_factors_accumulate, then fill in prime_persistence
+4. Worker immediately picked up opj — already analyzing Part 1
+
+**Pipeline**:
+```
+opj (verify prime-persistence.md) → xck (formalize prime_factors_accumulate)
+```
+
+**Contingencies**:
+- If opj APPROVES: xck proceeds. Agent decomposes into prime_persistence + assembly.
+- If opj flags gaps (LIKELY): Create explore task to revise specific gaps. Don't block formalize — the corollary structure is sound even if sub-proofs need work.
+- If xck fails: Decompose into 2-3 smaller formalize tasks (one per sub-lemma).
+
+**Sorry trajectory**: Holding at 1 for 5 heartbeats. Expected — NL math groundwork was necessary. The formalize task (xck) is now in the pipeline and should move the sorry count if the NL proof passes review.
+
+**Watch next**:
+- Does opj approve or flag revision? Key areas: Lemma 5, Theorem 2 Step 5.
+- If approved: does xck start and make progress on Lean code?
+- If revision needed: create targeted explore task for the specific gaps.
+- Monitor for worker picking up blocked xck before opj completes (shouldn't happen with deps).
