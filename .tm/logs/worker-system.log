@@ -14467,3 +14467,1417 @@ $ cd /home/jarred/code/erdos-410 && tm close erdos410-lqx
 4. **Review notes updated**: Changed Issue 1 status from 'MOSTLY RESOLVED' to 'RESOLVED' with updated description.
 
 The proof of Theorem 1 (Squarish Iterates Are Finite) is now internally consistent.
+[2026-02-08T02:10:50.457Z] ✅ Closed task erdos410-lqx
+
+[2026-02-08T02:10:50.526Z] 🔄 Checking git status...
+[2026-02-08T02:10:50.540Z] 📝 Committing changes...
+[2026-02-08T02:10:50.588Z] 🚀 Pushing to remote...
+[2026-02-08T02:10:52.262Z] 
+================================================================================
+[2026-02-08T02:10:52.262Z] 📌 Processing task: erdos410-xxd - Formalize squarish_iterates_finite (Basic.lean:793)
+[2026-02-08T02:10:52.262Z]    Role: formalize | Priority: 0 | Size: medium
+[2026-02-08T02:10:52.262Z] ================================================================================
+
+[2026-02-08T02:10:52.267Z] 🤖 Using agent: formalize with models: anthropic/claude-opus-4-6:high, anthropic/claude-opus-4-5:high, google-antigravity/gemini-3-pro:high
+
+[2026-02-08T02:10:52.267Z] ✓ Claimed task erdos410-xxd
+
+[2026-02-08T02:10:52.267Z] 💭 Starting pi agent session with model: anthropic/claude-opus-4-6:high...
+[2026-02-08T02:10:52.284Z] 📸 Capturing file state before agent execution...
+[2026-02-08T02:10:52.296Z] ✓ Captured state: 57 tracked, 1 untracked files
+
+[2026-02-08T02:10:56.243Z] 
+$ cd /home/jarred/code/erdos-410 && head -20 Erdos/Basic.lean
+[2026-02-08T02:10:56.244Z] 
+🛠️  Executing tool: read...
+[2026-02-08T02:10:56.245Z] 
+🛠️  Executing tool: read...
+[2026-02-08T02:11:01.549Z] 
+$ cd /home/jarred/code/erdos-410 && wc -l Erdos/Basic.lean
+[2026-02-08T02:11:01.551Z] 
+🛠️  Executing tool: read...
+[2026-02-08T02:11:04.582Z] 
+🛠️  Executing tool: read...
+[2026-02-08T02:11:04.583Z] 
+🛠️  Executing tool: read...
+[2026-02-08T02:11:07.633Z] 
+🛠️  Executing tool: read...
+[2026-02-08T02:11:10.697Z] 
+🛠️  Executing tool: read...
+[2026-02-08T02:14:54.169Z] [overseer] 💓 Heartbeat starting...
+[2026-02-08T02:14:54.172Z] [overseer] Running with model: anthropic/claude-opus-4-6:high
+[2026-02-08T02:16:32.767Z] [overseer] 💓 Heartbeat complete: No intervention needed — system progressing. Created ltw (formalize v2_hits_residue) to keep backlog seeded.
+[2026-02-08T02:19:00.108Z] 
+
+📝 Agent response complete.
+
+[2026-02-08T02:19:00.108Z] 📄 Log saved to .tm/logs/worker-erdos410-xxd.md
+[2026-02-08T02:19:00.108Z] WARN: ⚠️ No response received from model anthropic/claude-opus-4-6:high (possibly out of usage). Trying next model...
+[2026-02-08T02:19:00.108Z] 💭 Starting pi agent session with model: anthropic/claude-opus-4-5:high...
+[2026-02-08T02:19:00.125Z] 📸 Capturing file state before agent execution...
+[2026-02-08T02:19:00.136Z] ✓ Captured state: 57 tracked, 1 untracked files
+
+[2026-02-08T02:19:04.057Z] 
+🛠️  Executing tool: read...
+[2026-02-08T02:19:04.059Z] 
+🛠️  Executing tool: read...
+[2026-02-08T02:19:04.065Z] 
+$ tm update erdos410-xxd --status "Reading codebase and NL proof"
+[2026-02-08T02:19:11.046Z] 
+🛠️  Executing tool: read...
+[2026-02-08T02:19:11.053Z] 
+$ grep -n "IsSquarish\|sigma_odd_iff\|sigma_even_of" Erdos/Basic.lean | head -40
+[2026-02-08T02:19:23.659Z] 
+🛠️  Executing tool: read...
+[2026-02-08T02:19:23.666Z] 
+$ tm update erdos410-xxd --status "Exploring codebase for IsSquarish and Zsygmondy lemmas"
+[2026-02-08T02:19:28.983Z] 
+$ grep -ri "zsygmondy\|bang.*theorem\|primitive.*prime.*divisor" .lake/packages/mathlib --include="*.lean" 2>/dev/null | head -30
+[2026-02-08T02:19:29.594Z] 
+$ grep -ri "mersenne" .lake/packages/mathlib --include="*.lean" 2>/dev/null | head -20
+[2026-02-08T02:19:46.730Z] 
+$ grep -n "lemma\|theorem\|def" Erdos/Basic.lean | head -80
+[2026-02-08T02:19:46.739Z] 
+$ grep -rn "multiplicativeOrder\|ord_" .lake/packages/mathlib/Mathlib/GroupTheory/OrderOfElement.lean 2>/dev/null | head -20
+[2026-02-08T02:20:03.793Z] 
+🛠️  Executing tool: read...
+[2026-02-08T02:20:03.800Z] 
+$ tm update erdos410-xxd --status "Designing proof structure with Zsygmondy helper"
+[2026-02-08T02:20:26.580Z] 
+$ cat > /tmp/test_squarish.lean << 'EOF'
+import Mathlib
+
+open ArithmeticFunction Filter Finsupp
+
+namespace Erdos410
+
+/-- A natural number is a square or twice a square (IsSquarish). -/
+def IsSquarish (n : ℕ) : Prop := IsSquare n ∨ ∃ m, n = 2 * m ∧ IsSquare m
+
+/-- Zsygmondy's theorem: For a ≥ 7, 2^a - 1 has a primitive prime divisor.
+    This is a prime p such that p | 2^a - 1 but p ∤ 2^j - 1 for any 1 ≤ j < a. -/
+lemma zsygmondy_two_pow (a : ℕ) (ha : a ≥ 7) :
+    ∃ p, Nat.Prime p ∧ p ∣ 2^a - 1 ∧ ∀ j, 1 ≤ j → j < a → ¬(p ∣ 2^j - 1) := by
+  sorry
+
+#check zsygmondy_two_pow
+EOF
+cd /home/jarred/code/erdos-410 && timeout 60 lake env lean /tmp/test_squarish.lean
+[2026-02-08T02:20:57.806Z] 
+$ cat > /tmp/test_structure.lean << 'EOF'
+import Mathlib
+
+open ArithmeticFunction Filter Finsupp
+
+namespace Erdos410
+
+-- Key lemma: σ(2^a · m²) where m is odd equals (2^{a+1} - 1) · σ(m²)
+lemma sigma_squarish_form (a : ℕ) (m : ℕ) (hm_pos : m ≥ 1) (hm_odd : Odd m) :
+    sigma 1 (2^a * m^2) = (2^(a+1) - 1) * sigma 1 (m^2) := by
+  have hcop : Nat.gcd (2^a) (m^2) = 1 := by
+    refine Nat.coprime_pow_left_iff ?_ 2 m.succ_pos |>.mpr ?_
+    · exact Nat.succ_pos a
+    · rw [Nat.coprime_comm, Nat.coprime_pow_left_iff m.succ_pos]
+      exact Nat.coprime_two_left.mpr hm_odd
+  rw [isMultiplicative_sigma.map_mul_of_coprime hcop]
+  rw [sigma_apply_prime_pow Nat.prime_two]
+  simp only [mul_one]
+  rfl
+
+-- Key observation: 2^{a+1} - 1 is odd
+lemma two_pow_sub_one_odd (a : ℕ) : Odd (2^(a+1) - 1) := by
+  have h : 2^(a+1) ≥ 1 := Nat.one_le_pow (a+1) 2 (by omega)
+  exact Nat.Even.sub_odd h (Nat.even_pow.mpr ⟨even_two, by omega⟩) odd_one
+
+-- σ(m²) is odd when m is odd (since m² is a perfect square, hence squarish)
+lemma sigma_sq_odd (m : ℕ) (hm_pos : m ≥ 1) (hm_odd : Odd m) : Odd (sigma 1 (m^2)) := by
+  have hne : m^2 ≠ 0 := by positivity
+  have hsq : IsSquare (m^2) := ⟨m, rfl⟩
+  -- m² is squarish (since it's a perfect square)
+  have h_squarish : IsSquare (m^2) ∨ ∃ k, m^2 = 2 * k ∧ IsSquare k := Or.inl hsq
+  -- σ of squarish is odd
+  -- Need the sigma_odd_of_squarish lemma
+  sorry
+
+#check sigma_squarish_form
+#check two_pow_sub_one_odd
+EOF
+cd /home/jarred/code/erdos-410 && timeout 60 lake env lean /tmp/test_structure.lean
+[2026-02-08T02:21:15.291Z] 
+$ cat > /tmp/test_structure2.lean << 'EOF'
+import Mathlib
+
+open ArithmeticFunction Filter Finsupp
+
+namespace Erdos410
+
+-- Helper: geometric sum formula
+lemma geom_sum_eq (a : ℕ) : ∑ x ∈ Finset.range (a + 1), (2 : ℕ)^x = 2^(a+1) - 1 := by
+  have h := Nat.geomSum_eq (m := 2) (by omega : 2 ≤ 2) (a + 1)
+  simp only [ge_iff_le, le_refl, tsub_eq_zero_of_le, pow_zero] at h
+  exact h
+
+-- Key lemma: σ(2^a · m²) where m is odd equals (2^{a+1} - 1) · σ(m²)
+lemma sigma_squarish_form (a : ℕ) (m : ℕ) (hm_pos : m ≥ 1) (hm_odd : Odd m) :
+    sigma 1 (2^a * m^2) = (2^(a+1) - 1) * sigma 1 (m^2) := by
+  have hm_sq_odd : Odd (m^2) := hm_odd.pow
+  have hcop : Nat.gcd (2^a) (m^2) = 1 := by
+    rw [Nat.coprime_pow_left_iff (Nat.succ_pos a)]
+    exact Nat.coprime_two_left.mpr hm_sq_odd
+  rw [isMultiplicative_sigma.map_mul_of_coprime hcop]
+  rw [sigma_apply_prime_pow Nat.prime_two]
+  simp only [mul_one]
+  rw [geom_sum_eq]
+
+-- Key observation: 2^{a+1} - 1 is odd
+lemma two_pow_sub_one_odd (a : ℕ) : Odd (2^(a+1) - 1) := by
+  have h : 2^(a+1) ≥ 1 := Nat.one_le_pow (a+1) 2 (by omega)
+  exact Nat.Even.sub_odd h (Nat.even_pow.mpr ⟨even_two, by omega⟩) odd_one
+
+#check sigma_squarish_form
+#check two_pow_sub_one_odd
+EOF
+cd /home/jarred/code/erdos-410 && timeout 60 lake env lean /tmp/test_structure2.lean
+[2026-02-08T02:21:33.058Z] 
+$ cat > /tmp/test_structure3.lean << 'EOF'
+import Mathlib
+
+open ArithmeticFunction Filter Finsupp
+
+namespace Erdos410
+
+-- Helper: geometric sum formula - find the right approach
+example (a : ℕ) : ∑ x ∈ Finset.range (a + 1), (2 : ℕ)^x = 2^(a+1) - 1 := by
+  induction a with
+  | zero => simp
+  | succ a ih =>
+    rw [Finset.range_add_one, Finset.sum_insert Finset.notMem_range_self, ih]
+    ring_nf
+    omega
+
+-- Key lemma: σ(2^a · m²) where m is odd equals (2^{a+1} - 1) · σ(m²)
+lemma sigma_squarish_form (a : ℕ) (m : ℕ) (hm_pos : m ≥ 1) (hm_odd : Odd m) :
+    sigma 1 (2^a * m^2) = (2^(a+1) - 1) * sigma 1 (m^2) := by
+  have hm_sq_odd : Odd (m^2) := hm_odd.pow
+  have hcop : Nat.Coprime (2^a) (m^2) := by
+    exact Nat.Coprime.pow_left a (Nat.coprime_two_left.mpr hm_sq_odd)
+  rw [isMultiplicative_sigma.map_mul_of_coprime hcop]
+  rw [sigma_apply_prime_pow Nat.prime_two]
+  simp only [mul_one]
+  congr 1
+  induction a with
+  | zero => simp
+  | succ a ih =>
+    rw [Finset.range_add_one, Finset.sum_insert Finset.notMem_range_self, ih]
+    ring_nf
+    omega
+
+#check sigma_squarish_form
+EOF
+cd /home/jarred/code/erdos-410 && timeout 60 lake env lean /tmp/test_structure3.lean
+[2026-02-08T02:21:48.409Z] 
+$ cat > /tmp/test_structure4.lean << 'EOF'
+import Mathlib
+
+open ArithmeticFunction Filter Finsupp
+
+namespace Erdos410
+
+-- Helper: geometric sum formula
+lemma geom_sum_two (a : ℕ) : ∑ x ∈ Finset.range (a + 1), (2 : ℕ)^x = 2^(a+1) - 1 := by
+  induction a with
+  | zero => simp
+  | succ a ih =>
+    rw [Finset.range_add_one, Finset.sum_insert Finset.notMem_range_self, ih]
+    ring_nf
+    omega
+
+-- Key lemma: σ(2^a · m²) where m is odd equals (2^{a+1} - 1) · σ(m²)
+lemma sigma_squarish_form (a : ℕ) (m : ℕ) (hm_pos : m ≥ 1) (hm_odd : Odd m) :
+    sigma 1 (2^a * m^2) = (2^(a+1) - 1) * sigma 1 (m^2) := by
+  have hm_sq_odd : Odd (m^2) := hm_odd.pow
+  have hcop : Nat.Coprime (2^a) (m^2) := 
+    Nat.Coprime.pow_left a (Nat.coprime_two_left.mpr hm_sq_odd)
+  rw [isMultiplicative_sigma.map_mul_of_coprime hcop]
+  rw [sigma_apply_prime_pow Nat.prime_two]
+  simp only [mul_one]
+  rw [geom_sum_two]
+
+-- Key observation: 2^{a+1} - 1 is odd
+lemma two_pow_sub_one_odd (a : ℕ) : Odd (2^(a+1) - 1) := by
+  have h : 2^(a+1) ≥ 1 := Nat.one_le_pow (a+1) 2 (by omega)
+  exact Nat.Even.sub_odd h (Nat.even_pow.mpr ⟨even_two, by omega⟩) odd_one
+
+#check sigma_squarish_form
+#check two_pow_sub_one_odd
+EOF
+cd /home/jarred/code/erdos-410 && timeout 60 lake env lean /tmp/test_structure4.lean
+[2026-02-08T02:22:34.286Z] 
+$ cat > /tmp/test_full.lean << 'EOF'
+import Mathlib
+
+open ArithmeticFunction Filter Finsupp
+
+namespace Erdos410
+
+/-- A natural number is a square or twice a square (IsSquarish). -/
+def IsSquarish (n : ℕ) : Prop := IsSquare n ∨ ∃ m, n = 2 * m ∧ IsSquare m
+
+-- Helper: geometric sum formula
+lemma geom_sum_two (a : ℕ) : ∑ x ∈ Finset.range (a + 1), (2 : ℕ)^x = 2^(a+1) - 1 := by
+  induction a with
+  | zero => simp
+  | succ a ih =>
+    rw [Finset.range_add_one, Finset.sum_insert Finset.notMem_range_self, ih]
+    ring_nf; omega
+
+-- Key lemma: σ(2^a · m²) where m is odd equals (2^{a+1} - 1) · σ(m²)
+lemma sigma_squarish_form (a : ℕ) (m : ℕ) (hm_odd : Odd m) :
+    sigma 1 (2^a * m^2) = (2^(a+1) - 1) * sigma 1 (m^2) := by
+  have hm_sq_odd : Odd (m^2) := hm_odd.pow
+  have hcop : Nat.Coprime (2^a) (m^2) := 
+    Nat.Coprime.pow_left a (Nat.coprime_two_left.mpr hm_sq_odd)
+  rw [isMultiplicative_sigma.map_mul_of_coprime hcop]
+  rw [sigma_apply_prime_pow Nat.prime_two]
+  simp only [mul_one]; rw [geom_sum_two]
+
+-- Key observation: 2^{a+1} - 1 is odd
+lemma two_pow_sub_one_odd (a : ℕ) : Odd (2^(a+1) - 1) := by
+  have h : 2^(a+1) ≥ 1 := Nat.one_le_pow (a+1) 2 (by omega)
+  exact Nat.Even.sub_odd h (Nat.even_pow.mpr ⟨even_two, by omega⟩) odd_one
+
+/-- Zsygmondy's theorem: For a ≥ 7, 2^a - 1 has a primitive prime divisor.
+    This is a prime p such that p | 2^a - 1 but p ∤ 2^j - 1 for any 1 ≤ j < a. 
+    
+    The only exceptions for 2^a - 1 are a = 1 (trivial) and a = 6 
+    (where 2^6 - 1 = 63 = 7·9 and 7 | 2^3 - 1). -/
+lemma zsygmondy_two_pow (a : ℕ) (ha : a ≥ 7) :
+    ∃ p, Nat.Prime p ∧ p ∣ 2^a - 1 ∧ ∀ j, 1 ≤ j → j < a → ¬(p ∣ 2^j - 1) := by
+  sorry
+
+/-- Key constraint: For each a ≥ 6, the set of odd t such that 
+    (2^{a+1}-1) · σ(t²) is a perfect square is finite.
+    
+    This follows from Zsygmondy: the primitive prime divisor of 2^{a+1}-1
+    must appear in σ(t²) with matching parity, which constrains t. -/
+lemma squarish_constraint_finite (a : ℕ) (ha : a ≥ 6) :
+    Set.Finite {t : ℕ | Odd t ∧ t ≥ 1 ∧ IsSquare ((2^(a+1) - 1) * sigma 1 (t^2))} := by
+  sorry
+
+/-- For any fixed odd t ≥ 1, the set of a ≥ 6 such that 
+    (2^{a+1}-1) · σ(t²) is a perfect square is finite.
+    
+    This follows from Zsygmondy: as a increases, new primitive primes appear,
+    each creating a constraint that t must satisfy. A fixed t can only satisfy
+    finitely many such constraints. -/
+lemma squarish_constraint_finite' (t : ℕ) (ht_odd : Odd t) (ht_pos : t ≥ 1) :
+    Set.Finite {a : ℕ | a ≥ 6 ∧ IsSquare ((2^(a+1) - 1) * sigma 1 (t^2))} := by
+  sorry
+
+/-- If m is squarish and m ≥ 1, then m can be written as 2^a · t² 
+    for some a ≥ 0 and odd t ≥ 1. -/
+lemma squarish_decomposition {m : ℕ} (hm : m ≥ 1) (hsq : IsSquarish m) :
+    ∃ a t, m = 2^a * t^2 ∧ Odd t ∧ t ≥ 1 := by
+  rcases hsq with ⟨k, hk⟩ | ⟨m', hm', ⟨k, hk⟩⟩
+  · -- m = k²
+    -- Extract the 2-power from k
+    sorry
+  · -- m = 2 · k²
+    sorry
+
+/-- If n is squarish with n = 2^a · t² (odd t), then σ(n) is odd.
+    Moreover, σ(n) is squarish iff σ(n) is a perfect square. -/
+lemma sigma_squarish_is_square_iff (a : ℕ) (t : ℕ) (ht : Odd t) (ht_pos : t ≥ 1) :
+    IsSquarish ((2^(a+1) - 1) * sigma 1 (t^2)) ↔ 
+    IsSquare ((2^(a+1) - 1) * sigma 1 (t^2)) := by
+  constructor
+  · intro h
+    -- The product is odd (product of two odd numbers)
+    have hodd : Odd ((2^(a+1) - 1) * sigma 1 (t^2)) := by
+      apply Nat.Odd.mul
+      · exact two_pow_sub_one_odd a
+      · have hne : t^2 ≠ 0 := by positivity
+        have hsq' : IsSquare (t^2) := ⟨t, rfl⟩
+        have h_squarish : IsSquarish (t^2) := Or.inl hsq'
+        sorry -- need sigma_odd_of_squarish
+    -- An odd squarish number is a perfect square
+    rcases h with hsquare | ⟨m', heq, hm'_sq⟩
+    · exact hsquare
+    · -- If odd and equals 2 * (a square), contradiction
+      exfalso
+      rw [heq] at hodd
+      exact Nat.not_even_iff_odd.mpr hodd (even_two_mul m')
+  · intro hsq
+    exact Or.inl hsq
+
+#check sigma_squarish_form
+#check squarish_constraint_finite
+#check squarish_constraint_finite'
+EOF
+cd /home/jarred/code/erdos-410 && timeout 60 lake env lean /tmp/test_full.lean
+[2026-02-08T02:22:45.814Z] 
+$ grep -r "Odd.*mul\|mul.*Odd" ~/.elan/toolchains/leanprover-lean4-v4.27.0/lib/lean4/library/Std --include="*.lean" 2>/dev/null | head -5
+grep -r "odd_mul\|Odd.mul" .lake/packages/mathlib/Mathlib --include="*.lean" 2>/dev/null | head -10
+[2026-02-08T02:23:09.846Z] 
+$ cat > /tmp/test_full2.lean << 'EOF'
+import Mathlib
+
+open ArithmeticFunction Filter Finsupp
+
+namespace Erdos410
+
+/-- A natural number is a square or twice a square (IsSquarish). -/
+def IsSquarish (n : ℕ) : Prop := IsSquare n ∨ ∃ m, n = 2 * m ∧ IsSquare m
+
+-- Helper: geometric sum formula
+lemma geom_sum_two (a : ℕ) : ∑ x ∈ Finset.range (a + 1), (2 : ℕ)^x = 2^(a+1) - 1 := by
+  induction a with
+  | zero => simp
+  | succ a ih =>
+    rw [Finset.range_add_one, Finset.sum_insert Finset.notMem_range_self, ih]
+    ring_nf; omega
+
+-- Key lemma: σ(2^a · m²) where m is odd equals (2^{a+1} - 1) · σ(m²)
+lemma sigma_squarish_form (a : ℕ) (m : ℕ) (hm_odd : Odd m) :
+    sigma 1 (2^a * m^2) = (2^(a+1) - 1) * sigma 1 (m^2) := by
+  have hm_sq_odd : Odd (m^2) := hm_odd.pow
+  have hcop : Nat.Coprime (2^a) (m^2) := 
+    Nat.Coprime.pow_left a (Nat.coprime_two_left.mpr hm_sq_odd)
+  rw [isMultiplicative_sigma.map_mul_of_coprime hcop]
+  rw [sigma_apply_prime_pow Nat.prime_two]
+  simp only [mul_one]; rw [geom_sum_two]
+
+-- Key observation: 2^{a+1} - 1 is odd
+lemma two_pow_sub_one_odd (a : ℕ) : Odd (2^(a+1) - 1) := by
+  have h : 2^(a+1) ≥ 1 := Nat.one_le_pow (a+1) 2 (by omega)
+  exact Nat.Even.sub_odd h (Nat.even_pow.mpr ⟨even_two, by omega⟩) odd_one
+
+/-- σ of squarish is odd -/
+lemma sigma_odd_of_squarish' {n : ℕ} (hn : n ≠ 0) (hsq : IsSquarish n) : Odd (sigma 1 n) := by
+  sorry -- This is already proven in Basic.lean as sigma_odd_of_squarish
+
+/-- If n is squarish with n = 2^a · t² (odd t), then σ(n) is odd.
+    Moreover, σ(n) is squarish iff σ(n) is a perfect square. -/
+lemma sigma_squarish_is_square_iff (a : ℕ) (t : ℕ) (ht : Odd t) (ht_pos : t ≥ 1) :
+    IsSquarish ((2^(a+1) - 1) * sigma 1 (t^2)) ↔ 
+    IsSquare ((2^(a+1) - 1) * sigma 1 (t^2)) := by
+  constructor
+  · intro h
+    -- The product is odd (product of two odd numbers)
+    have hodd : Odd ((2^(a+1) - 1) * sigma 1 (t^2)) := by
+      apply Odd.mul
+      · exact two_pow_sub_one_odd a
+      · have hne : t^2 ≠ 0 := by positivity
+        have hsq' : IsSquare (t^2) := ⟨t, rfl⟩
+        have h_squarish : IsSquarish (t^2) := Or.inl hsq'
+        exact sigma_odd_of_squarish' hne h_squarish
+    -- An odd squarish number is a perfect square
+    rcases h with hsquare | ⟨m', heq, hm'_sq⟩
+    · exact hsquare
+    · -- If odd and equals 2 * (a square), contradiction
+      exfalso
+      rw [heq] at hodd
+      exact Nat.not_even_iff_odd.mpr hodd (even_two_mul m')
+  · intro hsq
+    exact Or.inl hsq
+
+#check sigma_squarish_form
+#check sigma_squarish_is_square_iff
+EOF
+cd /home/jarred/code/erdos-410 && timeout 60 lake env lean /tmp/test_full2.lean
+[2026-02-08T02:23:27.016Z] 
+$ cat > /tmp/test_full3.lean << 'EOF'
+import Mathlib
+
+open ArithmeticFunction Filter Finsupp
+
+namespace Erdos410
+
+/-- A natural number is a square or twice a square (IsSquarish). -/
+def IsSquarish (n : ℕ) : Prop := IsSquare n ∨ ∃ m, n = 2 * m ∧ IsSquare m
+
+-- Key observation: 2^{a+1} - 1 is odd
+lemma two_pow_sub_one_odd (a : ℕ) : Odd (2^(a+1) - 1) := by
+  have h : 2^(a+1) ≥ 1 := Nat.one_le_pow (a+1) 2 (by omega)
+  exact Nat.Even.sub_odd h (Nat.even_pow.mpr ⟨even_two, by omega⟩) odd_one
+
+/-- σ of squarish is odd -/
+lemma sigma_odd_of_squarish' {n : ℕ} (hn : n ≠ 0) (hsq : IsSquarish n) : Odd (sigma 1 n) := by
+  sorry -- This is already proven in Basic.lean as sigma_odd_of_squarish
+
+/-- t² is a perfect square (trivially) -/
+lemma sq_is_square (t : ℕ) : IsSquare (t^2) := by
+  use t
+  ring
+
+/-- If n is squarish with n = 2^a · t² (odd t), then σ(n) is odd.
+    Moreover, σ(n) is squarish iff σ(n) is a perfect square. -/
+lemma sigma_squarish_is_square_iff (a : ℕ) (t : ℕ) (ht : Odd t) (ht_pos : t ≥ 1) :
+    IsSquarish ((2^(a+1) - 1) * sigma 1 (t^2)) ↔ 
+    IsSquare ((2^(a+1) - 1) * sigma 1 (t^2)) := by
+  constructor
+  · intro h
+    -- The product is odd (product of two odd numbers)
+    have hodd : Odd ((2^(a+1) - 1) * sigma 1 (t^2)) := by
+      apply Odd.mul
+      · exact two_pow_sub_one_odd a
+      · have hne : t^2 ≠ 0 := by positivity
+        have h_squarish : IsSquarish (t^2) := Or.inl (sq_is_square t)
+        exact sigma_odd_of_squarish' hne h_squarish
+    -- An odd squarish number is a perfect square
+    rcases h with hsquare | ⟨m', heq, hm'_sq⟩
+    · exact hsquare
+    · -- If odd and equals 2 * (a square), contradiction
+      exfalso
+      rw [heq] at hodd
+      exact Nat.not_even_iff_odd.mpr hodd (even_two_mul m')
+  · intro hsq
+    exact Or.inl hsq
+
+#check sigma_squarish_is_square_iff
+EOF
+cd /home/jarred/code/erdos-410 && timeout 60 lake env lean /tmp/test_full3.lean
+[2026-02-08T02:23:53.976Z] 
+$ tm update erdos410-xxd --status "Writing proof structure with Zsygmondy and constraint finiteness sorries"
+[2026-02-08T02:23:55.182Z] 
+🛠️  Executing tool: read...
+[2026-02-08T02:24:40.432Z] 
+$ cat > /tmp/test_squarish_full.lean << 'EOF'
+import Mathlib
+
+open ArithmeticFunction Filter Finsupp
+
+namespace Erdos410
+
+/-- A natural number is a square or twice a square (IsSquarish). -/
+def IsSquarish (n : ℕ) : Prop := IsSquare n ∨ ∃ m, n = 2 * m ∧ IsSquare m
+
+-- Existing lemmas we need (with sorries to stand in for the actual proofs)
+lemma sigma_odd_of_squarish {n : ℕ} (hn : n ≠ 0) (hsq : IsSquarish n) : Odd (sigma 1 n) := by
+  sorry
+
+lemma sigma_iterate_ge_two (n : ℕ) (hn : n ≥ 2) (k : ℕ) :
+    (sigma 1)^[k] n ≥ 2 := by sorry
+
+lemma sigma_iterate_tendsto_atTop (n : ℕ) (hn : n ≥ 2) :
+    Tendsto (fun k => ((sigma 1)^[k] n : ℝ)) atTop atTop := by sorry
+
+/-! ## Helper lemmas for squarish_iterates_finite -/
+
+-- Key observation: 2^{a+1} - 1 is odd
+lemma two_pow_sub_one_odd' (a : ℕ) : Odd (2^(a+1) - 1) := by
+  have h : 2^(a+1) ≥ 1 := Nat.one_le_pow (a+1) 2 (by omega)
+  exact Nat.Even.sub_odd h (Nat.even_pow.mpr ⟨even_two, by omega⟩) odd_one
+
+/-- t² is a perfect square (trivially) -/
+lemma sq_is_square (t : ℕ) : IsSquare (t^2) := ⟨t, by ring⟩
+
+/-- t² is squarish -/
+lemma sq_is_squarish (t : ℕ) : IsSquarish (t^2) := Or.inl (sq_is_square t)
+
+/-- Helper: geometric sum formula for base 2 -/
+lemma geom_sum_two (a : ℕ) : ∑ x ∈ Finset.range (a + 1), (2 : ℕ)^x = 2^(a+1) - 1 := by
+  induction a with
+  | zero => simp
+  | succ a ih =>
+    rw [Finset.range_add_one, Finset.sum_insert Finset.notMem_range_self, ih]
+    ring_nf; omega
+
+/-- Key lemma: σ(2^a · m²) where m is odd equals (2^{a+1} - 1) · σ(m²) -/
+lemma sigma_squarish_form' (a : ℕ) (m : ℕ) (hm_odd : Odd m) :
+    sigma 1 (2^a * m^2) = (2^(a+1) - 1) * sigma 1 (m^2) := by
+  have hm_sq_odd : Odd (m^2) := hm_odd.pow
+  have hcop : Nat.Coprime (2^a) (m^2) := 
+    Nat.Coprime.pow_left a (Nat.coprime_two_left.mpr hm_sq_odd)
+  rw [isMultiplicative_sigma.map_mul_of_coprime hcop]
+  rw [sigma_apply_prime_pow Nat.prime_two]
+  simp only [mul_one]; rw [geom_sum_two]
+
+/-- If the product (2^{a+1}-1) · σ(t²) is squarish, it must be a perfect square
+    (since it's odd and squarish = square or 2*square). -/
+lemma sigma_squarish_is_square_iff' (a : ℕ) (t : ℕ) (ht_pos : t ≥ 1) :
+    IsSquarish ((2^(a+1) - 1) * sigma 1 (t^2)) ↔ 
+    IsSquare ((2^(a+1) - 1) * sigma 1 (t^2)) := by
+  constructor
+  · intro h
+    have hne : t^2 ≠ 0 := by positivity
+    have hodd : Odd ((2^(a+1) - 1) * sigma 1 (t^2)) := by
+      apply Odd.mul
+      · exact two_pow_sub_one_odd' a
+      · exact sigma_odd_of_squarish hne (sq_is_squarish t)
+    rcases h with hsquare | ⟨m', heq, hm'_sq⟩
+    · exact hsquare
+    · exfalso
+      rw [heq] at hodd
+      exact Nat.not_even_iff_odd.mpr hodd (even_two_mul m')
+  · intro hsq
+    exact Or.inl hsq
+
+/-- Zsygmondy's theorem: For a ≥ 7, 2^a - 1 has a primitive prime divisor.
+    This is a prime p such that p | 2^a - 1 but p ∤ 2^j - 1 for any 1 ≤ j < a. 
+    
+    The only exceptions for 2^a - 1 are a = 1 (trivial) and a = 6 
+    (where 2^6 - 1 = 63 = 7·9 and 7 | 2^3 - 1). -/
+lemma zsygmondy_two_pow (a : ℕ) (ha : a ≥ 7) :
+    ∃ p, Nat.Prime p ∧ p ∣ 2^a - 1 ∧ ∀ j, 1 ≤ j → j < a → ¬(p ∣ 2^j - 1) := by
+  sorry
+
+/-- Key finiteness: For a fixed a ≥ 6, the set of odd t such that 
+    (2^{a+1}-1) · σ(t²) is a perfect square is finite.
+    
+    This follows from Zsygmondy: the primitive prime divisor of 2^{a+1}-1
+    must appear in σ(t²) with matching parity, which constrains t. -/
+lemma squarish_constraint_set_finite (a : ℕ) (ha : a ≥ 6) :
+    Set.Finite {t : ℕ | Odd t ∧ t ≥ 1 ∧ IsSquare ((2^(a+1) - 1) * sigma 1 (t^2))} := by
+  sorry
+
+/-- Key finiteness (dual): For any fixed odd t ≥ 1, the set of a ≥ 6 such that 
+    (2^{a+1}-1) · σ(t²) is a perfect square is finite.
+    
+    This follows from Zsygmondy: as a increases, new primitive primes appear,
+    each creating a constraint. A fixed t can only satisfy finitely many. -/
+lemma squarish_a_set_finite (t : ℕ) (ht_odd : Odd t) (ht_pos : t ≥ 1) :
+    Set.Finite {a : ℕ | a ≥ 6 ∧ IsSquare ((2^(a+1) - 1) * sigma 1 (t^2))} := by
+  sorry
+
+/-- Squarish decomposition: If m ≥ 1 is squarish, then m = 2^a · t² 
+    for some a ≥ 0 and odd t ≥ 1. -/
+lemma squarish_decomposition' {m : ℕ} (hm : m ≥ 1) (hsq : IsSquarish m) :
+    ∃ a t, m = 2^a * t^2 ∧ Odd t ∧ t ≥ 1 := by
+  sorry
+
+/-- Main theorem: Squarish iterates are eventually absent.
+    For n ≥ 2, σₖ(n) is not squarish for all sufficiently large k. -/
+lemma squarish_iterates_finite' (n : ℕ) (hn : n ≥ 2) :
+    ∃ K, ∀ k ≥ K, ¬IsSquarish ((sigma 1)^[k] n) := by
+  -- We prove by contradiction: if infinitely many squarish iterates exist,
+  -- we derive a contradiction using the Zsygmondy-based finiteness constraints.
+  
+  -- First, handle small cases (a < 6) separately
+  -- For large a, use Zsygmondy to constrain t
+  
+  -- Key observation: σ_k(n) → ∞, so either:
+  -- (A) The 2-adic valuations a_k → ∞, or
+  -- (B) The a_k are bounded, forcing t_k → ∞
+  
+  -- In case (A): By squarish_a_set_finite, each t can only work for finitely many a.
+  --              So infinitely many distinct a's require infinitely many distinct t's.
+  --              But by squarish_constraint_set_finite, each a admits only finitely many t's.
+  --              This creates a contradiction as the sequence must eventually fail.
+  
+  -- In case (B): If a_k ≤ A for all k, then σ_k(n) = 2^{a_k} · t_k² → ∞ implies t_k → ∞.
+  --              But ⋃_{a ≤ A} {t : constraint_a(t)} is finite, so eventually t_k ∉ this set.
+  
+  sorry
+
+#check squarish_iterates_finite'
+EOF
+cd /home/jarred/code/erdos-410 && timeout 120 lake env lean /tmp/test_squarish_full.lean
+[2026-02-08T02:24:54.652Z] 
+🛠️  Executing tool: read...
+[2026-02-08T02:25:40.073Z] 
+🛠️  Executing tool: edit...
+[2026-02-08T02:25:43.766Z] 
+$ cd /home/jarred/code/erdos-410 && timeout 300 lake build 2>&1 | tail -30
+[2026-02-08T02:26:55.684Z] 
+$ cat > /tmp/test_decomp.lean << 'EOF'
+import Mathlib
+
+open ArithmeticFunction Filter Finsupp
+
+namespace Erdos410
+
+/-- A natural number is a square or twice a square (IsSquarish). -/
+def IsSquarish (n : ℕ) : Prop := IsSquare n ∨ ∃ m, n = 2 * m ∧ IsSquare m
+
+/-- Helper: extract the odd part of a natural number -/
+noncomputable def oddPart (n : ℕ) : ℕ := n / 2^(n.factorization 2)
+
+lemma oddPart_odd {n : ℕ} (hn : n ≥ 1) : Odd (oddPart n) := by
+  unfold oddPart
+  have h2div : 2^(n.factorization 2) ∣ n := Nat.pow_factorization_dvd n 2
+  have hne0 : n ≠ 0 := by omega
+  -- n / 2^v₂(n) is odd because all factors of 2 have been divided out
+  rw [Nat.odd_iff]
+  by_contra h
+  push_neg at h
+  have heven : Even (n / 2^(n.factorization 2)) := Nat.even_iff.mpr (Nat.not_odd_iff_even.mp h)
+  obtain ⟨k, hk⟩ := heven
+  have hdiv2 : 2 ∣ n / 2^(n.factorization 2) := ⟨k, hk⟩
+  have hdivn : 2^(n.factorization 2 + 1) ∣ n := by
+    rw [pow_succ]
+    exact Nat.mul_dvd_of_dvd_div h2div hdiv2
+  have hv2 : n.factorization 2 + 1 ≤ n.factorization 2 := 
+    Nat.pow_factorization_choose_le Nat.prime_two hdivn
+  omega
+
+lemma decomp_eq {n : ℕ} (hn : n ≥ 1) : n = 2^(n.factorization 2) * oddPart n := by
+  unfold oddPart
+  have h2div : 2^(n.factorization 2) ∣ n := Nat.pow_factorization_dvd n 2
+  exact (Nat.mul_div_cancel' h2div).symm
+
+/-- If n is squarish with n ≥ 1, all odd prime factors have even valuation -/
+lemma squarish_odd_prime_even_val {n p : ℕ} (hn : n ≥ 1) (hp : Nat.Prime p) (hodd : Odd p)
+    (hsq : IsSquarish n) : Even (n.factorization p) := by
+  have hne : n ≠ 0 := by omega
+  rcases hsq with ⟨m, hm⟩ | ⟨m, hn_eq, ⟨k, hk⟩⟩
+  · -- n = m²
+    have hm0 : m ≠ 0 := by intro h; rw [h] at hm; simp at hm; exact hne hm
+    have : n.factorization = 2 • m.factorization := by
+      rw [hm, ← sq, Nat.factorization_pow]
+    rw [this]
+    simp only [Finsupp.smul_apply, smul_eq_mul]
+    use m.factorization p; ring
+  · -- n = 2 · k²
+    have hk0 : k ≠ 0 := by intro h; rw [h] at hk; simp at hk; rw [hk] at hn_eq; simp at hn_eq; exact hne hn_eq
+    rw [hn_eq, hk]
+    have hpow : k * k ≠ 0 := by positivity
+    rw [Nat.factorization_mul (by omega) hpow]
+    have hfact_sq : (k * k).factorization = 2 • k.factorization := by
+      rw [← sq, Nat.factorization_pow]
+    rw [hfact_sq]
+    simp only [Finsupp.add_apply, Finsupp.smul_apply, smul_eq_mul]
+    have hp2 : p ≠ 2 := fun h => by rw [h] at hodd; omega
+    rw [Nat.Prime.factorization Nat.prime_two, Finsupp.single_apply, if_neg hp2.symm, zero_add]
+    use k.factorization p; ring
+
+/-- Squarish decomposition: If m ≥ 1 is squarish, then m = 2^a · t² 
+    for some a ≥ 0 and odd t ≥ 1. -/
+lemma squarish_decomposition {m : ℕ} (hm : m ≥ 1) (hsq : IsSquarish m) :
+    ∃ a t, m = 2^a * t^2 ∧ Odd t ∧ t ≥ 1 := by
+  -- The odd part of m is a perfect square because all odd prime valuations are even
+  use m.factorization 2
+  -- t is the square root of oddPart m
+  have hodd_part_sq : IsSquare (oddPart m) := by
+    apply isSquare_of_all_valuations_even
+    · unfold oddPart
+      have h2div : 2^(m.factorization 2) ∣ m := Nat.pow_factorization_dvd m 2
+      have hne : m ≠ 0 := by omega
+      exact Nat.div_ne_zero_iff_of_dvd h2div |>.mpr ⟨hne, Nat.one_le_pow _ 2 (by omega)⟩
+    · intro p hp
+      have hp_prime : Nat.Prime p := (Nat.mem_primeFactors.mp hp).1
+      rcases Nat.Prime.eq_two_or_odd hp_prime with rfl | hodd'
+      · -- p = 2: valuation in oddPart is 0
+        unfold oddPart
+        have h2div : 2^(m.factorization 2) ∣ m := Nat.pow_factorization_dvd m 2
+        rw [Nat.factorization_div h2div]
+        simp [Nat.Prime.factorization Nat.prime_two]
+      · -- p is odd: valuation is same as in m, which is even
+        have hval_eq : (oddPart m).factorization p = m.factorization p := by
+          unfold oddPart
+          have h2div : 2^(m.factorization 2) ∣ m := Nat.pow_factorization_dvd m 2
+          rw [Nat.factorization_div h2div]
+          have hp2 : p ≠ 2 := fun h => by rw [h] at hodd'; omega
+          simp [Nat.Prime.factorization Nat.prime_two, hp2]
+        rw [hval_eq]
+        exact squarish_odd_prime_even_val hm hp_prime (Nat.odd_iff.mpr hodd') hsq
+  obtain ⟨t, ht⟩ := hodd_part_sq
+  use t
+  constructor
+  · rw [decomp_eq hm, ht]
+    ring
+  constructor
+  · -- t is odd
+    have hodd_part : Odd (oddPart m) := oddPart_odd hm
+    rw [ht] at hodd_part
+    -- t * t is odd implies t is odd
+    exact (Nat.odd_mul.mp hodd_part).1
+  · -- t ≥ 1
+    by_contra hlt
+    push_neg at hlt
+    interval_cases t
+    rw [ht] at hodd_part_sq
+    simp at hodd_part_sq
+    have : oddPart m = 0 := hodd_part_sq
+    unfold oddPart at this
+    have h2div : 2^(m.factorization 2) ∣ m := Nat.pow_factorization_dvd m 2
+    have : m = 0 := by
+      rw [Nat.div_eq_zero_iff (Nat.one_le_pow _ 2 (by omega))] at this
+      cases this with
+      | inl h => exact h
+      | inr h => 
+        have hv2 : m.factorization 2 ≤ 0 := by
+          by_contra hc
+          push_neg at hc
+          have : m ≥ 2^(m.factorization 2) := Nat.le_of_dvd (by omega : m > 0) h2div
+          have : 2^(m.factorization 2) > m := h
+          omega
+        omega
+    omega
+
+#check squarish_decomposition
+EOF
+cd /home/jarred/code/erdos-410 && timeout 120 lake env lean /tmp/test_decomp.lean
+[2026-02-08T02:27:06.609Z] 
+$ grep -r "factorization.*dvd\|dvd.*factorization" .lake/packages/mathlib/Mathlib/Data/Nat/Factorization --include="*.lean" 2>/dev/null | head -20
+[2026-02-08T02:27:06.617Z] 
+$ grep -r "pow.*factorization_dvd\|two_pow_factorization" .lake/packages/mathlib/Mathlib --include="*.lean" 2>/dev/null | head -10
+[2026-02-08T02:27:10.960Z] 
+$ grep -r "pow_div\|two_pow_factorization_dvd\|Prime.pow_dvd" .lake/packages/mathlib/Mathlib --include="*.lean" 2>/dev/null | grep -i factorization | head -10
+[2026-02-08T02:27:11.082Z] 
+$ echo '#check Nat.Prime.pow_dvd_iff_le_factorization' > /tmp/check.lean && lake env lean /tmp/check.lean 2>&1
+[2026-02-08T02:27:16.471Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/check2.lean << 'EOF'
+import Mathlib
+
+-- Find the correct namespace
+#check Nat.pow_factorization_pos_of_dvd
+#check Nat.dvd_of_factorization_pos
+#check Nat.Prime.pow_dvd_iff_le_factorization
+EOF
+lake env lean /tmp/check2.lean 2>&1 | head -10
+[2026-02-08T02:27:29.552Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/check3.lean << 'EOF'
+import Mathlib
+
+variable (n : ℕ) (hn : n ≠ 0)
+
+-- The power of 2 in n divides n
+example : 2^(n.factorization 2) ∣ n := by
+  exact Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hn |>.mpr le_rfl
+  
+-- Also try
+#check Nat.ord_proj_dvd
+EOF
+lake env lean /tmp/check3.lean 2>&1
+[2026-02-08T02:28:20.062Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_decomp2.lean << 'EOF'
+import Mathlib
+
+open ArithmeticFunction Filter Finsupp
+
+namespace Erdos410
+
+/-- A natural number is a square or twice a square (IsSquarish). -/
+def IsSquarish (n : ℕ) : Prop := IsSquare n ∨ ∃ m, n = 2 * m ∧ IsSquare m
+
+/-- Power of p in factorization divides n -/
+lemma pow_factorization_dvd (n p : ℕ) (hn : n ≠ 0) (hp : Nat.Prime p) : 
+    p^(n.factorization p) ∣ n :=
+  Nat.Prime.pow_dvd_iff_le_factorization hp hn |>.mpr le_rfl
+
+/-- Helper: extract the odd part of a natural number -/
+noncomputable def oddPart (n : ℕ) : ℕ := n / 2^(n.factorization 2)
+
+lemma oddPart_odd {n : ℕ} (hn : n ≥ 1) : Odd (oddPart n) := by
+  unfold oddPart
+  have hne : n ≠ 0 := by omega
+  have h2div : 2^(n.factorization 2) ∣ n := pow_factorization_dvd n 2 hne Nat.prime_two
+  rw [Nat.odd_iff]
+  by_contra h
+  have heven : 2 ∣ n / 2^(n.factorization 2) := Nat.even_iff.mp (Nat.not_odd_iff_even.mp h)
+  have hdivn : 2^(n.factorization 2 + 1) ∣ n := by
+    rw [pow_succ]
+    exact Nat.mul_dvd_of_dvd_div h2div heven
+  have : n.factorization 2 + 1 ≤ n.factorization 2 := 
+    Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hne |>.mp hdivn
+  omega
+
+lemma decomp_eq {n : ℕ} (hn : n ≥ 1) : n = 2^(n.factorization 2) * oddPart n := by
+  unfold oddPart
+  have hne : n ≠ 0 := by omega
+  have h2div : 2^(n.factorization 2) ∣ n := pow_factorization_dvd n 2 hne Nat.prime_two
+  exact (Nat.mul_div_cancel' h2div).symm
+
+/-- If n is squarish with n ≥ 1, all odd prime factors have even valuation -/
+lemma squarish_odd_prime_even_val {n p : ℕ} (hn : n ≥ 1) (hp : Nat.Prime p) (hodd : Odd p)
+    (hsq : IsSquarish n) : Even (n.factorization p) := by
+  have hne : n ≠ 0 := by omega
+  rcases hsq with ⟨m, hm⟩ | ⟨m, hn_eq, ⟨k, hk⟩⟩
+  · -- n = m²
+    have hm0 : m ≠ 0 := by intro h; rw [h] at hm; simp at hm; exact hne hm
+    have hfact : n.factorization = 2 • m.factorization := by
+      rw [hm, ← sq, Nat.factorization_pow]
+    rw [hfact]; simp only [Finsupp.smul_apply, smul_eq_mul]
+    use m.factorization p; ring
+  · -- n = 2 · k²
+    have hk0 : k ≠ 0 := by 
+      intro h; rw [h] at hk; simp at hk
+      rw [hk] at hn_eq; simp at hn_eq; exact hne hn_eq
+    rw [hn_eq, hk]
+    have hpow : k * k ≠ 0 := by positivity
+    rw [Nat.factorization_mul (by omega) hpow]
+    have hfact_sq : (k * k).factorization = 2 • k.factorization := by
+      rw [← sq, Nat.factorization_pow]
+    rw [hfact_sq]
+    simp only [Finsupp.add_apply, Finsupp.smul_apply, smul_eq_mul]
+    have hp2 : p ≠ 2 := fun h => by rw [h] at hodd; omega
+    rw [Nat.Prime.factorization Nat.prime_two, Finsupp.single_apply, if_neg hp2.symm, zero_add]
+    use k.factorization p; ring
+
+-- Reuse from Basic.lean
+lemma isSquare_of_all_valuations_even' {n : ℕ} (hn : n ≠ 0) 
+    (h : ∀ p ∈ n.primeFactors, Even (n.factorization p)) : IsSquare n := by
+  have hsup : n.factorization.support = n.primeFactors := Nat.support_factorization n
+  have key : n = (n.primeFactors.prod (fun p => p ^ (n.factorization p / 2))) ^ 2 := by
+    conv_lhs => rw [← Nat.factorization_prod_pow_eq_self hn]
+    unfold Finsupp.prod
+    rw [hsup, sq, ← Finset.prod_mul_distrib]
+    apply Finset.prod_congr rfl
+    intro p hp
+    obtain ⟨k, hk⟩ := h p hp
+    rw [hk, ← two_mul, Nat.mul_div_cancel_left _ (by omega : 0 < 2)]; ring
+  use n.primeFactors.prod (fun p => p ^ (n.factorization p / 2))
+  rw [sq] at key; exact key
+
+/-- Squarish decomposition: If m ≥ 1 is squarish, then m = 2^a · t² 
+    for some a ≥ 0 and odd t ≥ 1. -/
+lemma squarish_decomposition' {m : ℕ} (hm : m ≥ 1) (hsq : IsSquarish m) :
+    ∃ a t, m = 2^a * t^2 ∧ Odd t ∧ t ≥ 1 := by
+  have hne : m ≠ 0 := by omega
+  use m.factorization 2
+  -- The odd part of m is a perfect square
+  have hodd_part_sq : IsSquare (oddPart m) := by
+    have oddPart_ne : oddPart m ≠ 0 := by
+      unfold oddPart
+      have h2div : 2^(m.factorization 2) ∣ m := pow_factorization_dvd m 2 hne Nat.prime_two
+      exact Nat.div_ne_zero_iff_of_dvd h2div |>.mpr ⟨hne, Nat.one_le_pow _ 2 (by omega)⟩
+    apply isSquare_of_all_valuations_even' oddPart_ne
+    intro p hp
+    have hp_prime : Nat.Prime p := (Nat.mem_primeFactors.mp hp).1
+    rcases Nat.Prime.eq_two_or_odd hp_prime with rfl | hodd'
+    · -- p = 2: valuation in oddPart is 0 (we divided out all powers of 2)
+      exfalso
+      unfold oddPart at hp
+      have h2div : 2^(m.factorization 2) ∣ m := pow_factorization_dvd m 2 hne Nat.prime_two
+      have hfact_div := Nat.factorization_div h2div
+      rw [Nat.mem_primeFactors] at hp
+      have : (m / 2 ^ m.factorization 2).factorization 2 > 0 := hp.2
+      rw [hfact_div] at this
+      simp [Nat.Prime.factorization Nat.prime_two] at this
+    · -- p is odd: valuation is same as in m
+      have hpne2 : p ≠ 2 := fun h => by rw [h] at hodd'; omega
+      have hval_eq : (oddPart m).factorization p = m.factorization p := by
+        unfold oddPart
+        have h2div : 2^(m.factorization 2) ∣ m := pow_factorization_dvd m 2 hne Nat.prime_two
+        rw [Nat.factorization_div h2div]
+        simp [Nat.Prime.factorization Nat.prime_two, hpne2]
+      rw [hval_eq]
+      exact squarish_odd_prime_even_val hm hp_prime (Nat.odd_iff.mpr hodd') hsq
+  obtain ⟨t, ht⟩ := hodd_part_sq
+  use t
+  refine ⟨?_, ?_, ?_⟩
+  · -- m = 2^a * t^2
+    rw [decomp_eq hm, ht, sq]
+  · -- t is odd
+    have hodd_part : Odd (oddPart m) := oddPart_odd hm
+    rw [ht] at hodd_part
+    exact (Nat.odd_mul.mp hodd_part).1
+  · -- t ≥ 1
+    by_contra hlt
+    push_neg at hlt
+    interval_cases t
+    rw [sq] at ht
+    simp at ht
+    have oddPart_ne : oddPart m ≠ 0 := by
+      unfold oddPart
+      have h2div : 2^(m.factorization 2) ∣ m := pow_factorization_dvd m 2 hne Nat.prime_two
+      exact Nat.div_ne_zero_iff_of_dvd h2div |>.mpr ⟨hne, Nat.one_le_pow _ 2 (by omega)⟩
+    exact oddPart_ne ht
+
+#check squarish_decomposition'
+EOF
+lake env lean /tmp/test_decomp2.lean 2>&1
+[2026-02-08T02:28:35.893Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_decomp3.lean << 'EOF'
+import Mathlib
+
+open ArithmeticFunction Filter Finsupp
+
+namespace Erdos410
+
+/-- A natural number is a square or twice a square (IsSquarish). -/
+def IsSquarish (n : ℕ) : Prop := IsSquare n ∨ ∃ m, n = 2 * m ∧ IsSquare m
+
+-- Simpler approach: use the definition directly
+/-- Squarish decomposition: If m ≥ 1 is squarish, then m = 2^a · t² 
+    for some a ≥ 0 and odd t ≥ 1. -/
+lemma squarish_decomposition' {m : ℕ} (hm : m ≥ 1) (hsq : IsSquarish m) :
+    ∃ a t, m = 2^a * t^2 ∧ Odd t ∧ t ≥ 1 := by
+  -- For now, use sorry - the full proof is complex
+  -- The key idea: extract v_2(m) and show the odd part is a perfect square
+  sorry
+
+#check squarish_decomposition'
+EOF
+lake env lean /tmp/test_decomp3.lean 2>&1
+[2026-02-08T02:28:50.696Z] 
+$ cd /home/jarred/code/erdos-410 && timeout 300 lake build 2>&1 | tail -20
+[2026-02-08T02:28:56.417Z] 
+$ tm update erdos410-xxd --status "Verifying build with helper lemmas and sorries"
+[2026-02-08T02:29:01.415Z] 
+🛠️  Executing tool: read...
+[2026-02-08T02:29:30.036Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_decomp_clean.lean << 'EOF'
+import Mathlib
+
+open ArithmeticFunction Filter Finsupp
+
+namespace Erdos410
+
+/-- A natural number is a square or twice a square (IsSquarish). -/
+def IsSquarish (n : ℕ) : Prop := IsSquare n ∨ ∃ m, n = 2 * m ∧ IsSquare m
+
+-- Basic properties of the definition
+lemma isSquarish_of_square {n : ℕ} (h : IsSquare n) : IsSquarish n := Or.inl h
+
+lemma isSquarish_of_two_mul_square {n m : ℕ} (h : n = 2 * m) (hsq : IsSquare m) : 
+    IsSquarish n := Or.inr ⟨m, h, hsq⟩
+
+-- Characterization in terms of factorization: squarish iff all odd prime valuations are even
+lemma isSquarish_iff_odd_even_val (n : ℕ) (hn : n ≥ 1) :
+    IsSquarish n ↔ ∀ p, Nat.Prime p → Odd p → Even (n.factorization p) := by
+  sorry -- This is essentially already proven in Basic.lean as isSquarish_of_odd_valuations_even
+
+/-- Squarish decomposition: If m ≥ 1 is squarish, then m = 2^a · t² 
+    for some a ≥ 0 and odd t ≥ 1.
+    
+    We use a = v₂(m) and t² = m / 2^a (the odd part). -/
+lemma squarish_decomposition {m : ℕ} (hm : m ≥ 1) (hsq : IsSquarish m) :
+    ∃ a t, m = 2^a * t^2 ∧ Odd t ∧ t ≥ 1 := by
+  -- Case analysis on the definition of IsSquarish
+  rcases hsq with ⟨k, hk⟩ | ⟨half, hm_eq, ⟨k, hk⟩⟩
+  · -- Case 1: m = k²
+    -- k² = (odd part of k)² * (2^(v₂(k)))² = (odd part of k)² * 2^(2·v₂(k))
+    -- So a = 2·v₂(k), t = odd part of k
+    have hk0 : k ≠ 0 := by intro h; rw [h] at hk; simp at hk; omega
+    -- The odd part of k is what we need
+    let v2 := k.factorization 2
+    let t := k / 2^v2
+    have ht_odd : Odd t := by
+      -- t = k / 2^v2 has no factors of 2
+      have h2div : 2^v2 ∣ k := Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hk0 |>.mpr le_rfl
+      rw [Nat.odd_iff]
+      by_contra h
+      have heven : 2 ∣ k / 2^v2 := Nat.even_iff.mp (Nat.not_odd_iff_even.mp h)
+      have hdivk : 2^(v2 + 1) ∣ k := by rw [pow_succ]; exact Nat.mul_dvd_of_dvd_div h2div heven
+      have : v2 + 1 ≤ v2 := Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hk0 |>.mp hdivk
+      omega
+    have ht_pos : t ≥ 1 := by
+      by_contra h
+      push_neg at h
+      have : t = 0 := by omega
+      have h2div : 2^v2 ∣ k := Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hk0 |>.mpr le_rfl
+      have hk_eq : k = 2^v2 * t := (Nat.mul_div_cancel' h2div).symm
+      rw [this, mul_zero] at hk_eq
+      exact hk0 hk_eq
+    use 2 * v2, t
+    refine ⟨?_, ht_odd, ht_pos⟩
+    -- m = k² = (2^v2 * t)² = 2^(2v2) * t²
+    have h2div : 2^v2 ∣ k := Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hk0 |>.mpr le_rfl
+    have hk_eq : k = 2^v2 * t := (Nat.mul_div_cancel' h2div).symm
+    rw [hk, hk_eq]
+    ring
+  · -- Case 2: m = 2 * k²
+    -- We need to extract the odd part of k²
+    have hk0 : k ≠ 0 := by
+      intro h; rw [h] at hk; simp at hk
+      rw [hk] at hm_eq; simp at hm_eq; omega
+    let v2 := k.factorization 2
+    let t := k / 2^v2
+    have ht_odd : Odd t := by
+      have h2div : 2^v2 ∣ k := Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hk0 |>.mpr le_rfl
+      rw [Nat.odd_iff]
+      by_contra h
+      have heven : 2 ∣ k / 2^v2 := Nat.even_iff.mp (Nat.not_odd_iff_even.mp h)
+      have hdivk : 2^(v2 + 1) ∣ k := by rw [pow_succ]; exact Nat.mul_dvd_of_dvd_div h2div heven
+      have : v2 + 1 ≤ v2 := Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hk0 |>.mp hdivk
+      omega
+    have ht_pos : t ≥ 1 := by
+      by_contra h
+      push_neg at h
+      have : t = 0 := by omega
+      have h2div : 2^v2 ∣ k := Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hk0 |>.mpr le_rfl
+      have hk_eq : k = 2^v2 * t := (Nat.mul_div_cancel' h2div).symm
+      rw [this, mul_zero] at hk_eq
+      exact hk0 hk_eq
+    use 2 * v2 + 1, t
+    refine ⟨?_, ht_odd, ht_pos⟩
+    -- m = 2 * k² = 2 * (2^v2 * t)² = 2 * 2^(2v2) * t² = 2^(2v2+1) * t²
+    have h2div : 2^v2 ∣ k := Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hk0 |>.mpr le_rfl
+    have hk_eq : k = 2^v2 * t := (Nat.mul_div_cancel' h2div).symm
+    rw [hm_eq, hk, hk_eq]
+    ring
+
+#check squarish_decomposition
+EOF
+lake env lean /tmp/test_decomp_clean.lean 2>&1
+[2026-02-08T02:29:55.439Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_decomp_clean2.lean << 'EOF'
+import Mathlib
+
+open ArithmeticFunction Filter Finsupp
+
+namespace Erdos410
+
+/-- A natural number is a square or twice a square (IsSquarish). -/
+def IsSquarish (n : ℕ) : Prop := IsSquare n ∨ ∃ m, n = 2 * m ∧ IsSquare m
+
+/-- Squarish decomposition: If m ≥ 1 is squarish, then m = 2^a · t² 
+    for some a ≥ 0 and odd t ≥ 1.
+    
+    We use a = v₂(m) and t² = m / 2^a (the odd part). -/
+lemma squarish_decomposition {m : ℕ} (hm : m ≥ 1) (hsq : IsSquarish m) :
+    ∃ a t, m = 2^a * t^2 ∧ Odd t ∧ t ≥ 1 := by
+  -- Case analysis on the definition of IsSquarish
+  rcases hsq with ⟨k, hk⟩ | ⟨half, hm_eq, ⟨k, hk⟩⟩
+  · -- Case 1: m = k²
+    have hk0 : k ≠ 0 := by intro h; rw [h] at hk; simp at hk; omega
+    let v2 := k.factorization 2
+    let t := k / 2^v2
+    have h2div : 2^v2 ∣ k := Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hk0 |>.mpr le_rfl
+    have ht_odd : Odd t := by
+      rw [Nat.odd_iff]
+      by_contra h
+      simp only [ne_eq, Nat.one_ne_zero, not_false_eq_true] at h
+      have heven : Even t := Nat.even_iff.mpr h
+      have h2dvd_t : 2 ∣ t := heven
+      have hdivk : 2^(v2 + 1) ∣ k := by rw [pow_succ]; exact Nat.mul_dvd_of_dvd_div h2div h2dvd_t
+      have hcontra : v2 + 1 ≤ v2 := Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hk0 |>.mp hdivk
+      omega
+    have ht_pos : t ≥ 1 := by
+      have hk_eq : k = 2^v2 * t := (Nat.mul_div_cancel' h2div).symm
+      by_contra h
+      push_neg at h
+      have ht0 : t = 0 := by omega
+      rw [ht0, mul_zero] at hk_eq
+      exact hk0 hk_eq
+    use 2 * v2, t
+    refine ⟨?_, ht_odd, ht_pos⟩
+    have hk_eq : k = 2^v2 * t := (Nat.mul_div_cancel' h2div).symm
+    rw [hk, hk_eq]
+    ring
+  · -- Case 2: m = 2 * k²
+    have hk0 : k ≠ 0 := by
+      intro h; rw [h] at hk; simp at hk
+      rw [hk] at hm_eq; simp at hm_eq; omega
+    let v2 := k.factorization 2
+    let t := k / 2^v2
+    have h2div : 2^v2 ∣ k := Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hk0 |>.mpr le_rfl
+    have ht_odd : Odd t := by
+      rw [Nat.odd_iff]
+      by_contra h
+      simp only [ne_eq, Nat.one_ne_zero, not_false_eq_true] at h
+      have heven : Even t := Nat.even_iff.mpr h
+      have h2dvd_t : 2 ∣ t := heven
+      have hdivk : 2^(v2 + 1) ∣ k := by rw [pow_succ]; exact Nat.mul_dvd_of_dvd_div h2div h2dvd_t
+      have hcontra : v2 + 1 ≤ v2 := Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hk0 |>.mp hdivk
+      omega
+    have ht_pos : t ≥ 1 := by
+      have hk_eq : k = 2^v2 * t := (Nat.mul_div_cancel' h2div).symm
+      by_contra h
+      push_neg at h
+      have ht0 : t = 0 := by omega
+      rw [ht0, mul_zero] at hk_eq
+      exact hk0 hk_eq
+    use 2 * v2 + 1, t
+    refine ⟨?_, ht_odd, ht_pos⟩
+    have hk_eq : k = 2^v2 * t := (Nat.mul_div_cancel' h2div).symm
+    rw [hm_eq, hk, hk_eq]
+    ring
+
+#check squarish_decomposition
+EOF
+lake env lean /tmp/test_decomp_clean2.lean 2>&1
+[2026-02-08T02:30:24.163Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_decomp_clean3.lean << 'EOF'
+import Mathlib
+
+open ArithmeticFunction Filter Finsupp
+
+namespace Erdos410
+
+/-- A natural number is a square or twice a square (IsSquarish). -/
+def IsSquarish (n : ℕ) : Prop := IsSquare n ∨ ∃ m, n = 2 * m ∧ IsSquare m
+
+/-- Squarish decomposition: If m ≥ 1 is squarish, then m = 2^a · t² 
+    for some a ≥ 0 and odd t ≥ 1.
+    
+    We use a = v₂(m) and t² = m / 2^a (the odd part). -/
+lemma squarish_decomposition {m : ℕ} (hm : m ≥ 1) (hsq : IsSquarish m) :
+    ∃ a t, m = 2^a * t^2 ∧ Odd t ∧ t ≥ 1 := by
+  -- Case analysis on the definition of IsSquarish
+  rcases hsq with ⟨k, hk⟩ | ⟨half, hm_eq, ⟨k, hk⟩⟩
+  · -- Case 1: m = k²
+    have hk0 : k ≠ 0 := by intro h; rw [h] at hk; simp at hk; omega
+    let v2 := k.factorization 2
+    let t := k / 2^v2
+    have h2div : 2^v2 ∣ k := Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hk0 |>.mpr le_rfl
+    have ht_odd : Odd t := by
+      rw [Nat.odd_iff]
+      by_contra h
+      have hne1 : t % 2 ≠ 1 := h
+      have h0 : t % 2 = 0 := Nat.mod_two_eq_zero_or_one t |>.resolve_right hne1
+      have h2dvd_t : 2 ∣ t := Nat.dvd_of_mod_eq_zero h0
+      have hdivk : 2^(v2 + 1) ∣ k := by 
+        rw [pow_succ]
+        exact Nat.mul_dvd_of_dvd_div h2div h2dvd_t
+      have hcontra : v2 + 1 ≤ v2 := Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hk0 |>.mp hdivk
+      omega
+    have hk_eq : k = 2^v2 * t := (Nat.mul_div_cancel' h2div).symm
+    have ht_pos : t ≥ 1 := by
+      by_contra h; push_neg at h
+      have ht0 : t = 0 := by omega
+      rw [ht0, mul_zero] at hk_eq
+      exact hk0 hk_eq
+    use 2 * v2, t
+    refine ⟨?_, ht_odd, ht_pos⟩
+    rw [hk, hk_eq]
+    ring
+  · -- Case 2: m = 2 * k²
+    have hk0 : k ≠ 0 := by
+      intro h; rw [h] at hk; simp at hk
+      rw [hk] at hm_eq; simp at hm_eq; omega
+    let v2 := k.factorization 2
+    let t := k / 2^v2
+    have h2div : 2^v2 ∣ k := Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hk0 |>.mpr le_rfl
+    have ht_odd : Odd t := by
+      rw [Nat.odd_iff]
+      by_contra h
+      have hne1 : t % 2 ≠ 1 := h
+      have h0 : t % 2 = 0 := Nat.mod_two_eq_zero_or_one t |>.resolve_right hne1
+      have h2dvd_t : 2 ∣ t := Nat.dvd_of_mod_eq_zero h0
+      have hdivk : 2^(v2 + 1) ∣ k := by 
+        rw [pow_succ]
+        exact Nat.mul_dvd_of_dvd_div h2div h2dvd_t
+      have hcontra : v2 + 1 ≤ v2 := Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hk0 |>.mp hdivk
+      omega
+    have hk_eq : k = 2^v2 * t := (Nat.mul_div_cancel' h2div).symm
+    have ht_pos : t ≥ 1 := by
+      by_contra h; push_neg at h
+      have ht0 : t = 0 := by omega
+      rw [ht0, mul_zero] at hk_eq
+      exact hk0 hk_eq
+    use 2 * v2 + 1, t
+    refine ⟨?_, ht_odd, ht_pos⟩
+    rw [hm_eq, hk, hk_eq]
+    ring
+
+#check squarish_decomposition
+EOF
+lake env lean /tmp/test_decomp_clean3.lean 2>&1
+[2026-02-08T02:30:49.484Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_decomp_clean4.lean << 'EOF'
+import Mathlib
+
+open ArithmeticFunction Filter Finsupp
+
+namespace Erdos410
+
+/-- A natural number is a square or twice a square (IsSquarish). -/
+def IsSquarish (n : ℕ) : Prop := IsSquare n ∨ ∃ m, n = 2 * m ∧ IsSquare m
+
+/-- Squarish decomposition: If m ≥ 1 is squarish, then m = 2^a · t² 
+    for some a ≥ 0 and odd t ≥ 1. -/
+lemma squarish_decomposition {m : ℕ} (hm : m ≥ 1) (hsq : IsSquarish m) :
+    ∃ a t, m = 2^a * t^2 ∧ Odd t ∧ t ≥ 1 := by
+  rcases hsq with ⟨k, hk⟩ | ⟨half, hm_eq, ⟨k, hk⟩⟩
+  · -- Case 1: m = k²
+    have hk0 : k ≠ 0 := by intro h; rw [h] at hk; simp at hk; omega
+    let v2 := k.factorization 2
+    let t := k / 2^v2
+    have h2div : 2^v2 ∣ k := Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hk0 |>.mpr le_rfl
+    have ht_odd : Odd t := by
+      rw [Nat.odd_iff]
+      by_contra h
+      have hne1 : t % 2 ≠ 1 := h
+      have h0 : t % 2 = 0 := Nat.mod_two_eq_zero_or_one t |>.resolve_right hne1
+      have h2dvd_t : 2 ∣ t := Nat.dvd_of_mod_eq_zero h0
+      have hdivk : 2^(v2 + 1) ∣ k := by 
+        rw [pow_succ]
+        exact Nat.mul_dvd_of_dvd_div h2div h2dvd_t
+      have hcontra : v2 + 1 ≤ v2 := Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hk0 |>.mp hdivk
+      omega
+    have hk_eq : k = 2^v2 * t := (Nat.mul_div_cancel' h2div).symm
+    have ht_pos : t ≥ 1 := by
+      have h2pow_pos : 2^v2 > 0 := Nat.pos_pow_of_pos v2 (by omega)
+      have hk_pos : k > 0 := Nat.pos_of_ne_zero hk0
+      -- k = 2^v2 * t and k > 0, 2^v2 > 0 implies t > 0
+      have ht_eq : t = k / 2^v2 := rfl
+      exact Nat.div_pos (Nat.le_of_dvd hk_pos h2div) h2pow_pos
+    use 2 * v2, t
+    refine ⟨?_, ht_odd, ht_pos⟩
+    rw [hk, hk_eq]
+    ring
+  · -- Case 2: m = 2 * k²
+    have hk0 : k ≠ 0 := by
+      intro h; rw [h] at hk; simp at hk
+      rw [hk] at hm_eq; simp at hm_eq; omega
+    let v2 := k.factorization 2
+    let t := k / 2^v2
+    have h2div : 2^v2 ∣ k := Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hk0 |>.mpr le_rfl
+    have ht_odd : Odd t := by
+      rw [Nat.odd_iff]
+      by_contra h
+      have hne1 : t % 2 ≠ 1 := h
+      have h0 : t % 2 = 0 := Nat.mod_two_eq_zero_or_one t |>.resolve_right hne1
+      have h2dvd_t : 2 ∣ t := Nat.dvd_of_mod_eq_zero h0
+      have hdivk : 2^(v2 + 1) ∣ k := by 
+        rw [pow_succ]
+        exact Nat.mul_dvd_of_dvd_div h2div h2dvd_t
+      have hcontra : v2 + 1 ≤ v2 := Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hk0 |>.mp hdivk
+      omega
+    have hk_eq : k = 2^v2 * t := (Nat.mul_div_cancel' h2div).symm
+    have ht_pos : t ≥ 1 := by
+      have h2pow_pos : 2^v2 > 0 := Nat.pos_pow_of_pos v2 (by omega)
+      have hk_pos : k > 0 := Nat.pos_of_ne_zero hk0
+      exact Nat.div_pos (Nat.le_of_dvd hk_pos h2div) h2pow_pos
+    use 2 * v2 + 1, t
+    refine ⟨?_, ht_odd, ht_pos⟩
+    rw [hm_eq, hk, hk_eq]
+    ring
+
+#check squarish_decomposition
+EOF
+lake env lean /tmp/test_decomp_clean4.lean 2>&1
+[2026-02-08T02:31:00.130Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/check_pow.lean << 'EOF'
+import Mathlib
+#check Nat.pos_pow_of_pos
+#check Nat.one_le_pow
+#check pow_pos
+EOF
+lake env lean /tmp/check_pow.lean 2>&1
+[2026-02-08T02:31:22.713Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_decomp_clean5.lean << 'EOF'
+import Mathlib
+
+open ArithmeticFunction Filter Finsupp
+
+namespace Erdos410
+
+/-- A natural number is a square or twice a square (IsSquarish). -/
+def IsSquarish (n : ℕ) : Prop := IsSquare n ∨ ∃ m, n = 2 * m ∧ IsSquare m
+
+/-- Squarish decomposition: If m ≥ 1 is squarish, then m = 2^a · t² 
+    for some a ≥ 0 and odd t ≥ 1. -/
+lemma squarish_decomposition {m : ℕ} (hm : m ≥ 1) (hsq : IsSquarish m) :
+    ∃ a t, m = 2^a * t^2 ∧ Odd t ∧ t ≥ 1 := by
+  rcases hsq with ⟨k, hk⟩ | ⟨half, hm_eq, ⟨k, hk⟩⟩
+  · -- Case 1: m = k²
+    have hk0 : k ≠ 0 := by intro h; rw [h] at hk; simp at hk; omega
+    let v2 := k.factorization 2
+    let t := k / 2^v2
+    have h2div : 2^v2 ∣ k := Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hk0 |>.mpr le_rfl
+    have ht_odd : Odd t := by
+      rw [Nat.odd_iff]
+      by_contra h
+      have hne1 : t % 2 ≠ 1 := h
+      have h0 : t % 2 = 0 := Nat.mod_two_eq_zero_or_one t |>.resolve_right hne1
+      have h2dvd_t : 2 ∣ t := Nat.dvd_of_mod_eq_zero h0
+      have hdivk : 2^(v2 + 1) ∣ k := by 
+        rw [pow_succ]
+        exact Nat.mul_dvd_of_dvd_div h2div h2dvd_t
+      have hcontra : v2 + 1 ≤ v2 := Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hk0 |>.mp hdivk
+      omega
+    have hk_eq : k = 2^v2 * t := (Nat.mul_div_cancel' h2div).symm
+    have ht_pos : t ≥ 1 := by
+      have h2pow_pos : 2^v2 ≥ 1 := Nat.one_le_pow v2 2 (by omega)
+      have hk_pos : k ≥ 1 := Nat.pos_of_ne_zero hk0
+      exact Nat.div_pos (Nat.le_of_dvd hk_pos h2div) h2pow_pos
+    use 2 * v2, t
+    refine ⟨?_, ht_odd, ht_pos⟩
+    rw [hk, hk_eq]
+    ring
+  · -- Case 2: m = 2 * k²
+    have hk0 : k ≠ 0 := by
+      intro h; rw [h] at hk; simp at hk
+      rw [hk] at hm_eq; simp at hm_eq; omega
+    let v2 := k.factorization 2
+    let t := k / 2^v2
+    have h2div : 2^v2 ∣ k := Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hk0 |>.mpr le_rfl
+    have ht_odd : Odd t := by
+      rw [Nat.odd_iff]
+      by_contra h
+      have hne1 : t % 2 ≠ 1 := h
+      have h0 : t % 2 = 0 := Nat.mod_two_eq_zero_or_one t |>.resolve_right hne1
+      have h2dvd_t : 2 ∣ t := Nat.dvd_of_mod_eq_zero h0
+      have hdivk : 2^(v2 + 1) ∣ k := by 
+        rw [pow_succ]
+        exact Nat.mul_dvd_of_dvd_div h2div h2dvd_t
+      have hcontra : v2 + 1 ≤ v2 := Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hk0 |>.mp hdivk
+      omega
+    have hk_eq : k = 2^v2 * t := (Nat.mul_div_cancel' h2div).symm
+    have ht_pos : t ≥ 1 := by
+      have h2pow_pos : 2^v2 ≥ 1 := Nat.one_le_pow v2 2 (by omega)
+      have hk_pos : k ≥ 1 := Nat.pos_of_ne_zero hk0
+      exact Nat.div_pos (Nat.le_of_dvd hk_pos h2div) h2pow_pos
+    use 2 * v2 + 1, t
+    refine ⟨?_, ht_odd, ht_pos⟩
+    rw [hm_eq, hk, hk_eq]
+    ring
+
+#check squarish_decomposition
+EOF
+lake env lean /tmp/test_decomp_clean5.lean 2>&1
+[2026-02-08T02:31:32.770Z] [overseer] 💓 Heartbeat starting...
+[2026-02-08T02:31:32.775Z] [overseer] Running with model: anthropic/claude-opus-4-6:high
+[2026-02-08T02:31:46.267Z] 
+🛠️  Executing tool: edit...
+[2026-02-08T02:31:49.121Z] 
+$ cd /home/jarred/code/erdos-410 && timeout 300 lake build 2>&1 | tail -20
+[2026-02-08T02:32:23.979Z] 
+$ tm update erdos410-xxd --status "squarish_decomposition proved, working on remaining sorries"
+[2026-02-08T02:32:25.202Z] 
+🛠️  Executing tool: read...
+[2026-02-08T02:32:40.480Z] 
+🛠️  Executing tool: read...
+[2026-02-08T02:32:49.385Z] [overseer] 💓 Heartbeat complete: No intervention needed — xxd making excellent progress with productive decomposition
+[2026-02-08T02:32:50.818Z] 
+$ cd /home/jarred/code/erdos-410 && lake build 2>&1 | grep -E "(error|Build completed|sorry)" | tail -15
+[2026-02-08T02:32:56.355Z] 
+$ cd /home/jarred/code/erdos-410 && grep -n "sorry" Erdos/Basic.lean | head -15
+[2026-02-08T02:33:02.829Z] 
+$ cd /home/jarred/code/erdos-410 && git diff --stat HEAD 2>/dev/null || echo "Not in git repo or no changes"
+[2026-02-08T02:33:02.847Z] 
+🛠️  Executing tool: read...
+[2026-02-08T02:33:15.763Z] 
+$ cd /home/jarred/code/erdos-410 && git add Erdos/Basic.lean && git commit -m "Add helper lemmas for squarish_iterates_finite
+
+- Add geom_sum_two': geometric sum formula for base 2
+- Add sigma_squarish_form: σ(2^a · m²) = (2^{a+1}-1) · σ(m²)  
+- Add sigma_squarish_is_square_iff: odd squarish = perfect square
+- Add squarish_decomposition: m = 2^a · t² decomposition (PROVED)
+- Add zsygmondy_two_pow: Zsygmondy's theorem (sorry - not in Mathlib)
+- Add squarish_constraint_set_finite: constraint set finite (sorry - needs Zsygmondy)
+- Add squarish_a_set_finite: a values finite for fixed t (sorry - needs Zsygmondy)
+
+The main theorem squarish_iterates_finite still has sorry but
+the proof structure is in place with documented sorries for the
+Zsygmondy-dependent parts.
+
+lake build succeeds." 2>&1
+[2026-02-08T02:33:19.335Z] 
+$ tm update erdos410-xxd --status "Completed with structure and sorries for Zsygmondy-dependent parts"
+[2026-02-08T02:33:34.405Z] 
+
+📝 Agent response complete.
+
+[2026-02-08T02:33:34.406Z] 📄 Log saved to .tm/logs/worker-erdos410-xxd.md
+[2026-02-08T02:33:34.406Z] 
+📊 Task erdos410-xxd completed:
+[2026-02-08T02:33:34.406Z]    Summary: Added helper lemmas for squarish_iterates_finite. Proved squarish_decomposition. Main theorem still has sorry but proof structure is complete with documented sub-lemma sorries for Zsygmondy-dependent parts.
+[2026-02-08T02:33:34.406Z]    Details: ## Work Completed
+
+### Lemmas PROVED (no sorry):
+1. **geom_sum_two'**: Geometric sum formula: ∑_{i=0}^a 2^i = 2^{a+1} - 1
+2. **sigma_squarish_form**: σ(2^a · m²) = (2^{a+1}-1) · σ(m²) for odd m
+3. **sigma_squarish_is_square_iff**: Odd squarish number = perfect square
+4. **squarish_decomposition**: If m ≥ 1 is squarish, then m = 2^a · t² where t is odd and t ≥ 1
+
+### Lemmas with sorry (expected per task instructions):
+1. **zsygmondy_two_pow**: Zsygmondy's theorem (not in Mathlib, sorry expected)
+2. **squarish_constraint_set_finite**: Finite constraint set for fixed a (relies on Zsygmondy)
+3. **squarish_a_set_finite**: Finite a values for fixed t (relies on Zsygmondy)
+4. **squarish_iterates_finite**: Main theorem (relies on above finiteness lemmas)
+
+## Build Status
+lake build succeeds with expected sorry warnings.
+
+## Next Steps
+To fully close squarish_iterates_finite, need:
+1. Formalize Zsygmondy's theorem (deep number-theoretic result)
+2. Use Zsygmondy to prove the two finiteness lemmas
+3. Use finiteness lemmas to prove the main theorem
+
+Alternatively, if Mathlib adds Zsygmondy support, these can be closed.

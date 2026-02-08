@@ -492,3 +492,67 @@ lqx (in progress, minor) → xxd (formalize squarish, p:0)
 - Human response on sorry #3 — may provide breakthrough hint or accept it as frontier
 - After xxd: create formalize task for v2_hits_residue (sorry #2)
 - If human provides no further guidance: the project reaches its mathematical limit at sorry #3
+
+## Heartbeat — 2026-02-08 02:15 UTC (Check-in 18)
+
+**Metrics**: 3 sorrys (lines 793, 893, 905), 1154 lines, 42 tasks (39 closed, 1 failed, 1 in_progress, 1 open). 1 Verified proof.
+**Status**: System healthy. Worker on xxd (squarish), pipeline seeded.
+
+**Observations**:
+1. **xxd (formalize, p:0) IN PROGRESS**: Started 02:10 UTC (~5 min ago). 218 lines of log — deep mathematical reasoning about squarish-to-squarish transitions. Agent found:
+   - Counterexamples: m=81→σ=121, m=400→σ=961 (both squarish→squarish)
+   - Explored Pell-like equations for infinitely many such cases
+   - Converging on approach: introduce Zsygmondy as sorry'd helper, build proof around it
+   - NOT stale, still actively reasoning. Only 7 file reads so far.
+
+2. **lqx (explore, p:3) COMPLETED**: Clarified Lemma 3' in prime-persistence.md. Committed `e37a414`.
+
+3. **vfp (explore, p:1) FAILED**: As recorded last heartbeat. Persistence gap unsolvable.
+
+4. **ltw (formalize, p:1) CREATED**: Pre-seeded task for sorry #2 (v2_hits_residue) so backlog isn't empty after xxd.
+
+5. **Human escalation pending**: Sent at 01:59 UTC, no response yet. Sorry #3 awaiting human guidance.
+
+**Pipeline**:
+```
+xxd (in progress, formalize squarish) → ltw (open, formalize v2_hits_residue) → [wait for human on sorry #3]
+```
+
+**Risk**: xxd agent is doing mathematical exploration (wrong role for formalize). If it doesn't commit Lean code within next ~15 min, may need to intervene with more specific Lean-level guidance. Currently 5 min in — too early to worry.
+
+**Watch next**:
+- Does xxd produce Lean code in the next 10-15 min? Or continue pure math?
+- If xxd gets stale (>30 min no progress): rewrite with even more specific Lean tactics
+- Human response on sorry #3
+- After xxd+ltw: project will be at 1 sorry (prime_div_eventually_always) or still at 3 if formalize fails
+
+## Heartbeat — 2026-02-08 02:32 UTC (Check-in 19)
+
+**Metrics**: 7 sorrys (lines 847, 859, 869, 878, 906, 1006, 1018), ~1270 lines (uncommitted), 42 tasks (39 closed, 1 failed, 1 in_progress, 1 open). 1 Verified proof.
+**Status**: PRODUCTIVE — xxd doing excellent decomposition work. Sorry count UP but this is progress.
+
+**Observations**:
+1. **xxd (formalize, p:0) IN PROGRESS**: Running ~22 min. 1714 lines of log. Agent has:
+   - **PROVED**: `geom_sum_two'`, `sigma_squarish_form`, `sigma_squarish_is_square_iff`, `squarish_decomposition` (4 new lemmas!)
+   - **SORRY'd**: `zsygmondy_two_pow` (Zsygmondy not in Mathlib), `squarish_constraint_set_finite`, `squarish_a_set_finite`
+   - Just completed `squarish_decomposition` (2-adic factorization m = 2^a · t² with t odd) — substantial proof (~60 lines)
+   - Currently running `lake build` to verify compilation
+   - NOT stale, actively producing code
+
+2. **Sorry count 3→7**: This is PRODUCTIVE decomposition:
+   - Original 3 sorrys (squarish_iterates_finite, v2_hits_residue, prime_div_eventually_always) → lines shifted due to inserted code
+   - New atomic sorrys: zsygmondy_two_pow, squarish_constraint_set_finite, squarish_a_set_finite, squarish_decomposition (wait — this was proved)
+   - Net: broke 1 monolithic sorry into 4 sub-sorrys, proved 4 helper lemmas
+
+3. **Zsygmondy confirmed NOT in Mathlib**: Agent correctly declared it as sorry. This is the right approach — Zsygmondy is a deep result and introducing it as a sorry is the pragmatic choice.
+
+4. **ltw (formalize, p:1)**: Still open, waiting for xxd to finish. Pipeline intact.
+
+**Actions**: None — system healthy, agent doing exactly the right work.
+
+**Watch next**:
+- Does `lake build` succeed? Agent should commit after.
+- Does agent attempt to close `squarish_iterates_finite` using the helpers? The assembly step.
+- After xxd: ltw (v2_hits_residue) is next.
+- Total sorry forecast after xxd: likely 5-6 (3 new zsygmondy-related + original v2_hits_residue + prime_div_eventually_always, minus squarish_iterates_finite if assembly works).
+- Human escalation on sorry #3 still pending — no response.
