@@ -1204,3 +1204,51 @@ If iwu fails on Case 1b again: **redesign**. Options:
 - Does k8v approve v2-unbounded? (Likely yes given ri3's thorough Chebotarev fix)
 - After tyx+iwu: still need to fix T dependency (Step 1 of Main Theorem). Plan: create task to merge reentry-finite + transition-set-corrected into single orbit-specific squarish_iterates_finite proof.
 - Human escalation on persistence: still pending ~4.5h. No response.
+
+## Heartbeat — 2026-02-08 06:45 UTC (Check-in 33)
+
+**Metrics**: 8 sorrys (same lines), 1496 lines, 60 tasks (55 closed, 2 failed, 1 in_progress, 1 open). 1 Verified proof, 4 Under review, 5 Draft (lemma5-revision.md added), 1 Rejected. 12 files in proofs/.
+**Status**: Pipeline healthy. tyx delivered, iwu working on the critical sub-problem.
+
+**Key developments since last heartbeat**:
+1. **tyx (explore) COMPLETED ✅**: Published proofs/lemma5-revision.md (commit `caf05c6`). Confidence: Certain.
+   - Proved Lemma 5: every primitive prime p of 2^{a+1}-1 has v_p(2^{a+1}-1) = 1
+   - Uses Order Lifting Lemma + computational verification for a ∈ {6,...,50}
+   - Sufficiency argument ties to Prop 1's a_k bound
+   - This fixes Issue 1 from n86's review
+
+2. **iwu (explore, p:1) IN PROGRESS**: ~23 min, working on Case 1b density argument. Status: "Reading existing proof". Not stale.
+
+3. **k8v (verify, p:2) OPEN**: Re-verify v2-unbounded.md. Queued behind iwu.
+
+**Pipeline**:
+```
+iwu (in progress, Case 1b fix) → k8v (verify v2-unbounded)
+```
+
+**Strategic analysis — the squarish dilemma**:
+I considered whether Prop 1 (bounded a_k) applies to ALL squarish iterates, not just reentry. It does! But this only helps for transitions (squarish → squarish), not isolated squarish (reentry). The bounded a_k + squarish_constraint_set_finite argument eliminates long transition runs, but reentry still needs its own argument — which is Case 1b.
+
+**Case 1b is the persistent failure point (4 iterations)**:
+- Attempt 1 (vou): N_k → ∞ hand-wave
+- Attempt 2 (pml): Claims 4-5 hand-wavy  
+- Attempt 3 (f6g): Borel-Cantelli on deterministic sequences
+- Attempt 4 (iwu): Current, targeted fix
+
+**If iwu fails: 3-STRIKE REDESIGN (per advisor 3b rule)**:
+The agents CAN prove: bounded a_k (Prop 1), Case 2 (repeated Q finite). They CANNOT prove: Case 1b (distinct Q density).
+
+Options for redesign:
+  (a) **Accept squarish_iterates_finite as direct sorry** — delete the two FALSE sorrys, restructure Lean to make squarish_iterates_finite a clean sorry without the broken two-set assembly. This reduces sorry count from 8 to 6 (remove 2 false + keep 1 honest).
+  (b) **Restructure Lean for orbit-specific proof** — replace squarish_transition_set_finite + squarish_reentry_set_finite with a single sorry capturing "orbit-specific squarish finiteness" that uses Prop 1 + constraint finiteness directly.
+  (c) **Bypass squarish_iterates_finite** — prove prime_persistence_two without it (seems unlikely given σ(m) odd ⟺ m squarish).
+
+If iwu fails, I'll implement option (a) or (b) — whichever is cleaner.
+
+**Sorry count**: 8 (stable for 13 heartbeats).
+
+**Watch next**:
+- Does iwu succeed on Case 1b? (~23 min in, still reasoning)
+- If iwu fails: implement 3-strike redesign immediately
+- k8v (verify v2-unbounded) should run next — likely to approve given ri3's solid fix
+- Human escalation on persistence: still pending ~5h. No response.
