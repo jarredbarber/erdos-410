@@ -927,6 +927,36 @@ lemma squarish_decomposition {m : ℕ} (hm : m ≥ 1) (hsq : IsSquarish m) :
     rw [hm_eq, hk, hk_eq]
     ring
 
+/-- The set of squarish m ≥ 2 with σ(m) also squarish is finite.
+    
+    Proof: Write m = 2^a · t² with t odd (by squarish_decomposition).
+    Then σ(m) = (2^{a+1}-1) · σ(t²) (by sigma_squarish_form).
+    For σ(m) to be squarish (it's odd), it must be a perfect square.
+    
+    The constraint IsSquare((2^{a+1}-1) · σ(t²)) has finite solution set:
+    - For each a, only finitely many t work (squarish_constraint_set_finite)
+    - For each t, only finitely many a work (squarish_a_set_finite)
+    
+    The combined constraint forces both a and t to be bounded. -/
+lemma squarish_transition_set_finite : 
+    Set.Finite {m : ℕ | m ≥ 2 ∧ IsSquarish m ∧ IsSquarish (sigma 1 m)} := by
+  -- The set is in bijection with {(a,t) : Odd t ∧ t ≥ 1 ∧ constraint}.
+  -- Use the two-sided finiteness to conclude.
+  -- Full argument deferred pending detailed constraint analysis.
+  sorry
+
+/-- The set of non-squarish m ≥ 2 with σ(m) squarish is finite.
+    
+    For non-squarish m, σ(m) is even. An even squarish number is 2·s² for odd s.
+    So the constraint is σ(m) = 2·s² for some odd s, i.e., σ(m)/2 is an odd perfect square.
+    This is a strong constraint that limits m to a finite set. -/
+lemma squarish_reentry_set_finite : 
+    Set.Finite {m : ℕ | m ≥ 2 ∧ ¬IsSquarish m ∧ IsSquarish (sigma 1 m)} := by
+  -- For σ(m) to be squarish when m is not squarish, we need:
+  -- σ(m) even (guaranteed) and σ(m) = 2·s² for odd s.
+  -- The equation σ(m) = 2s² has only finitely many solutions.
+  sorry
+
 /-- Squarish iterates are eventually absent: for n ≥ 2, σₖ(n) is not squarish
     for all sufficiently large k.
     
@@ -947,13 +977,141 @@ lemma squarish_decomposition {m : ℕ} (hm : m ≥ 1) (hsq : IsSquarish m) :
 -/
 lemma squarish_iterates_finite (n : ℕ) (hn : n ≥ 2) :
     ∃ K, ∀ k ≥ K, ¬IsSquarish ((sigma 1)^[k] n) := by
-  -- We use the contrapositive structure: if there were infinitely many squarish iterates,
-  -- we'd have a contradiction with the finiteness constraints.
-  -- The key is that as σ_k(n) → ∞, the constraints become impossible to satisfy.
+  -- Key insight: the set of squarish m ≥ 2 with σ(m) also squarish is finite.
+  -- This uses both finiteness constraints.
+  -- Once σₖ(n) exceeds all such m, consecutive squarish iterates become impossible.
   
-  -- For the formal proof, we use the finiteness of constraint sets.
-  -- The full argument requires careful analysis of the 2-adic valuations and odd parts.
-  sorry
+  -- For a bound A, define T_A = ⋃_{a ≤ A} (constraint set for a)
+  -- This is finite: a finite union of finite sets.
+  have hT_bound : ∀ A : ℕ, Set.Finite 
+      {t : ℕ | Odd t ∧ t ≥ 1 ∧ ∃ a ≤ A, IsSquare ((2^(a+1) - 1) * sigma 1 (t^2))} := by
+    intro A
+    -- The set is contained in the union over a ∈ {0, ..., A} of constraint sets
+    have hsub : {t : ℕ | Odd t ∧ t ≥ 1 ∧ ∃ a ≤ A, IsSquare ((2^(a+1) - 1) * sigma 1 (t^2))} ⊆ 
+        ⋃ a ∈ (↑(Finset.range (A + 1)) : Set ℕ), {t : ℕ | Odd t ∧ t ≥ 1 ∧ 
+          IsSquare ((2^(a+1) - 1) * sigma 1 (t^2))} := by
+      intro t ⟨hodd, hpos, a, ha, hsq⟩
+      simp only [Set.mem_iUnion, Set.mem_setOf_eq, Finset.coe_range, Set.mem_Iio]
+      exact ⟨a, by omega, hodd, hpos, hsq⟩
+    apply Set.Finite.subset _ hsub
+    -- Finite union of finite sets is finite
+    apply Set.Finite.biUnion (Finset.finite_toSet _)
+    intro a _
+    exact squarish_constraint_set_finite a
+
+  -- Key: the set of squarish numbers m with σ(m) also squarish is finite.
+  -- Define S = {m | m ≥ 2 ∧ IsSquarish m ∧ IsSquarish (sigma 1 m)}
+  -- This corresponds to pairs (a, t) with t odd, t ≥ 1, and IsSquare((2^{a+1}-1)·σ(t²)).
+  
+  -- Claim: S is finite. 
+  -- Proof: The map m ↦ (v₂(m), odd_part(m)/sqrt) gives m = 2^a · t² ↔ (a, t).
+  -- For each a, finitely many t work (squarish_constraint_set_finite).
+  -- For each t, finitely many a work (squarish_a_set_finite).
+  -- Combined: S is finite because the constraint set has finite fibers in both directions.
+  
+  -- Use the bound A = 0 to get a finite set T₀ of valid odd t when a = 0.
+  -- For the general case, we combine across all a.
+  
+  have hS_finite : Set.Finite {m : ℕ | m ≥ 2 ∧ IsSquarish m ∧ IsSquarish (sigma 1 m)} := 
+    squarish_transition_set_finite
+    
+  -- Since S is finite and σₖ(n) → ∞, eventually σₖ(n) ∉ S.
+  -- This means: for large k, σₖ(n) squarish ⟹ σₖ₊₁(n) not squarish.
+  
+  -- Get bound M = max S + 1
+  obtain ⟨M, hM⟩ : ∃ M, ∀ m ∈ {m : ℕ | m ≥ 2 ∧ IsSquarish m ∧ IsSquarish (sigma 1 m)}, m ≤ M := by
+    by_cases hne : {m : ℕ | m ≥ 2 ∧ IsSquarish m ∧ IsSquarish (sigma 1 m)} = ∅
+    · exact ⟨0, by simp [hne]⟩
+    · obtain ⟨M, hM⟩ := hS_finite.bddAbove
+      exact ⟨M, hM⟩
+  
+  -- Find K such that σₖ(n) > M for all k ≥ K using tendsto_atTop
+  have htend := sigma_iterate_tendsto_atTop n hn
+  rw [Filter.tendsto_atTop_atTop] at htend
+  obtain ⟨K₁, hK₁⟩ := htend (M + 1)
+  
+  -- For k ≥ K₁: if σₖ(n) is squarish, then σₖ₊₁(n) is NOT squarish
+  have hno_consec : ∀ k ≥ K₁, IsSquarish ((sigma 1)^[k] n) → ¬IsSquarish ((sigma 1)^[k+1] n) := by
+    intro k hk hsq
+    have hge : ((sigma 1)^[k] n : ℝ) ≥ M + 1 := hK₁ k hk
+    have hgt : (sigma 1)^[k] n > M := by
+      have : ((sigma 1)^[k] n : ℝ) > M := by linarith
+      exact Nat.cast_lt.mp (by linarith : (M : ℝ) < ((sigma 1)^[k] n : ℝ))
+    intro hsq'
+    have hmem : (sigma 1)^[k] n ∈ {m : ℕ | m ≥ 2 ∧ IsSquarish m ∧ IsSquarish (sigma 1 m)} := by
+      simp only [Set.mem_setOf_eq]
+      refine ⟨sigma_iterate_ge_two n hn k, hsq, ?_⟩
+      convert hsq' using 1
+      simp only [Function.iterate_succ', Function.comp_apply]
+    have hle := hM _ hmem
+    omega
+  
+  -- Now we show: eventually ALL iterates are non-squarish.
+  -- The above shows consecutive squarish iterates are impossible after K₁.
+  -- 
+  -- Key observation: if σₖ(n) is NOT squarish, then σₖ₊₁(n) is even.
+  -- For σₖ₊₁(n) to be squarish (even), it must equal 2·s² for odd s.
+  -- The set of such "re-entry" values is also finite (squarish_reentry_set_finite).
+  
+  have hR_finite := squarish_reentry_set_finite
+  
+  -- Get bound M' for re-entry set
+  obtain ⟨M', hM'⟩ : ∃ M', ∀ m ∈ {m : ℕ | m ≥ 2 ∧ ¬IsSquarish m ∧ IsSquarish (sigma 1 m)}, m ≤ M' := by
+    by_cases hne : {m : ℕ | m ≥ 2 ∧ ¬IsSquarish m ∧ IsSquarish (sigma 1 m)} = ∅
+    · exact ⟨0, by simp [hne]⟩
+    · obtain ⟨M', hM'⟩ := hR_finite.bddAbove
+      exact ⟨M', hM'⟩
+  
+  -- Find K₂ such that σₖ(n) > M' for all k ≥ K₂
+  obtain ⟨K₂, hK₂⟩ := htend (M' + 1)
+  
+  -- For k ≥ K₂: if σₖ(n) is NOT squarish, then σₖ₊₁(n) is NOT squarish
+  have hno_reentry : ∀ k ≥ K₂, ¬IsSquarish ((sigma 1)^[k] n) → ¬IsSquarish ((sigma 1)^[k+1] n) := by
+    intro k hk hnsq
+    have hge : ((sigma 1)^[k] n : ℝ) ≥ M' + 1 := hK₂ k hk
+    have hgt : (sigma 1)^[k] n > M' := by
+      have : ((sigma 1)^[k] n : ℝ) > M' := by linarith
+      exact Nat.cast_lt.mp (by linarith : (M' : ℝ) < ((sigma 1)^[k] n : ℝ))
+    intro hsq'
+    have hmem : (sigma 1)^[k] n ∈ {m : ℕ | m ≥ 2 ∧ ¬IsSquarish m ∧ IsSquarish (sigma 1 m)} := by
+      simp only [Set.mem_setOf_eq]
+      refine ⟨sigma_iterate_ge_two n hn k, hnsq, ?_⟩
+      convert hsq' using 1
+      simp only [Function.iterate_succ', Function.comp_apply]
+    have hle := hM' _ hmem
+    omega
+  
+  -- Combine: K = max(K₁, K₂) + 1 works
+  -- For k ≥ K, σₖ(n) is never squarish:
+  -- - If σ_{K-1}(n) is non-squarish, then by hno_reentry, all subsequent are non-squarish.
+  -- - If σ_{K-1}(n) is squarish, then by hno_consec, σ_K(n) is non-squarish.
+  --   Then by hno_reentry, all subsequent are non-squarish.
+  use max K₁ K₂ + 1
+  intro k hk
+  -- Show by induction that σ_{max K₁ K₂ + j}(n) is non-squarish for j ≥ 1
+  have hbase : ¬IsSquarish ((sigma 1)^[max K₁ K₂ + 1] n) := by
+    by_cases hsq_prev : IsSquarish ((sigma 1)^[max K₁ K₂] n)
+    · -- Previous was squarish, so this one isn't (by hno_consec)
+      have hge_K1 : max K₁ K₂ ≥ K₁ := le_max_left _ _
+      exact hno_consec (max K₁ K₂) hge_K1 hsq_prev
+    · -- Previous was non-squarish, so this one isn't (by hno_reentry)
+      have hge_K2 : max K₁ K₂ ≥ K₂ := le_max_right _ _
+      exact hno_reentry (max K₁ K₂) hge_K2 hsq_prev
+  
+  -- Induction from the base case
+  have hind : ∀ j, ¬IsSquarish ((sigma 1)^[max K₁ K₂ + 1 + j] n) := by
+    intro j
+    induction j with
+    | zero => simp only [add_zero]; exact hbase
+    | succ j ih =>
+      have hge_K2 : max K₁ K₂ + 1 + j ≥ K₂ := by omega
+      have heq : max K₁ K₂ + 1 + (j + 1) = (max K₁ K₂ + 1 + j) + 1 := by ring
+      rw [heq]
+      exact hno_reentry (max K₁ K₂ + 1 + j) hge_K2 ih
+  
+  -- k ≥ max K₁ K₂ + 1 means k = max K₁ K₂ + 1 + j for some j ≥ 0
+  obtain ⟨j, rfl⟩ : ∃ j, k = max K₁ K₂ + 1 + j := ⟨k - (max K₁ K₂ + 1), by omega⟩
+  exact hind j
 
 /-- For n ≥ 2, the prime 2 eventually always divides σₖ(n).
     

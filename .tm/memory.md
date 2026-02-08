@@ -556,3 +556,95 @@ xxd (in progress, formalize squarish) → ltw (open, formalize v2_hits_residue) 
 - After xxd: ltw (v2_hits_residue) is next.
 - Total sorry forecast after xxd: likely 5-6 (3 new zsygmondy-related + original v2_hits_residue + prime_div_eventually_always, minus squarish_iterates_finite if assembly works).
 - Human escalation on sorry #3 still pending — no response.
+
+## Heartbeat — 2026-02-08 02:50 UTC (Check-in 20)
+
+**Metrics**: 6 sorrys (lines 847, 859, 869, 956, 1058, 1089), 1338 lines, 44 tasks (40 closed, 1 failed, 1 in_progress, 1 open, 1 open). 1 Verified proof.
+**Status**: MAJOR PROGRESS — both xxd and ltw completed. v2_hits_residue CLOSED. Backlog refilled.
+
+**Key developments since last heartbeat**:
+1. **xxd (formalize) COMPLETED ✅**: Committed `ecdbaa6` + `4f371a1`. Added helper lemmas:
+   - PROVED: geom_sum_two', sigma_squarish_form, sigma_squarish_is_square_iff, squarish_decomposition
+   - SORRY'd: zsygmondy_two_pow, squarish_constraint_set_finite, squarish_a_set_finite
+   - squarish_iterates_finite still has sorry (assembly step)
+
+2. **ltw (formalize) COMPLETED ✅**: Committed `286c15d` + `f18e4e3`. **Closed v2_hits_residue!**
+   - Decomposed v2_hits_residue → v2_hits_multiple_once (once version) + shifting argument
+   - v2_hits_residue is now PROVEN from v2_hits_multiple_once (sorry)
+   - Brilliant decomposition: just apply the "once" lemma to σ^K(n) and shift
+
+3. **Backlog was EMPTY** — worker idle. Created tasks immediately.
+
+**Current 6 sorrys in 3 clusters**:
+```
+Zsygmondy cluster (4 sorrys):
+  zsygmondy_two_pow (847) ────────────┐
+  squarish_constraint_set_finite (859) ├──→ squarish_iterates_finite (956)
+  squarish_a_set_finite (869) ─────────┘
+  
+v2 cluster (1 sorry):
+  v2_hits_multiple_once (1058) ──→ v2_hits_residue (PROVEN)
+
+Persistence (1 sorry):
+  prime_div_eventually_always (1089) ──→ [5+ failed attempts, human escalation pending]
+```
+
+**Sorry trajectory**: 7 → 5 → 4 → 1 → 3 → 7 → 6
+(The latest 7→6 was ltw closing v2_hits_residue)
+
+**Actions**:
+1. Created **02h** (formalize, p:0): Prove squarish_iterates_finite assembly using helpers — worker already picked up
+2. Created **j4q** (explore, p:1): Prove v2_hits_multiple_once (NL proof needed first)
+
+**Pipeline**:
+```
+02h (in progress, assembly) → j4q (open, explore v2 once)
+                              + [human pending on persistence]
+```
+
+**Assessment**: The proof is now deeply decomposed. All sorrys are atomic mathematical claims:
+- Zsygmondy's theorem (classical, not in Mathlib) → keep as sorry
+- Two finiteness lemmas (follow from Zsygmondy) → potentially provable from sorry'd Zsygmondy
+- Assembly (combinatorial) → in progress now
+- v2 dynamics (once version) → needs NL proof
+- Persistence → blocked on human
+
+**Realistic end state**: If assembly + v2_once succeed, we'll have 4 sorrys:
+1. zsygmondy_two_pow (irreducible — need Mathlib upstream)
+2. squarish_constraint_set_finite (could be proved from Zsygmondy)
+3. squarish_a_set_finite (could be proved from Zsygmondy)
+4. prime_div_eventually_always (mathematical frontier)
+
+**Watch next**:
+- Does 02h (assembly) succeed? The proof outline has subtleties about what the constraint sets actually constrain.
+- After j4q: need verify + formalize pipeline for v2_hits_multiple_once
+- Human response on persistence
+
+## Heartbeat — 2026-02-08 03:06 UTC (Check-in 21)
+
+**Metrics**: 6 sorrys (lines 847, 859, 869, 956, 1058, 1089), 1338 lines (+52 uncommitted), 44 tasks (40 closed, 1 failed, 1 in_progress, 1 open). 1 Verified proof.
+**Status**: System healthy. Agent actively coding assembly proof.
+
+**Observations**:
+1. **02h (formalize, p:0) IN PROGRESS**: Started 03:01 UTC (~5 min ago). 248 lines of log. Agent has:
+   - **PROVED** `hT_bound`: For any A, {t : Odd t, t≥1, ∃a≤A, IsSquare((2^{a+1}-1)·σ(t²))} is finite (finite union of finite sets)
+   - Identified the mathematical subtlety: S' = {(a,t) : constraint} might be infinite even with each T(a) and A(t) finite
+   - Currently reasoning about how orbit growth + finiteness constraints combine
+   - Still has sorry for the main assembly step
+   - NOT stale, actively writing Lean code
+
+2. **Mathematical concern**: The assembly proof has a real gap. The two finiteness lemmas (T(a) finite, A(t) finite) don't immediately imply S' is finite. The agent recognizes this. The orbit-specific argument is needed: for THIS orbit σ_k(n), the growth constraints + finiteness prevent infinitely many squarish iterates. This might require:
+   - A lemma that {m : m squarish ∧ σ(m) squarish} is finite (stronger claim)
+   - OR an orbit-specific argument using σ_k(n) → ∞ + T(a) finiteness
+   - OR accepting squarish_iterates_finite itself stays as sorry
+
+3. **j4q (explore, p:1)**: Open, queued. Will run after 02h.
+
+**Actions**: None — system healthy, agent working.
+
+**Watch next**:
+- Does 02h commit partial progress (hT_bound is real value even if assembly stays sorry)?
+- Does agent introduce new sorry'd helper (e.g., squarish_sigma_squarish_finite)?
+- If 02h fails: the assembly gap is genuine. May need explore task for NL proof of "squarish-to-squarish transitions are finite."
+- j4q (v2_hits_multiple_once) is the next productive task after 02h.
+- Human escalation on persistence: still no response (1h+ pending).
