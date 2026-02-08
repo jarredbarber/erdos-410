@@ -945,3 +945,92 @@ If pml fails: this would be the 2nd attempt at the orbit-specific argument. Opti
 - If pml fails: implement Option A or B above
 - After pml: 4bk (Part 1) → xov (v2 verify) → pipeline continues
 - Human escalation on persistence still pending (~3h)
+
+## Heartbeat — 2026-02-08 05:09 UTC (Check-in 28)
+
+**Metrics**: 8 sorrys (same lines), 1496+ lines, 53 tasks (48 closed, 2 failed, 1 in_progress, 2 open). 1 Verified, 2 Under review, 5 Draft, 1 Rejected.
+**Status**: PROGRESS — pml delivered Stage 3 fix. 4bk working on Part 1 fix. Pipeline intact.
+
+**Key developments since last heartbeat**:
+1. **pml (explore, p:1, large) COMPLETED ✅**: Published proofs/reentry-finite.md (316 lines, Draft, Confidence: High). Commit `a9c4ddb`.
+   - Proves reentry points are finite using:
+     - Step 1-3: Escape Lemma forces a_k > A for large k (clean argument)
+     - Step 4: Each fixed a allows finitely many reentry points (weaker — relies on Claims 4-5)
+     - Final counting: Uniform bound M on |V(Q)| + orbit uniqueness
+   - **Quality assessment**: Steps 1-3 are solid. Step 4 and the final counting have hand-wavy elements:
+     - Claim 5 (uniform bound) asserted without rigorous proof
+     - "Only finitely many (a, Q) pairs satisfy it overall" feels circular
+   - Needs careful verification
+
+2. **4bk (explore, p:2) IN PROGRESS**: 537 lines. Working on Part 1 (transition set finiteness).
+   - Found key insight: Zsygmondy primitive prime p_a ≥ a+2, so for product to be square need p_a | σ(t²), bounding a by σ(t²)-2
+   - Working on reverse direction: for fixed a, is T_a finite?
+   - Exploring squarefree part matching constraints
+   - Not stale, actively reasoning through multiplicative structure
+
+3. **xov (verify, p:2) OPEN**: v2-unbounded verify — queued after 4bk.
+
+**Actions**:
+1. Created **1t1** (verify, p:1): Review proofs/reentry-finite.md — with specific scrutiny on Claims 4-5 and the final counting argument.
+
+**Pipeline**:
+```
+4bk (in progress, Part 1 fix) → 1t1 (verify reentry, p:1) or xov (verify v2, p:2)
+                                 → [re-verify squarish-iterates after both fixes]
+                                 → [formalize restructure]
+```
+
+**Strategic note**: 1t1 (p:1) will run before xov (p:2) since it has higher priority. This is correct — the squarish proof chain is more critical than the v2 chain.
+
+**Watch next**:
+- Does 4bk deliver a Part 1 fix? Agent is making good progress with Zsygmondy insights.
+- Does 1t1 approve reentry-finite.md? The Claims 4-5 are the weak points. If revision requested: need explore task for a cleaner counting argument.
+- After both Part 1 + Stage 3 are verified: comprehensive formalize task to restructure squarish_iterates_finite in Lean (remove false squarish_reentry_set_finite, implement orbit-specific approach).
+- Human escalation on persistence still pending (~3.5h). No response.
+
+## Heartbeat — 2026-02-08 05:25 UTC (Check-in 29)
+
+**Metrics**: 8 sorrys (same lines), 1496+ lines, 53 tasks (48 closed, 2 failed, 1 in_progress, 2 open). 1 Verified, 2 Under review, 5+ Draft, 1 Rejected.
+**Status**: System healthy. 4bk making critical discovery: transition set T might be INFINITE.
+
+**Observations**:
+1. **4bk (explore, p:2) IN PROGRESS**: 1432 lines of log. Agent has:
+   - Discovered the transition set T = {m squarish : σ(m) squarish} might be **infinite globally** (computational evidence: growing number of solutions)
+   - This is a SECOND structural discovery (after squarish_reentry_set_finite being false)
+   - Agent correctly pivoting to orbit-specific argument: even if T is infinite globally, any specific orbit can only hit T finitely often
+   - Writing proofs/transition-set-bounded.md (7.7KB) — new approach: if squarish numbers appear infinitely often, then v₂(σ_k(n)) is bounded, which restricts to finitely many a values, then Escape Lemma makes constraint impossible
+   - Not stale, actively writing proof
+
+2. **1t1 (verify, p:1) OPEN**: Review reentry-finite.md — queued after 4bk
+3. **xov (verify, p:2) OPEN**: Review v2-unbounded.md — queued after 1t1
+
+**STRUCTURAL IMPLICATIONS if T is infinite**:
+- `squarish_transition_set_finite` (sorry line 946) is also FALSE
+- This means the two-set assembly proof of `squarish_iterates_finite` depends on TWO false sorrys:
+  - squarish_transition_set_finite (likely FALSE)
+  - squarish_reentry_set_finite (confirmed FALSE)
+- The squarish_iterates_finite statement itself is probably still TRUE but needs a completely orbit-specific proof
+- The 4bk agent is correctly discovering this and building the alternative
+
+**Impact on Lean code**: When we formalize, we need to:
+1. Delete both false sorrys (squarish_transition_set_finite, squarish_reentry_set_finite)
+2. Replace the two-set assembly proof of squarish_iterates_finite with an orbit-specific proof
+3. This might require restructuring how squarish_iterates_finite is stated/proved
+
+**Actions**: None — 4bk is adapting correctly to the mathematical reality.
+
+**Sorry map update**:
+```
+Zsygmondy (3): zsygmondy_two_pow, squarish_constraint_set_finite, squarish_a_set_finite
+  → Still needed even in orbit-specific approach
+Finiteness (2): squarish_transition_set_finite, squarish_reentry_set_finite
+  → BOTH LIKELY FALSE — need complete replacement approach
+v2 (2): v2_iterate_unbounded, v2_hits_target_residue
+Persistence (1): prime_div_eventually_always
+```
+
+**Watch next**:
+- Does 4bk deliver a complete orbit-specific proof? The bounded-a-then-Escape approach is sound.
+- After 4bk: 1t1 verifies reentry-finite.md. If both proofs are verified, need comprehensive formalize task.
+- The formalization task will be more complex than expected — need to restructure squarish_iterates_finite proof entirely, not just fix one sorry.
+- Human escalation on persistence still pending (~3.5h+)
