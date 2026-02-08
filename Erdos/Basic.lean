@@ -1199,21 +1199,69 @@ lemma q_dvd_sigma_of_v2_dvd (q m : ℕ) (hm : m ≠ 0)
     (Nat.Coprime.pow_left _ (Nat.coprime_two_left.mpr (odd_part_is_odd m hm)))]
   exact dvd_mul_of_dvd_left hq _
 
+/-- The 2-adic valuation of σₖ(n) is unbounded: for any M, there exists k
+    with v₂(σₖ(n)) ≥ M.
+
+    Proof outline (Lemma 5 of prime-persistence.md):
+    Write σₖ(n) = 2^{aₖ} · mₖ with mₖ odd. Then aₖ₊₁ = v₂(σ(mₖ)).
+    For odd m, v₂(σ(m)) = Σ_{p|m, eₚ odd} v₂(σ(p^{eₚ})) where each
+    summand ≥ 1. As more odd primes with odd exponent accumulate in
+    the orbit (Escape Lemma — S* is infinite), this sum grows without
+    bound. The key steps are:
+    1. By Dirichlet, for any j ≥ 1 there exist primes with v₂(p+1) = j
+    2. By the Escape Lemma, infinitely many new primes enter S*
+    3. New primes typically enter with exponent 1 (odd), contributing
+       v₂(p+1) to the sum
+    4. As more contributing primes accumulate, v₂(σ(mₖ)) → ∞ -/
+lemma v2_iterate_unbounded (n : ℕ) (hn : n ≥ 2) :
+    ∀ M : ℕ, ∃ k,
+      ((sigma 1)^[k] n).factorization 2 ≥ M := by
+  sorry
+
+/-- The 2-adic valuation of σₖ(n) hits residue d-1 modulo d for some k.
+
+    This goes beyond mere unboundedness (v2_iterate_unbounded): we need
+    the specific residue class d-1 mod d to be achieved. The argument
+    requires showing that contributions from primes entering S* can
+    produce any target residue:
+    - Dirichlet's theorem gives primes p with v₂(p+1) ≡ 1 (mod d)
+    - Such primes enter S* by the Escape Lemma
+    - Their contributions shift v₂(σ(mₖ)) by amounts coprime to d
+    - This ensures all residue classes mod d are eventually hit
+
+    See proofs/prime-persistence.md, Corollary 5.1. -/
+lemma v2_hits_target_residue (n : ℕ) (hn : n ≥ 2)
+    (d : ℕ) (hd : d ≥ 2) :
+    ∃ k, ((sigma 1)^[k] n).factorization 2 % d = d - 1 := by
+  sorry
+
 /-- For n ≥ 2 and d ≥ 1, there exists some k such that d ∣ v₂(σₖ(n)) + 1.
     This is the "single hit" version — the infinitely-often version
     (`v2_hits_residue`) follows by applying this to σ^K(n).
 
-    The proof uses the dynamics of σ acting on 2-adic valuations:
-    - Escape Lemma: new primes keep entering the orbit (S* is infinite)
-    - Dirichlet's theorem: among new primes, some have v₂(p+1) = j for any target j
-    - When such a prime p enters with odd exponent, σ(p^1) = p+1 contributes
-      v₂(p+1) = j to v₂(σ(odd part))
-    - By choosing j appropriately mod d, we can ensure d ∣ v₂(σₖ(n)) + 1
+    Case d = 1 is trivial. For d ≥ 2, we use `v2_hits_target_residue`
+    to find k with v₂(σₖ(n)) ≡ d-1 (mod d), then v₂(σₖ(n)) + 1 ≡ 0
+    (mod d).
 
     See proofs/prime-persistence.md, Lemma 5 + Corollary 5.1. -/
 lemma v2_hits_multiple_once (n : ℕ) (hn : n ≥ 2) (d : ℕ) (hd : d ≥ 1) :
     ∃ k, d ∣ ((sigma 1)^[k] n).factorization 2 + 1 := by
-  sorry
+  by_cases hd1 : d = 1
+  · -- d = 1: trivially 1 ∣ anything
+    exact ⟨0, by rw [hd1]; exact one_dvd _⟩
+  · -- d ≥ 2: find k with v₂(σₖ(n)) ≡ d-1 (mod d)
+    obtain ⟨k, hk⟩ := v2_hits_target_residue n hn d (by omega)
+    refine ⟨k, ?_⟩
+    -- From v₂ % d = d - 1, derive d ∣ v₂ + 1
+    -- Use: d * (v₂/d) + v₂%d = v₂ (Nat.div_add_mod)
+    -- With v₂%d = d-1: v₂ = d*(v₂/d) + (d-1)
+    -- So v₂ + 1 = d*(v₂/d) + d = d*(v₂/d + 1)
+    have hdiv := Nat.div_add_mod
+      (((sigma 1)^[k] n).factorization 2) d
+    rw [hk] at hdiv
+    refine ⟨((sigma 1)^[k] n).factorization 2 / d + 1, ?_⟩
+    rw [mul_add, mul_one]
+    omega
 
 /-- The 2-adic valuation of σₖ(n) hits multiples of any d ≥ 1 infinitely often.
 
