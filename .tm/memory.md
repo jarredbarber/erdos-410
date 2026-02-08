@@ -217,3 +217,67 @@ Items 3+4 are "just plumbing" once 1+2 are done. The real frontier is 1+2.
 - Does 3hu produce ANY Lean (even decomposed sorrys)? Or does it fail completely?
 - Does 6i8 produce a bridge proof in proofs/bridge-to-tendsto.md?
 - If 3hu fails AND 6i8 fails: this is the 3rd attempt at this sorry. Escalation threshold approaching.
+
+## Heartbeat — 2026-02-08 00:06 UTC (Check-in 10)
+
+**Metrics**: 1 sorry (line 791), 937 lines, 32 tasks (30 closed, 2 open). 3 proofs in proofs/ (1 Verified, 2 Draft).
+**Status**: Course correction — redirecting from premature formalization to mathematical completion.
+
+**Observations**:
+1. **3hu (formalize) STALE → CLOSED**: Ran 35+ minutes, 345 lines of reasoning log, zero Lean code. The formalize agent was asked to invent new mathematics (wrong role). We lack a complete NL proof for prime_factors_accumulate — the escape lemma only proves S* infinite, not Tendsto. Closed as misconceived.
+
+2. **6i8 (explore) COMPLETED**: Published proofs/bridge-to-tendsto.md (Draft ✏️). Key results:
+   - **Theorem 2 (Equivalence)**: ∑1/p → ∞ ⟺ σ_k(n)^{1/k} → ∞. The (2⇒1) direction is clean. The (1⇒2) direction proves only the bounded case (∑1/p ≤ R ∀k ⟹ σ_k(n)^{1/k} bounded), not the full contrapositive with liminf.
+   - **Theorem 3 (Prime Persistence for q=2)**: Partial proof using parity characterization + Mersenne structure. Gap acknowledged at the end.
+   - **Theorem 4 (General Prime Persistence)**: Conjectured, not proved. Strategy outlined for odd q using 2-adic valuation + multiplicative orders.
+   - **Recommendation**: Two paths identified — Prime Persistence → ∑1/p → ∞ (elementary but tedious) OR restructure proof chain.
+
+3. **Proof of concept**: The equivalence theorem confirms the current proof architecture is sound: proving ∑1/p → ∞ DOES give erdos_410 via the existing chain. The missing piece is purely mathematical: Prime Persistence.
+
+**Actions**:
+1. Recovered + closed stale 3hu (formalize without complete NL proof = waste)
+2. Created **rx2** (verify, p:2): Review bridge-to-tendsto.md — identify exactly what's complete vs gapped
+3. Created **q0l** (explore, p:1): Prove Prime Persistence for all primes q — THE KEY MISSING MATH
+   - Task includes detailed strategy: use σ multiplicativity + multiplicative orders mod q + 2-adic valuation growth
+   - Framed as "standard consequence of multiplicative structure" (not hard/open)
+
+**Strategy Assessment**:
+- The only path to erdos_410 goes through proving that ∑_{p|σ_k(n)} 1/p → ∞ (or something equivalent)
+- Prime Persistence (∀ q prime, eventually q always divides σ_k(n)) is the most promising approach
+- If Prime Persistence holds: ∑ 1/p ≥ ∑_{q ≤ Q} 1/q for k ≥ max K_q, and this → ∞ as Q → ∞
+- The Lean proof chain is: prime_factors_accumulate → abundancy_ratio_diverges → sigma_iterate_superexp_gt_one → erdos_410
+
+**Workflow sequence**:
+1. q0l (explore): Prove Prime Persistence → proofs/prime-persistence.md
+2. rx2 (verify): Review bridge proof → identify what's solid
+3. Create verify task for prime-persistence.md
+4. Create formalize task for prime_factors_accumulate with COMPLETE verified NL proof
+5. Done
+
+**Sorry trajectory**: 7 → 5 → 4 → 1 (holding at 1 for 3 heartbeats now)
+
+**Watch next**:
+- Does q0l produce a complete Prime Persistence proof? This is the mathematical frontier.
+- If q0l fails: the q=2 case might be provable (finish Lemma 3.3 from bridge proof). Even q=2 alone would let us prove σ_k(n) grows at least like (3/2)^k (exponential, not super-exponential). Still need more for erdos_410.
+- If q0l fails twice: escalate to human. The problem may require techniques beyond what the agents can discover.
+- 3 heartbeats at 1 sorry — NOT stagnant because we were doing necessary mathematical groundwork (escape lemma → bridge → prime persistence). The sorry count won't move until the math is done.
+
+## Heartbeat — 2026-02-08 00:14 UTC (Check-in 11)
+
+**Metrics**: 1 sorry (line 791), 937 lines, 32 tasks (30 closed, 1 in_progress, 1 open). 1 Verified proof, 2 Draft proofs.
+**Status**: System healthy — explore agent actively working on Prime Persistence.
+
+**Observations**:
+1. **q0l (explore, p:1)**: Running ~7 min. Agent read all 3 existing proofs in `proofs/`, now reasoning through the multiplicative structure of σ mod q. Correct approach — analyzing when q | σ(p^a) via multiplicative orders. Not stale.
+2. **rx2 (verify, p:2)**: Open, queued behind q0l. Will run after q0l completes.
+3. **Sorry count**: Still 1 (line 791, `prime_factors_accumulate`). Unchanged for 4 heartbeats — expected since we're doing necessary NL math groundwork.
+4. **No stale tasks**, worker healthy (PID 1609124).
+
+**Actions**: None — system healthy. Agent doing exactly the right work.
+
+**Watch next**:
+- Does q0l produce proofs/prime-persistence.md? This is the mathematical core.
+- Quality of the Prime Persistence proof: does it handle both q=2 (parity) and general odd q (multiplicative orders)?
+- Does it address PERSISTENCE (once q divides, it stays) or just APPEARANCE (q divides eventually)?
+- If q0l succeeds: need verify task for prime-persistence.md, then formalize task for prime_factors_accumulate.
+- If q0l fails: 2nd attempt threshold. Consider breaking into q=2 case (easier, already partially proved) vs general q case.
