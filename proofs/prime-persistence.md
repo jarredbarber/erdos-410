@@ -1,9 +1,10 @@
 # Every Prime Eventually Always Divides σ_k(n)
 
-**Status:** Draft ✏️
+**Status:** Under review 🔍
 **Statement:** For any prime $q$ and any $n \geq 2$, there exists $K_q$ such that $q \mid \sigma_k(n)$ for all $k \geq K_q$.
 **Dependencies:** proofs/prime-factors-accumulate.md (Escape Lemma, $\sigma_k(n) \to \infty$, $S^*$ infinite)
 **Confidence:** High
+**Reviewed by:** erdos410-5bt (second review)
 
 ## Overview
 
@@ -381,6 +382,38 @@ This revision addresses the four critical issues from the verification review:
   - Pigeonhole on primes ≡ 1 (mod q) 
   - The deterministic bound that when ≥ q such primes are present with varying exponents, at least one has exponent ≡ q-1 (mod q)
 - The heuristic "density" argument is replaced by the deterministic pigeonhole + growth argument.
+
+---
+
+## Review Notes (erdos410-5bt)
+
+### Second Review - Progress Assessment
+
+The revision addresses 3 of 4 critical issues from the first review (erdos410-opj):
+
+**✅ Issue 2 (Varying pairs) - RESOLVED:** Theorem 1 now explicitly handles Case A (unbounded $a_j$) and Case B (bounded $a_j$) separately. Clear and correct.
+
+**✅ Issue 3 (Residue 0) - RESOLVED:** Lemma 5 rigorously proves $v_2(\sigma_k(n)) \to \infty$ using Escape Lemma + Dirichlet. Corollary 5.1 correctly derives infinitely many hits of residue $0 \pmod d$.
+
+**✓ Issue 1 (Lemma 3) - MOSTLY RESOLVED:** The new Lemma 3' has the right idea but overstates its conclusion. It claims "for each fixed $a$, $T_a$ is finite," but the proof argues by varying $a$ and accumulating constraints. What's actually proven is: "the set of $t$ compatible with infinitely many $a$ values is finite/empty." This is sufficient for Theorem 1's Case A, but the lemma statement should be clarified.
+
+**❌ Issue 4 (Permanence) - NOT FULLY RESOLVED:** Theorem 2, Stage 2e has a remaining gap:
+
+**What's proven:** $q \mid \sigma_k(n)$ for infinitely many $k$ (via two independent mechanisms: 2-adic in Stage 1, and exponent growth in Stage 2d).
+
+**What's needed:** $\exists K$ such that $q \mid \sigma_k(n)$ for ALL $k \geq K$.
+
+**The gap:** Step 2e claims that for $k$ large enough, when $|R_q \cap \text{primeFactors}(\sigma_k(n))| \geq q$, at least one prime has exponent $\equiv q-1 \pmod q$. Issues:
+
+1. The count $|R_q \cap \text{primeFactors}(\sigma_k(n))|$ is not monotonic - it hasn't been proven to be eventually always $\geq q$.
+2. The pigeonhole argument doesn't guarantee the specific residue $q-1$ appears (only that some residue appears among $q$ items in $q$ boxes).
+3. The deterministic bound is still partly heuristic.
+
+**Recommendation:** The proof should either:
+- Prove that the number of primes from $R_q$ dividing $\sigma_k(n)$ is **monotonically increasing** (or at least eventually always large), OR  
+- Use a different mechanism to establish permanence (e.g., show that once $q$ enters in a "strong" way, it cannot exit)
+
+**Next steps:** Create follow-up task to close the permanence gap for odd primes.
 
 ---
 
