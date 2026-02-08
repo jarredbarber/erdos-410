@@ -1090,3 +1090,62 @@ This is the 3rd iteration on the squarish orbit-specific proof. Each iteration g
   - Or try bypass: prove prime_persistence_two without squarish_iterates_finite
 - Human escalation on persistence still pending (~4h)
 - xov (verify v2-unbounded) still queued — will run after f6g
+
+## Heartbeat — 2026-02-08 05:57 UTC (Check-in 31)
+
+**Metrics**: 8 sorrys (lines 847, 859, 869, 946, 958, 1219, 1236, 1295), 1496 lines, 57 tasks (52 closed, 2 failed, 1 in_progress, 2 open). 1 Verified proof, 3 Under review, 6 Draft, 1 Rejected. 11 files in proofs/.
+**Status**: Pipeline healthy. Three parallel tracks advancing.
+
+**Key developments since last heartbeat**:
+1. **f6g (explore) COMPLETED ✅**: Revised proofs/reentry-finite.md (commit `24776bb`). Third iteration of orbit-specific squarish proof. New approach:
+   - Prop 1: a_k bounded at reentry via Zsygmondy + entry timing (SOLID)
+   - Prop 2: finite R_a per fixed a via density + Diophantine finiteness (Case 2 solid, Case 1b hand-wavy density argument)
+   - Avoids all 3 issues from 1t1's review
+
+2. **xov (verify) COMPLETED**: Reviewed v2-unbounded.md → revision requested 🔍. Lemma 5 (primitive primes with large v₂(q+1)) has gap: CRT+Dirichlet doesn't guarantee primitive divisors. Created ri3.
+
+3. **ri3 (explore, p:2) IN PROGRESS**: Just started (~5 min). Fixing Lemma 5 of v2-unbounded.md. Not stale.
+
+**Assessment of f6g's reentry-finite.md**:
+- Proposition 1 is rigorous: entry timing + valuation bound → a < O(log a) → contradiction
+- Proposition 2, Case 2 is rigorous: σ(m) = N has finitely many solutions (standard)
+- Proposition 2, Case 1b is weak: density O(m^{-1/2}) + "Borel-Cantelli for deterministic sequences" is heuristic
+- Lemma 5 (odd valuation primitive prime) asserted "generically" — minor gap
+- Still depends on squarish-iterates.md Theorem 1 (transition set finite) — which 4bk showed is FALSE globally
+
+**Actions**:
+1. Created **n86** (verify, p:1): Review revised reentry-finite.md (3rd iteration)
+2. Created **k8v** (verify, p:2, depends on ri3): Re-verify v2-unbounded.md after Lemma 5 fix
+
+**Pipeline**:
+```
+ri3 (in progress, fixing v2 Lemma 5) → k8v (verify v2-unbounded)
+n86 (verify reentry-finite 3rd iter) → [if approved: formalize squarish restructure]
+```
+
+**Sorry map unchanged (8 sorrys, 4 clusters)**:
+```
+Zsygmondy (3): zsygmondy_two_pow, squarish_constraint_set_finite, squarish_a_set_finite
+Finiteness (2): squarish_transition_set_finite (LIKELY FALSE), squarish_reentry_set_finite (FALSE)
+v2 (2): v2_iterate_unbounded, v2_hits_target_residue
+Persistence (1): prime_div_eventually_always (5+ failed, human escalation ~4h pending)
+```
+
+**Squarish proof iteration tracker**:
+- Attempt 1 (vou → 9m4): König argument + N_k hand-wave → flagged
+- Attempt 2 (pml → 1t1): Escape Lemma + Mersenne matching → 3 critical issues
+- Attempt 3 (f6g → n86): Entry timing + density → awaiting review
+- Prop 1 quality is highest yet. Prop 2 Case 1b density argument is the remaining concern.
+
+**If n86 flags Case 1b density**: This would be attempt #4. Consider:
+  - (a) Accept Prop 2 with Case 2 only + restructure to avoid Case 1b
+  - (b) Formalize with sorry for the density claim specifically
+  - (c) Escalate to human — we may have hit the mathematical frontier on this sub-problem
+
+**Human escalation on persistence**: Still pending ~4h. No response.
+
+**Watch next**:
+- Does ri3 fix v2-unbounded Lemma 5? (Simple gap, should succeed)
+- Does n86 approve revised reentry-finite? Prop 2 Case 1b is the likely sticking point.
+- After both: formalize tasks for squarish restructure + v2_iterate_unbounded
+- Human response on persistence (sorry #8)
