@@ -468,3 +468,26 @@ The modular arithmetic bridge (v₂%d = d-1 → d|v₂+1) is fully proved.
 
 lake build succeeds with no new compilation errors."
 ```
+
+```bash
+$ cd /home/jarred/code/erdos-410 && tm update erdos410-sru --status "Completed: decomposed sorry, lake build succeeds"
+```
+```json
+{
+  "status": "completed",
+  "summary": "Decomposed v2_hits_multiple_once sorry into two smaller, well-scoped sub-lemmas. The main lemma is now sorry-free.",
+  "details": "The original sorry in v2_hits_multiple_once (line 1216) was replaced with a complete proof that:\n\n1. **d = 1 case**: Proved trivially — 1 divides anything.\n2. **d ≥ 2 case**: Reduces to `v2_hits_target_residue` via modular arithmetic. The bridge proof uses `Nat.div_add_mod` to show that `v₂ % d = d - 1` implies `d ∣ v₂ + 1`, which is fully formalized (no sorry).\n\nTwo new sorry holes were introduced as well-defined sub-lemmas:\n\n- **`v2_iterate_unbounded`** (line 1219): States that v₂(σₖ(n)) is unbounded. This is Lemma 5 of prime-persistence.md. Proof requires the Escape Lemma + Dirichlet's theorem to show new primes entering S* contribute increasingly to v₂.\n\n- **`v2_hits_target_residue`** (line 1236): States that v₂(σₖ(n)) hits residue d-1 mod d for some k. This goes beyond unboundedness — requires showing additive contributions from primes in S* can generate all residue classes. Depends on Dirichlet's theorem for primes in arithmetic progressions.\n\nNote: The NL proof (proofs/v2-hits-multiple.md) was rejected by the verifier. The rejected proof's gaps center on (1) whether primes with diverse v₂(p+1) values enter S*, and (2) whether the sequence actually hits all residue classes (not just grows unboundedly). These gaps map precisely to the two new sorry lemmas. A revised NL proof addressing these specific points would enable closing them.\n\nlake build succeeds. Total sorry count: 8 (was 7, net +1 from splitting one into two sub-problems)."
+}
+```
+
+## Final Result
+
+```json
+{
+  "status": "completed",
+  "summary": "Decomposed v2_hits_multiple_once sorry into two smaller, well-scoped sub-lemmas. The main lemma is now sorry-free.",
+  "details": "The original sorry in v2_hits_multiple_once (line 1216) was replaced with a complete proof that:\n\n1. **d = 1 case**: Proved trivially — 1 divides anything.\n2. **d ≥ 2 case**: Reduces to `v2_hits_target_residue` via modular arithmetic. The bridge proof uses `Nat.div_add_mod` to show that `v₂ % d = d - 1` implies `d ∣ v₂ + 1`, which is fully formalized (no sorry).\n\nTwo new sorry holes were introduced as well-defined sub-lemmas:\n\n- **`v2_iterate_unbounded`** (line 1219): States that v₂(σₖ(n)) is unbounded. This is Lemma 5 of prime-persistence.md. Proof requires the Escape Lemma + Dirichlet's theorem to show new primes entering S* contribute increasingly to v₂.\n\n- **`v2_hits_target_residue`** (line 1236): States that v₂(σₖ(n)) hits residue d-1 mod d for some k. This goes beyond unboundedness — requires showing additive contributions from primes in S* can generate all residue classes. Depends on Dirichlet's theorem for primes in arithmetic progressions.\n\nNote: The NL proof (proofs/v2-hits-multiple.md) was rejected by the verifier. The rejected proof's gaps center on (1) whether primes with diverse v₂(p+1) values enter S*, and (2) whether the sequence actually hits all residue classes (not just grows unboundedly). These gaps map precisely to the two new sorry lemmas. A revised NL proof addressing these specific points would enable closing them.\n\nlake build succeeds. Total sorry count: 8 (was 7, net +1 from splitting one into two sub-problems)."
+}
+```
+
+End Time: 2026-02-08T03:55:25.717Z
