@@ -1,9 +1,10 @@
 # 2-adic Valuation Hits Every Residue Class (Once Version)
 
-**Status:** Draft ✏️
+**Status:** Rejected ❌
 **Statement:** For any $n \geq 2$ and $d \geq 1$, there exists $k$ such that $d \mid v_2(\sigma_k(n)) + 1$.
 **Dependencies:** proofs/prime-factors-accumulate.md (Escape Lemma), proofs/prime-persistence.md (Lemma 5)
 **Confidence:** High
+**Reviewed by:** erdos410-8ay
 
 ## Overview
 
@@ -183,6 +184,88 @@ Contradiction. Hence $a_k \equiv d-1 \pmod{d}$ for some $k$. $\square$
    - `v2_unbounded`: $\limsup_k v_2(\sigma_k(n)) = \infty$
    - Dirichlet's theorem for primes in arithmetic progressions
    - The additive structure of $v_2(\sigma(u))$ for odd $u$
+
+---
+
+## Review Notes (erdos410-8ay)
+
+**Decision: REJECTED ❌**
+
+This proof contains multiple critical gaps that render it incomplete. The main issues are:
+
+### Issue 1: Step 3 — Unjustified Residue Coverage Claim
+
+**Problem:** Step 3 claims: "For any residue class $r \in \{1, \ldots, d-1\}$, infinitely many primes with $v_2(p+1) \equiv r \pmod{d}$ exist (by Dirichlet), and among the infinitely many primes entering $S^*$, some have this property."
+
+**Gap:** This is an invalid inference. The Escape Lemma establishes that $S^*$ is infinite, but does NOT control which arithmetic progressions the primes in $S^*$ fall into.
+
+**Counterexample:** If $S^*$ consisted only of primes $p \equiv 3 \pmod{4}$ (which have $v_2(p+1) = 1$), then $S^*$ would be infinite but $v_2(p+1)$ for $p \in S^*$ would only hit one residue class modulo any $d$.
+
+**What's needed:** A proof that $S^*$ contains primes from diverse arithmetic progressions, or at least that it contains primes with $v_2(p+1)$ spanning different residue classes mod $d$. The Escape Lemma alone doesn't provide this.
+
+### Issue 2: Step 4 — Non-Constancy Argument Is Hand-Wavy
+
+**Problem:** The proof claims $(a_k \mod d)$ is not eventually constant by arguing that when a new prime $p$ enters with $v_2(p+1) \not\equiv 0 \pmod{d}$, it shifts the residue.
+
+**Gaps:**
+1. The argument doesn't account for other primes simultaneously changing exponents or leaving the factorization.
+2. The recurrence $a_{k+1} = \sum_{p \mid u_k, v_p(u_k) \text{ odd}} v_2(\sigma(p^{v_p(u_k)}))$ is a **sum** over all relevant primes, not a single prime's contribution.
+3. When a prime $p$ enters with odd exponent, other primes might simultaneously have their exponents change from odd to even (or vice versa), potentially canceling the shift mod $d$.
+4. The proof assumes primes "typically appear with exponent 1 at first entry" but doesn't establish this rigorously.
+
+**What's needed:** A rigorous argument that the additive contributions from changing prime factorizations don't eventually stabilize to a constant residue mod $d$.
+
+### Issue 3: Step 5 — Generation Claim Depends on Step 3 Gap
+
+**Problem:** The Sub-claim states that contributions from primes in $S^*$ generate $\mathbb{Z}/d\mathbb{Z}$ because they include some $j \equiv 1 \pmod{d}$ (from primes with $v_2(p+1) = 1$).
+
+**Gap:** This assumes that primes with $v_2(p+1) = 1$ enter $S^*$, which is precisely the unjustified claim from Step 3.
+
+**What's needed:** Resolve Issue 1 first.
+
+### Issue 4: Step 6 — "Growth Implies Hitting Residues" Is Not Rigorous
+
+**Problem:** The proof argues that because $a_k \to \infty$ along a subsequence and "small primes contribute small amounts," the sequence must pass through all residues mod $d$ including $d-1$.
+
+**Critical gaps:**
+1. **Non-monotonicity:** The sequence $a_k$ is NOT monotonically increasing. The recurrence can make $a_{k+1} < a_k$ if the factorization of $u_k$ changes (primes with odd exponents might drop out or switch to even exponents).
+2. **No continuity:** The proof treats $a_k$ as if it "passes through" integer values continuously, but it's a discrete sequence that can jump over values.
+3. **Jump size control:** The argument that "small primes entering contribute small amounts" doesn't account for:
+   - Multiple primes changing exponents simultaneously (cumulative large jump)
+   - Primes leaving (decreases)
+   - Higher powers of primes (e.g., $\sigma(p^3)$ for odd $p$ and odd exponent contributes more than $v_2(p+1)$)
+
+**Example of the gap:** The proof says "if the sequence ever reaches $d-2$, the next addition of 1 would give $d-1$." But:
+- The sequence might never hit $d-2$ (it could jump from $d-3$ to $d$ or beyond)
+- Even if it hits $d-2$, the next step might not add 1 (could add 2, 3, or even decrease)
+
+**What's needed:** A completely different approach. Either:
+- Prove that the sequence $(a_k \mod d)$ is **eventually periodic or constant**, then show it must hit $d-1$ within the period, OR
+- Use the unboundedness more carefully with a different structural argument, OR
+- Strengthen the claim to prove that $(a_k \mod d)$ hits EVERY residue infinitely often (as suggested in Remarks), which might be easier to prove than hitting $d-1$ once.
+
+### Issue 5: Dependency on Unverified Result
+
+**Problem:** The proof depends on Lemma 5 from `proofs/prime-persistence.md`, which is currently marked **Under review 🔍**, not Verified ✅.
+
+**Workflow violation:** According to the review protocol, a proof cannot be verified if it depends on unverified results. The proof must wait until Lemma 5 is either verified or provide an independent proof of the unboundedness claim.
+
+---
+
+## Recommendation
+
+The proof approach has the right general idea (using unboundedness + additive variety) but the execution has critical gaps that cannot be fixed with minor revisions. The proof needs:
+
+1. **A mechanism to ensure residue diversity in $S^*$**: Either strengthen the Escape Lemma or prove a separate result about the arithmetic structure of primes entering the sequence.
+
+2. **A rigorous treatment of the dynamics of $(a_k \mod d)$**: The current argument is too informal and doesn't account for the complexity of the recurrence.
+
+3. **Resolution of the dependency**: Either wait for Lemma 5 verification or include an independent proof.
+
+**Suggested path forward:**
+- Create a new explore task to develop a proof that primes with diverse $v_2(p+1)$ values enter $S^*$
+- Consider strengthening to "infinitely often" rather than "once" (might be easier to prove)
+- Revisit after Lemma 5 is verified
 
 ---
 

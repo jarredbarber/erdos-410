@@ -708,3 +708,54 @@ j4q (in progress) → [verify v2 proof] → [formalize v2_hits_multiple_once]
 - Human response on persistence still pending (1.5h+)
 - Consider: formalize squarish_transition_set_finite from squarish_constraint_set_finite + squarish_a_set_finite (should be doable)
 - Consider: explore task for squarish_reentry_set_finite (new mathematical claim)
+
+## Heartbeat — 2026-02-08 03:41 UTC (Check-in 23)
+
+**Metrics**: 7 sorrys (lines 847, 859, 869, 946, 958, 1216, 1247), 1496 lines, 46 tasks (42 closed, 1 failed, 1 in_progress, 2 open). 1 Verified proof, 1 Draft (v2-hits-multiple.md).
+**Status**: INTERVENTION — backlog was empty, worker idle. j4q completed, pipeline rebuilt.
+
+**Key developments since last heartbeat**:
+1. **j4q (explore) COMPLETED ✅**: Published proofs/v2-hits-multiple.md (Draft ✏️). Commit `0a2b462`.
+   - Proof for v2_hits_multiple_once: for any n≥2, d≥1, ∃ k with d | v₂(σₖ(n))+1
+   - Uses unboundedness of v₂ (Lemma 5) + Dirichlet + Escape Lemma
+   - Quality: Steps 1-3 clean. Steps 4-6 have the same "growing sequence hits every residue" hand-wave.
+   - Confidence: High but with gaps.
+
+2. **Backlog was EMPTY** — worker idle. Critical.
+
+**Actions**:
+1. Created **8ay** (verify, p:1): Review proofs/v2-hits-multiple.md — with specific scrutiny points
+2. Created **sru** (formalize, p:0, depends on 8ay): Close v2_hits_multiple_once sorry
+3. Created **348** (explore, p:2): Prove squarish_reentry_set_finite (new mathematical claim)
+4. Worker immediately picked up 8ay
+
+**Pipeline**:
+```
+8ay (verify, in progress) → sru (formalize v2_once, blocked)
+348 (explore squarish reentry, open — runs after 8ay or sru finishes)
+```
+
+**Current sorry map (7 sorrys, 4 clusters)**:
+```
+Zsygmondy cluster (4): zsygmondy_two_pow, squarish_constraint_set_finite, squarish_a_set_finite, squarish_transition_set_finite
+  → Deep classical NT. Not in Mathlib. No tasks created yet.
+  
+Reentry (1): squarish_reentry_set_finite (958)  
+  → 348 (explore) will produce NL proof. New mathematical claim.
+
+v2 dynamics (1): v2_hits_multiple_once (1216)
+  → 8ay (verify) → sru (formalize). Pipeline active.
+
+Persistence (1): prime_div_eventually_always (1247)
+  → Human escalation pending 1.7h+. 5+ failed attempts. Mathematical frontier.
+```
+
+**Sorry trajectory**: 7 (stable for 3 heartbeats — sorrys are now all atomic)
+
+**Watch next**:
+- Does 8ay approve or flag revision? The hand-wave in Steps 4-6 is the weak point.
+- If approved: sru starts formalization. Monitor for correct Lean approach.
+- If revision requested: create targeted explore task for the gap.
+- Does 348 produce a rigorous proof for squarish_reentry_set_finite?
+- Human response on persistence — still pending.
+- Realistic end state if v2 + reentry succeed: 5 sorrys (Zsygmondy × 4 + persistence × 1)
