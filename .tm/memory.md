@@ -189,3 +189,31 @@ Items 3+4 are "just plumbing" once 1+2 are done. The real frontier is 1+2.
 - If 3hu fails: consider weakening the statement to "for any R, ∃ k, ∑(1/p) > R" and restructuring abundancy_ratio_diverges to use ∃ instead of ∀ k ≥ k₀.
 - If both fail after 2 attempts: escalate to human — this may be genuinely unprovable with current approach.
 - Monitor for axiom-sneaking: agents may try to use `axiom` or `Decidable.em` tricks again.
+
+## Heartbeat — 2026-02-07 23:44 UTC (Check-in 9)
+
+**Metrics**: 1 sorry (line 791), 937 lines, 30 tasks (28 closed, 2 in_progress)
+**Status**: No change from last heartbeat — still 1 sorry. Two agents actively working.
+
+**Observations**:
+1. **3hu (formalize, p:0)**: Running ~18 min. 345 lines of log, all mathematical reasoning — zero Lean code written. Agent is circling: tries monotonicity (fails — ∑1/p oscillates), tries restructuring (notes it cascades), tries breaking into smaller sorrys (hasn't committed to it). Correctly identifies the core gap (S* infinite ≠ Tendsto of individual iterates) but can't solve it.
+2. **6i8 (explore, p:1)**: Running ~0 min (just started). Reading literature. This is the RIGHT task for bridging the mathematical gap.
+3. **cu4 (verify)**: Completed — approved proofs/prime-factors-accumulate.md as Verified ✅.
+4. **Neither task is stale** (both under 30 min).
+
+**Mathematical situation unchanged**: 
+- Verified NL proof shows S* = ⋃_k primeFactors(σ_k(n)) is infinite
+- Lean needs: Tendsto (fun k => ∑ p ∈ primeFactors(σ^[k] n), 1/p) atTop atTop
+- Gap: "infinitely many primes across iterates" ≠ "sum of reciprocals of primes in ONE iterate → ∞"
+- The abundancy_ratio_diverges proof uses `tendsto_atTop_atTop` which requires ∀ R, ∃ k₀, ∀ k ≥ k₀, sum ≥ R
+
+**Actions**: None — system healthy, both agents active.
+
+**Predicted outcome for 3hu**: Likely to fail. The formalize agent is doing mathematical exploration (wrong role) and circling without convergence. If it fails:
+- Create new formalize task focused on DECOMPOSITION: break prime_factors_accumulate into 2-3 smaller sorrys (escape lemma, monotonicity/non-collapse, assembly)
+- OR restructure: weaken prime_factors_accumulate to ∀ R, ∃ k, sum ≥ R (not eventually-always) and fix abundancy_ratio_diverges to work with this
+
+**Watch next**: 
+- Does 3hu produce ANY Lean (even decomposed sorrys)? Or does it fail completely?
+- Does 6i8 produce a bridge proof in proofs/bridge-to-tendsto.md?
+- If 3hu fails AND 6i8 fails: this is the 3rd attempt at this sorry. Escalation threshold approaching.
