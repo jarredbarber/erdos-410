@@ -782,14 +782,177 @@ lemma prod_one_plus_inv_primes_unbounded :
   -- By lower bound, product diverges
   exact tendsto_atTop_mono h_lower_bound h_one_add_sum_unbounded
 
+/-! ## Helper lemmas for squarish_iterates_finite
+
+The following lemmas establish the key finiteness constraints used to prove
+that squarish iterates are eventually absent. The proof relies on:
+1. Zsygmondy's theorem on primitive prime divisors of 2^a - 1
+2. The fact that consecutive squarish iterates create strong constraints
+3. As σ_k(n) → ∞, these constraints become impossible to satisfy
+-/
+
+/-- Helper: geometric sum formula for base 2.
+    ∑_{i=0}^a 2^i = 2^{a+1} - 1 -/
+lemma geom_sum_two' (a : ℕ) : ∑ x ∈ Finset.range (a + 1), (2 : ℕ)^x = 2^(a+1) - 1 := by
+  induction a with
+  | zero => simp
+  | succ a ih =>
+    rw [Finset.range_add_one, Finset.sum_insert Finset.notMem_range_self, ih]
+    ring_nf; omega
+
+/-- Key lemma: σ(2^a · m²) where m is odd equals (2^{a+1} - 1) · σ(m²).
+    This follows from multiplicativity of σ and the formula for σ(2^a). -/
+lemma sigma_squarish_form (a : ℕ) (m : ℕ) (hm_odd : Odd m) :
+    sigma 1 (2^a * m^2) = (2^(a+1) - 1) * sigma 1 (m^2) := by
+  have hm_sq_odd : Odd (m^2) := hm_odd.pow
+  have hcop : Nat.Coprime (2^a) (m^2) := 
+    Nat.Coprime.pow_left a (Nat.coprime_two_left.mpr hm_sq_odd)
+  rw [isMultiplicative_sigma.map_mul_of_coprime hcop]
+  rw [sigma_apply_prime_pow Nat.prime_two]
+  simp only [mul_one]; rw [geom_sum_two']
+
+/-- If the product (2^{a+1}-1) · σ(t²) is squarish, it must be a perfect square.
+    This is because the product is odd (product of two odd numbers), and
+    an odd squarish number is necessarily a perfect square. -/
+lemma sigma_squarish_is_square_iff (a : ℕ) (t : ℕ) (ht_pos : t ≥ 1) :
+    IsSquarish ((2^(a+1) - 1) * sigma 1 (t^2)) ↔ 
+    IsSquare ((2^(a+1) - 1) * sigma 1 (t^2)) := by
+  constructor
+  · intro h
+    have hne : t^2 ≠ 0 := by positivity
+    have hsq_t : IsSquarish (t^2) := Or.inl ⟨t, by ring⟩
+    have hodd : Odd ((2^(a+1) - 1) * sigma 1 (t^2)) := by
+      apply Odd.mul
+      · have h2 : 2^(a+1) ≥ 1 := Nat.one_le_pow (a+1) 2 (by omega)
+        exact Nat.Even.sub_odd h2 (Nat.even_pow.mpr ⟨even_two, by omega⟩) odd_one
+      · exact sigma_odd_of_squarish hne hsq_t
+    rcases h with hsquare | ⟨m', heq, _⟩
+    · exact hsquare
+    · exfalso
+      rw [heq] at hodd
+      exact Nat.not_even_iff_odd.mpr hodd (even_two_mul m')
+  · intro hsq
+    exact Or.inl hsq
+
+/-- Zsygmondy's theorem: For a ≥ 7, 2^a - 1 has a primitive prime divisor.
+    This is a prime p such that p | 2^a - 1 but p ∤ 2^j - 1 for any 1 ≤ j < a. 
+    
+    The only exceptions for 2^a - 1 are a = 1 (trivial) and a = 6 
+    (where 2^6 - 1 = 63 = 7·9 and 7 | 2^3 - 1).
+    
+    Note: This is a deep number-theoretic result (Zsygmondy 1892/Bang 1886)
+    that is not currently in Mathlib. -/
+lemma zsygmondy_two_pow (a : ℕ) (ha : a ≥ 7) :
+    ∃ p, Nat.Prime p ∧ p ∣ 2^a - 1 ∧ ∀ j, 1 ≤ j → j < a → ¬(p ∣ 2^j - 1) := by
+  sorry
+
+/-- Key finiteness: For a fixed a ≥ 6, the set of odd t ≥ 1 such that 
+    (2^{a+1}-1) · σ(t²) is a perfect square is finite.
+    
+    This follows from Zsygmondy: the primitive prime divisor p of 2^{a+1}-1
+    must appear in σ(t²) with matching parity for the product to be a perfect square.
+    This creates a finite constraint on t.
+    
+    For a < 6, the constraint set is also finite (can be verified directly). -/
+lemma squarish_constraint_set_finite (a : ℕ) :
+    Set.Finite {t : ℕ | Odd t ∧ t ≥ 1 ∧ IsSquare ((2^(a+1) - 1) * sigma 1 (t^2))} := by
+  sorry
+
+/-- Key finiteness (dual): For any fixed odd t ≥ 1, the set of a such that 
+    (2^{a+1}-1) · σ(t²) is a perfect square is finite.
+    
+    This follows from Zsygmondy: as a increases beyond 6, new primitive primes appear
+    in 2^{a+1}-1, each creating a constraint. A fixed t can only satisfy finitely many
+    such constraints because t has only finitely many prime factors. -/
+lemma squarish_a_set_finite (t : ℕ) (ht_odd : Odd t) (ht_pos : t ≥ 1) :
+    Set.Finite {a : ℕ | IsSquare ((2^(a+1) - 1) * sigma 1 (t^2))} := by
+  sorry
+
+/-- Squarish decomposition: If m ≥ 1 is squarish, then m = 2^a · t² 
+    for some a ≥ 0 and odd t ≥ 1. This is the canonical form where
+    a is the 2-adic valuation of m and t² is the odd part. -/
+lemma squarish_decomposition {m : ℕ} (hm : m ≥ 1) (hsq : IsSquarish m) :
+    ∃ a t, m = 2^a * t^2 ∧ Odd t ∧ t ≥ 1 := by
+  rcases hsq with ⟨k, hk⟩ | ⟨half, hm_eq, ⟨k, hk⟩⟩
+  · -- Case 1: m = k²
+    have hk0 : k ≠ 0 := by intro h; rw [h] at hk; simp at hk; omega
+    let v2 := k.factorization 2
+    let t := k / 2^v2
+    have h2div : 2^v2 ∣ k := Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hk0 |>.mpr le_rfl
+    have ht_odd : Odd t := by
+      rw [Nat.odd_iff]
+      by_contra h
+      have hne1 : t % 2 ≠ 1 := h
+      have h0 : t % 2 = 0 := Nat.mod_two_eq_zero_or_one t |>.resolve_right hne1
+      have h2dvd_t : 2 ∣ t := Nat.dvd_of_mod_eq_zero h0
+      have hdivk : 2^(v2 + 1) ∣ k := by 
+        rw [pow_succ]
+        exact Nat.mul_dvd_of_dvd_div h2div h2dvd_t
+      have hcontra : v2 + 1 ≤ v2 := Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hk0 |>.mp hdivk
+      omega
+    have hk_eq : k = 2^v2 * t := (Nat.mul_div_cancel' h2div).symm
+    have ht_pos : t ≥ 1 := by
+      have h2pow_pos : 2^v2 ≥ 1 := Nat.one_le_pow v2 2 (by omega)
+      have hk_pos : k ≥ 1 := Nat.pos_of_ne_zero hk0
+      exact Nat.div_pos (Nat.le_of_dvd hk_pos h2div) h2pow_pos
+    use 2 * v2, t
+    refine ⟨?_, ht_odd, ht_pos⟩
+    rw [hk, hk_eq]
+    ring
+  · -- Case 2: m = 2 * k²
+    have hk0 : k ≠ 0 := by
+      intro h; rw [h] at hk; simp at hk
+      rw [hk] at hm_eq; simp at hm_eq; omega
+    let v2 := k.factorization 2
+    let t := k / 2^v2
+    have h2div : 2^v2 ∣ k := Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hk0 |>.mpr le_rfl
+    have ht_odd : Odd t := by
+      rw [Nat.odd_iff]
+      by_contra h
+      have hne1 : t % 2 ≠ 1 := h
+      have h0 : t % 2 = 0 := Nat.mod_two_eq_zero_or_one t |>.resolve_right hne1
+      have h2dvd_t : 2 ∣ t := Nat.dvd_of_mod_eq_zero h0
+      have hdivk : 2^(v2 + 1) ∣ k := by 
+        rw [pow_succ]
+        exact Nat.mul_dvd_of_dvd_div h2div h2dvd_t
+      have hcontra : v2 + 1 ≤ v2 := Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hk0 |>.mp hdivk
+      omega
+    have hk_eq : k = 2^v2 * t := (Nat.mul_div_cancel' h2div).symm
+    have ht_pos : t ≥ 1 := by
+      have h2pow_pos : 2^v2 ≥ 1 := Nat.one_le_pow v2 2 (by omega)
+      have hk_pos : k ≥ 1 := Nat.pos_of_ne_zero hk0
+      exact Nat.div_pos (Nat.le_of_dvd hk_pos h2div) h2pow_pos
+    use 2 * v2 + 1, t
+    refine ⟨?_, ht_odd, ht_pos⟩
+    rw [hm_eq, hk, hk_eq]
+    ring
+
 /-- Squarish iterates are eventually absent: for n ≥ 2, σₖ(n) is not squarish
     for all sufficiently large k.
     
     This uses Zsygmondy's theorem on primitive prime divisors of 2^a - 1
     to show that consecutive squarish iterates are impossible for large enough a.
-    See proofs/prime-persistence.md, Theorem 1. -/
+    See proofs/prime-persistence.md, Theorem 1.
+    
+    Proof outline:
+    1. Suppose for contradiction infinitely many k have σ_k(n) squarish
+    2. Write σ_{k_j}(n) = 2^{a_j} · t_j² where t_j is odd
+    3. Since σ_k(n) → ∞, either a_j → ∞ or t_j → ∞ (or both)
+    4. Case A (a_j → ∞): Each t can only work for finitely many a (by squarish_a_set_finite).
+       So infinitely many distinct a's require infinitely many distinct t's.
+       But for consecutive squarish iterates, t must satisfy constraints from primitive primes.
+       This becomes impossible as more constraints accumulate.
+    5. Case B (a_j bounded): t_j → ∞, but ⋃_{a ≤ A} (constraint set for a) is finite,
+       so eventually t_j escapes all constraint sets.
+-/
 lemma squarish_iterates_finite (n : ℕ) (hn : n ≥ 2) :
     ∃ K, ∀ k ≥ K, ¬IsSquarish ((sigma 1)^[k] n) := by
+  -- We use the contrapositive structure: if there were infinitely many squarish iterates,
+  -- we'd have a contradiction with the finiteness constraints.
+  -- The key is that as σ_k(n) → ∞, the constraints become impossible to satisfy.
+  
+  -- For the formal proof, we use the finiteness of constraint sets.
+  -- The full argument requires careful analysis of the 2-adic valuations and odd parts.
   sorry
 
 /-- For n ≥ 2, the prime 2 eventually always divides σₖ(n).
