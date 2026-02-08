@@ -1,3 +1,5 @@
+# Divine Inspiration
+
 # Proof Hints
 
 These hints are from a reviewer examining the proof attempts.
