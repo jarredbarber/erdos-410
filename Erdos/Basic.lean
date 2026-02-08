@@ -782,21 +782,64 @@ lemma prod_one_plus_inv_primes_unbounded :
   -- By lower bound, product diverges
   exact tendsto_atTop_mono h_lower_bound h_one_add_sum_unbounded
 
+/-- Squarish iterates are eventually absent: for n ≥ 2, σₖ(n) is not squarish
+    for all sufficiently large k.
+    
+    This uses Zsygmondy's theorem on primitive prime divisors of 2^a - 1
+    to show that consecutive squarish iterates are impossible for large enough a.
+    See proofs/prime-persistence.md, Theorem 1. -/
+lemma squarish_iterates_finite (n : ℕ) (hn : n ≥ 2) :
+    ∃ K, ∀ k ≥ K, ¬IsSquarish ((sigma 1)^[k] n) := by
+  sorry
+
+/-- For n ≥ 2, the prime 2 eventually always divides σₖ(n).
+    
+    Proof: By `squarish_iterates_finite`, eventually σₖ(n) is not squarish.
+    By `sigma_even_of_not_squarish`, σ(m) is even when m is not squarish.
+    So σₖ₊₁(n) = σ(σₖ(n)) is even for large k. -/
+lemma prime_persistence_two (n : ℕ) (hn : n ≥ 2) :
+    ∃ K, ∀ k ≥ K, 2 ∣ (sigma 1)^[k] n := by
+  obtain ⟨K, hK⟩ := squarish_iterates_finite n hn
+  use K + 1
+  intro k hk
+  obtain ⟨j, rfl⟩ : ∃ j, k = j + 1 := ⟨k - 1, by omega⟩
+  have hnsq : ¬IsSquarish ((sigma 1)^[j] n) := hK j (by omega)
+  have hne : (sigma 1)^[j] n ≠ 0 := by
+    have := sigma_iterate_ge_two n hn j; omega
+  have heven := sigma_even_of_not_squarish hne hnsq
+  simp only [Function.iterate_succ', Function.comp_apply]
+  exact even_iff_two_dvd.mp heven
+
+/-- For odd prime q, q eventually always divides σₖ(n).
+    
+    The proof uses:
+    - Once 2 permanently divides (from `prime_persistence_two`), write
+      σₖ(n) = 2^{aₖ} · mₖ with mₖ odd.
+    - The 2-adic valuation aₖ is unbounded (since σₖ(n) → ∞).
+    - Let d = ord_q(2). When d | (aₖ + 1), we get q | σ(2^aₖ) | σₖ₊₁(n).
+    - Once q enters, it persists because σ(q^b) ≡ 1 (mod q) contributes
+      no factors of q, but the growing number of prime factors ensures
+      q | σ(M) for the q-free part M.
+    See proofs/prime-persistence.md, Theorem 2. -/
+lemma prime_persistence_odd (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2)
+    (n : ℕ) (hn : n ≥ 2) :
+    ∃ K, ∀ k ≥ K, q ∣ (sigma 1)^[k] n := by
+  sorry
+
 /-- **Prime Persistence**: Every prime eventually always divides σₖ(n).
     
     For any prime q and n ≥ 2, there exists K such that q ∣ σₖ(n) for all k ≥ K.
     
-    The proof uses:
-    - For q = 2: Squarish iterates (odd part is a perfect square) are finite,
-      by Zsygmondy's theorem on primitive prime divisors of 2^a - 1.
-    - For odd q: Once 2 permanently divides, the 2-adic valuation eventually
-      cycles through all residues mod ord_q(2), forcing q to divide periodically
-      with bounded gaps, and hence eventually permanently.
+    The proof splits into two cases:
+    - For q = 2: Uses `prime_persistence_two` (squarish iterates are finite).
+    - For odd q: Uses `prime_persistence_odd` (2-adic valuation mechanism).
     
     See proofs/prime-persistence.md for the full natural language proof. -/
 lemma prime_persistence (q : ℕ) (hq : Nat.Prime q) (n : ℕ) (hn : n ≥ 2) :
     ∃ K, ∀ k ≥ K, q ∣ (sigma 1)^[k] n := by
-  sorry
+  rcases Nat.Prime.eq_two_or_odd hq with rfl | hodd
+  · exact prime_persistence_two n hn
+  · exact prime_persistence_odd q hq (by omega) n hn
 
 /-- The sum of reciprocals of primes in sigma orbit tends to infinity.
     This is the key lemma for proving Erdős Problem 410.
