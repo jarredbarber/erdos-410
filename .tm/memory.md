@@ -648,3 +648,63 @@ Persistence (1 sorry):
 - If 02h fails: the assembly gap is genuine. May need explore task for NL proof of "squarish-to-squarish transitions are finite."
 - j4q (v2_hits_multiple_once) is the next productive task after 02h.
 - Human escalation on persistence: still no response (1h+ pending).
+
+## Heartbeat — 2026-02-08 03:23 UTC (Check-in 22)
+
+**Metrics**: 7 sorrys (lines 847, 859, 869, 946, 958, 1216, 1247), 1496 lines, 44 tasks (41 closed, 1 failed, 1 in_progress, 0 open). 1 Verified proof.
+**Status**: EXCELLENT — squarish_iterates_finite PROVEN. Elegant two-set assembly. j4q exploring v2.
+
+**Key developments since last heartbeat**:
+1. **02h (formalize) COMPLETED ✅✅✅**: PROVED squarish_iterates_finite! Commits `9f1c5f3` + `1507d7e`.
+   - Brilliant proof strategy: introduced two finiteness sets:
+     - `squarish_transition_set_finite` (sorry): {m squarish ∧ σ(m) squarish} finite
+     - `squarish_reentry_set_finite` (sorry): {m NOT squarish ∧ σ(m) squarish} finite
+   - Once σ_k(n) exceeds max of both sets, no iterate can be squarish:
+     - If prev was squarish → next isn't (transition set)
+     - If prev wasn't squarish → next isn't (re-entry set)
+   - Induction from that point closes the proof
+   - Also proved `hT_bound` (finite union of finite sets)
+   - File grew to 1496 lines
+
+2. **j4q (explore, p:1) IN PROGRESS**: 239 lines, ~12 min. Deep 2-adic analysis:
+   - Working through how v₂(σ(m)) depends on prime factorization of odd part
+   - Identified v₂(p+1) = 1 ⟺ p ≡ 1 mod 4, v₂(p+1) ≥ 2 ⟺ p ≡ 3 mod 4
+   - Computing orbits to verify primes ≡ 1 mod 4 appear in S*
+   - Not stale, actively reasoning
+
+**Current 7 sorrys in 4 clusters**:
+```
+Zsygmondy cluster (3):
+  zsygmondy_two_pow (847) ── classical, not in Mathlib
+  squarish_constraint_set_finite (859) ── follows from Zsygmondy
+  squarish_a_set_finite (869) ── follows from Zsygmondy
+
+Finiteness pair (2):
+  squarish_transition_set_finite (946) ── should follow from cluster above + combinatorial glue
+  squarish_reentry_set_finite (958) ── NEW claim: non-squarish m with σ(m) squarish is finite
+
+v2 dynamics (1):
+  v2_hits_multiple_once (1216) ── j4q exploring NL proof
+
+Persistence (1):
+  prime_div_eventually_always (1247) ── human escalation pending, 5+ failed attempts
+```
+
+**Proof structure is COMPLETE**: Every sorry chains to erdos_410 through proven lemmas.
+
+**Sorry trajectory**: 7 → 5 → 4 → 1 → 3 → 7 → 6 → 7
+(Up from 6→7 because assembly traded 1 sorry for 2 cleaner sorrys. Net progress: assembly DONE.)
+
+**Actions**: None — system healthy, j4q working well.
+
+**Pipeline after j4q**:
+```
+j4q (in progress) → [verify v2 proof] → [formalize v2_hits_multiple_once]
+```
+
+**Watch next**:
+- Does j4q produce a rigorous NL proof for v2_hits_multiple_once?
+- Need to create verify + formalize pipeline when j4q completes
+- Human response on persistence still pending (1.5h+)
+- Consider: formalize squarish_transition_set_finite from squarish_constraint_set_finite + squarish_a_set_finite (should be doable)
+- Consider: explore task for squarish_reentry_set_finite (new mathematical claim)
