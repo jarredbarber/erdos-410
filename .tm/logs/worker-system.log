@@ -15953,3 +15953,22 @@ the single-hit lemma to σ^K(n) and using Function.iterate_add_apply.
 The sorry is now isolated in v2_hits_multiple_once, which captures
 the core number theory: Escape Lemma + Dirichlet give control over
 the 2-adic valuation dynamics of iterated σ."
+[2026-02-08T02:39:38.346Z] 
+$ cd /home/jarred/code/erdos-410 && tm update erdos410-ltw --status "v2_hits_residue proved from v2_hits_multiple_once. Build succeeds. Committed."
+[2026-02-08T02:39:48.023Z] 
+
+📝 Agent response complete.
+
+[2026-02-08T02:39:48.023Z] 📄 Log saved to .tm/logs/worker-erdos410-ltw.md
+[2026-02-08T02:39:48.023Z] 
+📊 Task erdos410-ltw completed:
+[2026-02-08T02:39:48.023Z]    Summary: Closed sorry in v2_hits_residue. lake build succeeds.
+[2026-02-08T02:39:48.023Z]    Details: Decomposed v2_hits_residue into two parts:
+
+1. **v2_hits_multiple_once** (new, sorry'd): ∃ k, d ∣ ((sigma 1)^[k] n).factorization 2 + 1 — the "single hit" version capturing the core number theory (Escape Lemma + Dirichlet).
+
+2. **v2_hits_residue** (now sorry-free): ∀ K, ∃ k ≥ K, d ∣ ... — proved by applying v2_hits_multiple_once to σ^K(n), which satisfies the ≥ 2 hypothesis via sigma_iterate_ge_two. Uses Function.iterate_add_apply to compose iterates.
+
+The key insight: since the "single hit" property is universal over n ≥ 2, we can restart it from any point in the orbit to get infinitely many hits.
+
+New sorry introduced: v2_hits_multiple_once (line 1058). This isolates the deep number-theoretic content: using dynamics of σ on 2-adic valuations, the Escape Lemma, and Dirichlet's theorem to show d divides v₂(σₖ(n)) + 1 for some k.
