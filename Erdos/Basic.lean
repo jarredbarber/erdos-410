@@ -782,13 +782,82 @@ lemma prod_one_plus_inv_primes_unbounded :
   -- By lower bound, product diverges
   exact tendsto_atTop_mono h_lower_bound h_one_add_sum_unbounded
 
+/-- **Prime Persistence**: Every prime eventually always divides σₖ(n).
+    
+    For any prime q and n ≥ 2, there exists K such that q ∣ σₖ(n) for all k ≥ K.
+    
+    The proof uses:
+    - For q = 2: Squarish iterates (odd part is a perfect square) are finite,
+      by Zsygmondy's theorem on primitive prime divisors of 2^a - 1.
+    - For odd q: Once 2 permanently divides, the 2-adic valuation eventually
+      cycles through all residues mod ord_q(2), forcing q to divide periodically
+      with bounded gaps, and hence eventually permanently.
+    
+    See proofs/prime-persistence.md for the full natural language proof. -/
+lemma prime_persistence (q : ℕ) (hq : Nat.Prime q) (n : ℕ) (hn : n ≥ 2) :
+    ∃ K, ∀ k ≥ K, q ∣ (sigma 1)^[k] n := by
+  sorry
+
 /-- The sum of reciprocals of primes in sigma orbit tends to infinity.
     This is the key lemma for proving Erdős Problem 410.
-    This follows from the fact that the sequence grows unboundedly and 
-    continually gains new prime factors (Bang's Theorem / Zsigmondy's Theorem). -/
+    
+    Proof: By Prime Persistence, every prime eventually permanently divides σₖ(n).
+    For any target R, choose M primes whose reciprocal sum exceeds R.
+    Take K = max of their persistence thresholds. For k ≥ K, all M primes
+    are in σₖ(n)'s prime factors, so the sum exceeds R. -/
 lemma prime_factors_accumulate (n : ℕ) (hn : n ≥ 2) :
     Tendsto (fun k => ∑ p ∈ ((sigma 1)^[k] n).primeFactors, (1 / (p : ℝ))) atTop atTop := by
-  sorry
+  rw [tendsto_atTop_atTop]
+  intro R
+  -- Step 1: The sum of prime reciprocals diverges
+  have h_primes_diverge := Theorems100.Real.tendsto_sum_one_div_prime_atTop
+  rw [tendsto_atTop_atTop] at h_primes_diverge
+  obtain ⟨N, hN⟩ := h_primes_diverge R
+  
+  -- Step 2: The set S = {p < N : Prime p} has reciprocal sum ≥ R
+  let S := Finset.filter Nat.Prime (Finset.range N)
+  have hS_sum : R ≤ ∑ p ∈ S, (1 : ℝ) / p := hN N le_rfl
+  
+  -- Step 3: For each prime p in S, get persistence threshold
+  have h_persist : ∀ p ∈ S, ∃ K, ∀ k ≥ K, p ∣ (sigma 1)^[k] n := fun p hp => by
+    have hp_prime : Nat.Prime p := Finset.mem_filter.mp hp |>.2
+    exact prime_persistence p hp_prime n hn
+  
+  -- Step 4: Choose thresholds for all primes in S
+  classical
+  choose! K_of hK_of using h_persist
+  
+  -- Step 5: Take K = max of all thresholds (or 0 if S is empty)
+  let K := if hne : S.Nonempty then S.sup' hne K_of else 0
+  use K
+  
+  intro k hk
+  -- For k ≥ K, every prime in S divides σₖ(n)
+  have h_div : ∀ p ∈ S, p ∣ (sigma 1)^[k] n := fun p hp => by
+    have hKp : K_of p ≤ K := by
+      simp only [K]
+      split_ifs with hne
+      · exact Finset.le_sup' K_of hp
+      · exfalso; exact hne ⟨p, hp⟩
+    exact hK_of p hp k (le_trans hKp hk)
+  
+  -- σₖ(n) ≠ 0
+  have hsk_ne : (sigma 1)^[k] n ≠ 0 := by
+    have h2 := sigma_iterate_ge_two n hn k
+    omega
+  
+  -- Every prime in S is in the prime factors of σₖ(n)
+  have h_mem : S ⊆ ((sigma 1)^[k] n).primeFactors := fun p hp => by
+    have hp_prime : Nat.Prime p := Finset.mem_filter.mp hp |>.2
+    exact Nat.mem_primeFactors.mpr ⟨hp_prime, h_div p hp, hsk_ne⟩
+  
+  -- Sum over S ≤ sum over primeFactors (since 1/p ≥ 0)
+  have h_nonneg : ∀ p ∈ ((sigma 1)^[k] n).primeFactors, p ∉ S → (0 : ℝ) ≤ 1 / p := 
+    fun p _ _ => by positivity
+  
+  calc R ≤ ∑ p ∈ S, (1 : ℝ) / p := hS_sum
+    _ ≤ ∑ p ∈ ((sigma 1)^[k] n).primeFactors, (1 : ℝ) / p := 
+        Finset.sum_le_sum_of_subset_of_nonneg h_mem h_nonneg
 
 /-- The abundancy ratio σ(σₖ(n))/σₖ(n) tends to infinity. -/
 lemma abundancy_ratio_diverges (n : ℕ) (hn : n ≥ 2) :
