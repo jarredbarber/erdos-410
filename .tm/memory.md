@@ -327,3 +327,47 @@ opj (verify prime-persistence.md) → xck (formalize prime_factors_accumulate)
 - If approved: does xck start and make progress on Lean code?
 - If revision needed: create targeted explore task for the specific gaps.
 - Monitor for worker picking up blocked xck before opj completes (shouldn't happen with deps).
+
+## Heartbeat — 2026-02-08 00:50 UTC (Check-in 13)
+
+**Metrics**: 1 sorry (line 799, `prime_persistence`), ~950 lines, 37 tasks (33 closed, 1 in_progress, 3 open). 1 Verified proof, 1 Under review, 2 Draft.
+**Status**: Excellent progress — proof chain complete, sorry isolated. Pipeline fully built.
+
+**Key developments since last heartbeat**:
+1. **opj (verify) COMPLETED**: Reviewed prime-persistence.md → Under review 🔍. Found 4 critical gaps:
+   - Lemma 3 (odd valuation) — Wieferich hedge
+   - Theorem 1 Step 3 (varying pairs) — not rigorous
+   - Lemma 5 (residue equidistribution) — hand-wavy "chaotic mixing"
+   - Theorem 2 Step 5 (density → permanence) — stated without proof
+   Created an6 (explore) to address gaps.
+
+2. **xck (formalize) COMPLETED ✅**: Brilliant decomposition:
+   - Created `prime_persistence` helper lemma with sorry (line 799)
+   - Proved `prime_factors_accumulate` using prime_persistence + **Mathlib's `Theorems100.Real.tendsto_sum_one_div_prime_atTop`** (sum of prime reciprocals diverges — already in Mathlib!)
+   - Committed: `e8f35c5`. Build succeeds.
+   - Entire chain now works: prime_persistence → prime_factors_accumulate → abundancy_ratio_diverges → sigma_iterate_superexp_gt_one → erdos_410
+
+3. **an6 (explore) IN PROGRESS**: Agent doing serious math — analyzing v_2(σ(p^b)) via LTE, correctly identifying that v_2(σ_{k+1}) comes from σ(m_k) only. 51 lines of log, deep thinking phase.
+
+**The proof chain is now COMPLETE modulo one sorry**:
+```
+prime_persistence (sorry) → prime_factors_accumulate (proven) → abundancy_ratio_diverges (proven) → sigma_iterate_superexp_gt_one (proven) → erdos_410 (proven)
+```
+
+**Pipeline**:
+```
+an6 (explore: fix NL gaps) → 5bt (verify revised proof) → zp6 (formalize prime_persistence)
+```
+
+**Actions**:
+1. Created **5bt** (verify, p:1, depends on an6): Review revised prime-persistence.md
+2. Created **zp6** (formalize, p:0, depends on 5bt): Close prime_persistence sorry
+3. Full DAG is clean with correct dependencies
+
+**Mathlib discovery**: `Theorems100.Real.tendsto_sum_one_div_prime_atTop` — the sum of prime reciprocals diverges, already formalized in Mathlib! This eliminated the need for our Mertens-type exploration.
+
+**Watch next**:
+- Does an6 successfully close all 4 gaps? Agent seems capable — doing real 2-adic analysis.
+- If an6 fails: create smaller explore tasks for individual gaps (Lemma 5 alone might suffice if we can restructure around the density argument).
+- If 5bt rejects again: we may need 2 revision rounds. Consider whether to have formalize agent work with sorry decomposition while math is being revised.
+- **NEW RISK**: The formalize agent (zp6) will need Zsygmondy's theorem in Lean. Check if it's in Mathlib: look for `Zsygmondy` or `exists_prime_dvd_pow_sub_one` or `Nat.exists_prime_and_dvd`. If not available, formalization may need an alternative approach.
