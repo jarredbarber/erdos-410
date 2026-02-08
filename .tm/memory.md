@@ -821,3 +821,46 @@ Persistence (1): prime_div_eventually_always (5+ failed attempts)
 - After vou: need formalize task to restructure squarish_iterates_finite proof in Lean (remove false reentry sorry, add correct approach)
 - 221 (v2 unbounded) is secondary but useful for later
 - Human escalation on persistence still pending (2+ hours)
+
+## Heartbeat — 2026-02-08 04:20 UTC (Check-in 25)
+
+**Metrics**: 8 sorrys (same lines), 1496+ lines, 50 tasks (45 closed, 2 failed, 1 in_progress, 2 open).
+**Status**: RECOVERY — vou delivered orbit-specific proof for squarish_iterates_finite. Pipeline rebuilt.
+
+**Key developments since last heartbeat**:
+1. **vou (explore, p:0) COMPLETED ✅**: Published proofs/squarish-iterates.md (Draft ✏️). Commit `9c56119`.
+   - Three-stage orbit-specific proof:
+     - **Part 1**: Transition set T = {m squarish : σ(m) squarish} is finite (Zsygmondy + König-type argument)
+     - **Stage 1**: No consecutive squarish iterates once orbit exceeds max(T)
+     - **Stages 2-3**: Reentry becomes impossible as prime factors accumulate — N_k (count of odd-exponent primes) → ∞
+   - Quality: Part 1 strong, Stage 1 clean, Stage 3 has some hand-waving in the "limsup N_k = ∞" argument
+   - This REPLACES the broken squarish_reentry_set_finite approach
+   
+2. **221 (explore, p:1) IN PROGRESS**: 116 lines, ~15 min. Working on v2_iterate_unbounded.
+   - Trying contradiction: if v₂ bounded by B, then ≤B odd-exponent primes, but Escape Lemma forces unboundedly many odd primes → contradiction
+   - Good approach, actively reasoning
+
+**Actions**:
+1. Created **9m4** (verify, p:1): Review proofs/squarish-iterates.md — queued after 221
+
+**Pipeline**:
+```
+221 (in progress) → 9m4 (verify squarish-iterates, open) → [formalize restructure]
+```
+
+**Structural recovery status**:
+- squarish_reentry_set_finite: CONFIRMED FALSE (proofs/squarish-reentry.md)
+- squarish_iterates_finite: New orbit-specific NL proof available, needs verify
+- Lean code: still compiles (all sorrys intact), but squarish_reentry_set_finite is known-false
+- After verify+formalize: need to restructure squarish_iterates_finite proof to use orbit-specific argument instead of two-set approach
+
+**If 9m4 approves squarish-iterates.md**: Create formalize task to:
+1. Remove squarish_reentry_set_finite (delete false sorry)
+2. Replace squarish_iterates_finite proof with orbit-specific approach
+3. squarish_transition_set_finite stays (used by the new proof too)
+
+**Watch next**:
+- Does 221 succeed with v2_iterate_unbounded proof?
+- Does 9m4 approve squarish-iterates.md? Stage 3 is the weak point.
+- If Stage 3 rejected: need revision. The N_k argument is the key.
+- Human escalation on persistence still pending (~2.5h)
