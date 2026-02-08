@@ -864,3 +864,84 @@ Persistence (1): prime_div_eventually_always (5+ failed attempts)
 - Does 9m4 approve squarish-iterates.md? Stage 3 is the weak point.
 - If Stage 3 rejected: need revision. The N_k argument is the key.
 - Human escalation on persistence still pending (~2.5h)
+
+## Heartbeat — 2026-02-08 04:36 UTC (Check-in 26)
+
+**Metrics**: 8 sorrys (same lines), 1496+ lines, 52 tasks (47 closed, 2 failed, 1 in_progress, 2 open).
+**Status**: System healthy. Pipeline active: Stage 3 fix in progress, Part 1 fix queued, v2 verify queued.
+
+**Key developments since last heartbeat**:
+1. **221 (explore) COMPLETED ✅**: Published proofs/v2-unbounded.md (Draft, Confidence: Certain). Commit `f278a97`.
+   - Proves v₂(σₖ(n)) is unbounded using LTE + Escape Lemma + CRT density
+   - Needs verification
+
+2. **9m4 (verify) COMPLETED**: Revision requested 🔍 on squarish-iterates.md. Commit `b0ccbaa`.
+   - **Part 1 gaps**: Case A (T_a finite for a≤5) not proven, Case B sub-claim B1 (order relationship), König-type combination incorrect
+   - **Stage 3 gaps**: N_k → ∞ not rigorously proven, odd exponents not guaranteed, Mersenne balancing not ruled out
+   - Agent created two follow-up tasks: pml (Stage 3, p:1), 4bk (Part 1, p:2)
+
+3. **pml (explore, p:1, large) IN PROGRESS**: 83 lines, ~15 min. Working on Stage 3 fix.
+   - Explored multiple approaches: valuation counting, Zsygmondy constraints, covering arguments
+   - Currently pivoting between direct Diophantine analysis and energy arguments
+   - Correctly identifying that ω(mₖ) → ∞ and trying to use this
+   - Not stale, actively reasoning through options
+
+4. **4bk (explore, p:2) OPEN**: Part 1 transition set finiteness fix — queued after pml.
+
+**Actions**:
+1. Created **xov** (verify, p:2): Review proofs/v2-unbounded.md
+
+**Pipeline**:
+```
+pml (in progress, Stage 3 fix) → 4bk (Part 1 fix) → xov (verify v2-unbounded)
+                                                      → [re-verify squarish-iterates after both fixes]
+                                                      → [formalize tasks]
+```
+
+**Sorry trajectory**: 8 (stable for 5 heartbeats — NL math groundwork in progress)
+
+**Key concern**: pml (Stage 3 fix) is the critical path. This is the orbit-specific argument that:
+- Global reentry set is infinite (proven false: squarish_reentry_set_finite)
+- But orbit-specific reentry is finite (what we need to prove)
+- The gap: why can't this specific orbit keep hitting squarish values?
+
+If pml fails: this would be the 2nd attempt at the orbit-specific argument. Options:
+- Try completely different approach to squarish_iterates_finite
+- Or: bypass squarish_iterates_finite entirely — prove prime_persistence_two differently
+
+**Watch next**:
+- Does pml find a rigorous Stage 3 argument?
+- Does 4bk fix Part 1 gaps?
+- Does xov approve v2-unbounded.md?
+- Human escalation on persistence still pending (~3h)
+
+## Heartbeat — 2026-02-08 04:52 UTC (Check-in 27)
+
+**Metrics**: 8 sorrys (same lines), 1496+ lines, 52 tasks (47 closed, 2 failed, 1 in_progress, 2 open). 1 Verified, 2 Under review, 4 Draft, 1 Rejected.
+**Status**: System healthy. pml deeply engaged on Stage 3 fix.
+
+**Observations**:
+1. **pml (explore, p:1, large) IN PROGRESS**: 291 lines (up from 83 at last heartbeat — 3.5× growth in 15 min). Agent deeply engaged with the lcm-of-orders argument:
+   - Core approach: Par(Q_k) at reentry must match Par(2^{a_k+1}-1), primes accumulate with increasingly large multiplicative orders, lcm of orders must divide a_k+1, eventually impossible
+   - **Identified gap**: "establishing that enough primes with coprime orders actually appear in Par(Q_k)" — this is the genuine mathematical difficulty
+   - Agent keeps finding subtleties but is actively pivoting to "cleaner argument" (last line)
+   - NOT stale, very active reasoning
+
+2. **4bk (open, p:2)**: Part 1 fix — queued after pml
+3. **xov (open, p:2)**: v2-unbounded verify — queued after 4bk
+
+**Assessment**: pml is doing real mathematics on a hard problem. The lcm/order argument is the right approach but the agent recognizes the gap. This is attempt #2 at orbit-specific Stage 3 (vou produced it, 9m4 flagged it, pml fixing it). Let it run — it's a large task with more time budget.
+
+**Actions**: None — system healthy, agent actively working.
+
+**Risk assessment for pml failure**: If pml fails (attempt #2 at Stage 3):
+- Option A: Try completely different proof of squarish_iterates_finite (e.g., density argument: squarish numbers have density 0, orbit visits each number at most once → finite intersection)
+- Option B: Bypass squarish_iterates_finite entirely — prove prime_persistence_two via a different route (direct even/odd dynamics without needing "eventually never squarish")
+- Option C: Accept squarish_iterates_finite as a sorry (orbit-specific claim that's likely true but hard to prove rigorously)
+- Would need to evaluate which is most productive
+
+**Watch next**:
+- Does pml converge on a proof or give up? At 291 lines it may be reaching the limit of productive reasoning
+- If pml fails: implement Option A or B above
+- After pml: 4bk (Part 1) → xov (v2 verify) → pipeline continues
+- Human escalation on persistence still pending (~3h)
