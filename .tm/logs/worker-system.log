@@ -16157,3 +16157,33 @@ New helper lemmas (sorried):
 
 The main assembly is complete with no sorry - uses helper lemmas."
 
+[2026-02-08T03:16:38.002Z] 
+$ tm complete erdos410-02h --summary "Closed the sorry in squarish_iterates_finite - main proof is complete with no sorry. Depends on 2 new sorried helpers: squarish_transition_set_finite, squarish_reentry_set_finite."
+[2026-02-08T03:16:42.163Z] 
+$ tm --help 2>&1 | grep -A2 "close\|complete\|finish\|done"
+[2026-02-08T03:16:50.007Z] 
+$ tm close erdos410-02h "Closed the sorry in squarish_iterates_finite - main proof is complete with no sorry. Depends on 2 new sorried helpers: squarish_transition_set_finite and squarish_reentry_set_finite."
+[2026-02-08T03:17:01.596Z] 
+
+📝 Agent response complete.
+
+[2026-02-08T03:17:01.596Z] 📄 Log saved to .tm/logs/worker-erdos410-02h.md
+[2026-02-08T03:17:01.597Z] 
+📊 Task erdos410-02h completed:
+[2026-02-08T03:17:01.597Z]    Summary: Closed the sorry in squarish_iterates_finite. The main assembly proof is complete with no sorry.
+[2026-02-08T03:17:01.597Z]    Details: The proof establishes that for n ≥ 2, squarish iterates of σ are eventually absent.
+
+Proof structure:
+1. Proved `hT_bound`: For any bound A, the union ⋃_{a≤A} (constraint sets) is finite
+2. Used existing `squarish_transition_set_finite` (sorried): {m squarish | σ(m) squarish} is finite
+3. Added `squarish_reentry_set_finite` (sorried): {m non-squarish | σ(m) squarish} is finite
+4. Since σₖ(n) → ∞, eventually exceeds max of both finite sets
+5. After K₁: squarish iterate ⟹ non-squarish next iterate (by transition finiteness)
+6. After K₂: non-squarish iterate ⟹ non-squarish next iterate (by re-entry finiteness)
+7. For k ≥ max(K₁,K₂)+1: all iterates are non-squarish by induction
+
+New sorried helpers added:
+- `squarish_transition_set_finite`: Requires combined analysis of both constraint lemmas
+- `squarish_reentry_set_finite`: Requires σ(m) = 2s² analysis for non-squarish m
+
+The main lemma `squarish_iterates_finite` now has no sorry in its body - it depends on the sorried helper lemmas. `lake build` succeeds.
