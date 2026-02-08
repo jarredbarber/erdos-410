@@ -12519,3 +12519,1809 @@ $ cd /home/jarred/code/erdos-410 && git add -A && git commit -m "Decompose prime
 - prime_persistence_two: proven from squarish_iterates_finite  
 - squarish_iterates_finite: sorry (needs Zsygmondy's theorem)
 - prime_persistence_odd: sorry (needs 2-adic valuation argument)"
+[2026-02-08T01:13:51.682Z] 
+$ cd /home/jarred/code/erdos-410 && tm update erdos410-zp6 --status "prime_persistence closed (case split). Now trying to further decompose sub-lemmas."
+[2026-02-08T01:14:04.918Z] 
+$ cd /home/jarred/code/erdos-410 && grep -rn "multiplicitiveOrder\|orderOf\|ZMod.orderOf\|Nat.Mpl" .lake/packages/mathlib/Mathlib/NumberTheory/ --include="*.lean" -l 2>/dev/null | head -10
+[2026-02-08T01:14:04.934Z] 
+$ cd /home/jarred/code/erdos-410 && grep -rn "orderOf" .lake/packages/mathlib/Mathlib/GroupTheory/Order* --include="*.lean" -l 2>/dev/null | head -10
+[2026-02-08T01:14:07.580Z] 
+$ cd /home/jarred/code/erdos-410 && grep -rn "geomSum_dvd\|geom_sum_dvd\|dvd_geom" .lake/packages/mathlib/Mathlib/ --include="*.lean" | head -10
+[2026-02-08T01:15:43.959Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_order.lean << 'EOF'
+import Mathlib
+
+-- Check orderOf in ZMod
+#check @orderOf (ZMod _) _ _
+#check ZMod.orderOf_dvd_iff
+#check orderOf_dvd_iff_pow_eq_one
+#check ZMod.val_natCast
+EOF
+lake env lean /tmp/test_order.lean 2>&1 | head -20
+[2026-02-08T01:15:58.081Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_order2.lean << 'EOF'
+import Mathlib
+
+-- q | 2^{a+1} - 1 iff ord_q(2) | (a+1)
+-- In ZMod q: 2^{a+1} = 1 iff ord_q(2) | (a+1)
+-- And 2^{a+1} ≡ 1 (mod q) iff q | 2^{a+1} - 1
+
+#check ZMod.natCast_zmod_eq_zero_iff_dvd
+#check Nat.sub_one_eq_pred
+-- For σ(2^a) = 2^{a+1} - 1:
+-- #check ArithmeticFunction.sigma_apply_prime_pow
+
+-- For the geom sum:
+#check Nat.geomSum_eq
+
+-- ZMod.units
+#check ZMod.unitOfCoprime
+EOF
+lake env lean /tmp/test_order2.lean 2>&1 | head -20
+[2026-02-08T01:16:10.706Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_order3.lean << 'EOF'
+import Mathlib
+
+-- Key bridge: q | 2^(a+1) - 1 iff (2 : ZMod q)^(a+1) = 1
+-- Then orderOf_dvd_iff_pow_eq_one gives ord_q(2) | (a+1)
+
+-- Need: q | 2^(a+1) - 1 ↔ (2 : ZMod q)^(a+1) = 1
+#check ZMod.natCast_zmod_eq_zero_iff_dvd  -- might be gone 
+#check ZMod.natCast_eq_zero
+-- ah maybe:
+example (q : ℕ) (hq : q ≠ 0) (a : ℕ) : q ∣ a ↔ (a : ZMod q) = 0 := by
+  exact_mod_cast (ZMod.natCast_zmod_eq_zero_iff_dvd a q).symm
+EOF
+lake env lean /tmp/test_order3.lean 2>&1 | head -20
+[2026-02-08T01:16:21.272Z] 
+$ cd /home/jarred/code/erdos-410 && grep -rn "natCast.*zmod.*eq.*zero\|natCast.*eq_zero" .lake/packages/mathlib/Mathlib/Data/ZMod/ --include="*.lean" | head -10
+[2026-02-08T01:16:31.734Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_order4.lean << 'EOF'
+import Mathlib
+
+-- The key lemma we need
+#check ZMod.natCast_eq_zero_iff
+
+-- Bridge: q | 2^(a+1) - 1 relates to (2 : ZMod q)^(a+1) = 1
+-- 2^(a+1) - 1 ≡ 0 (mod q) iff 2^(a+1) ≡ 1 (mod q) 
+
+-- Can we get: q | (2^n - 1) iff (2 : ZMod q)^n = 1?
+-- First: q | m iff (m : ZMod q) = 0
+-- So: q | (2^n - 1) iff (2^n - 1 : ZMod q) = 0 iff (2 : ZMod q)^n = 1
+
+-- sigma_pow_two' already exists in our codebase
+-- sigma 1 (2^k) = 2^(k+1) - 1
+
+-- For q | sigma 1 (2^a):
+-- q | 2^(a+1) - 1
+-- iff (2^(a+1) - 1 : ZMod q) = 0  [by ZMod.natCast_eq_zero_iff]
+-- iff (2 : ZMod q)^(a+1) = 1  [since 2^(a+1) ≥ 1]
+-- iff orderOf (2 : ZMod q) ∣ (a+1)  [by orderOf_dvd_iff_pow_eq_one]
+
+-- Let's verify the cast works
+example (q : ℕ) (n : ℕ) (h : n ≥ 1) : 
+    (q ∣ n - 1) ↔ ((n : ZMod q) = 1) := by
+  sorry
+  
+-- Actually let me check Nat.cast_sub
+#check @Nat.cast_sub
+EOF
+lake env lean /tmp/test_order4.lean 2>&1 | head -20
+[2026-02-08T01:16:48.729Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_order5.lean << 'EOF'
+import Mathlib
+
+open ArithmeticFunction
+
+-- q | sigma 1 (2^a) iff orderOf (2 : ZMod q) | (a + 1), for q prime and q ≠ 2
+-- sigma 1 (2^a) = 2^(a+1) - 1 by sigma_pow_two' (in our codebase)
+-- q | 2^(a+1) - 1 iff (2^(a+1) : ZMod q) = 1
+
+-- Step 1: q | 2^n - 1 iff (2 : ZMod q)^n = 1  (for q ≥ 2)
+lemma dvd_two_pow_sub_one_iff (q n : ℕ) (hq : q ≥ 2) (hn : n ≥ 1) :
+    q ∣ 2^n - 1 ↔ (2 : ZMod q)^n = 1 := by
+  have h2n_pos : 2^n ≥ 1 := Nat.one_le_pow n 2 (by omega)
+  rw [← ZMod.natCast_eq_zero_iff, Nat.cast_sub h2n_pos]
+  push_cast
+  constructor
+  · intro h; linarith [h]
+  · intro h; linarith [h]
+
+-- Step 2: (2 : ZMod q)^n = 1 iff orderOf (2 : ZMod q) | n
+-- This is just orderOf_dvd_iff_pow_eq_one
+
+-- Combine:
+lemma q_dvd_sigma_two_pow_iff (q a : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2) :
+    q ∣ 2^(a+1) - 1 ↔ orderOf (2 : ZMod q) ∣ (a + 1) := by
+  rw [dvd_two_pow_sub_one_iff q (a+1) (by omega) (by omega)]
+  exact orderOf_dvd_iff_pow_eq_one.symm
+EOF
+lake env lean /tmp/test_order5.lean 2>&1 | head -30
+[2026-02-08T01:17:06.555Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_order6.lean << 'EOF'
+import Mathlib
+
+-- q | 2^n - 1 iff (2 : ZMod q)^n = 1
+lemma dvd_two_pow_sub_one_iff (q n : ℕ) (hq : q ≥ 2) :
+    q ∣ 2^n - 1 ↔ (2 : ZMod q)^n = 1 := by
+  have h2n_pos : 2^n ≥ 1 := Nat.one_le_pow n 2 (by omega)
+  rw [← ZMod.natCast_eq_zero_iff, Nat.cast_sub h2n_pos]
+  simp [sub_eq_zero]
+EOF
+lake env lean /tmp/test_order6.lean 2>&1 | head -20
+[2026-02-08T01:17:32.563Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_order7.lean << 'EOF'
+import Mathlib
+
+open ArithmeticFunction
+
+-- From our codebase
+lemma sigma_pow_two' (k : ℕ) : sigma 1 (2^k) = 2^(k+1) - 1 := by
+  rw [sigma_apply_prime_pow (Nat.prime_two)]
+  have h : ∀ j, 2^(j * 1) = 2^j := fun j => by ring_nf
+  simp_rw [h]
+  have hgs := Nat.geomSum_eq (by norm_num : (2 : ℕ) ≤ 2) (k + 1)
+  have h2 : (2 : ℕ) - 1 = 1 := by norm_num
+  rw [h2, Nat.div_one] at hgs
+  exact hgs
+
+-- q | 2^n - 1 iff (2 : ZMod q)^n = 1
+lemma dvd_two_pow_sub_one_iff (q n : ℕ) :
+    q ∣ 2^n - 1 ↔ (2 : ZMod q)^n = 1 := by
+  have h2n_pos : 2^n ≥ 1 := Nat.one_le_pow n 2 (by omega)
+  rw [← ZMod.natCast_eq_zero_iff, Nat.cast_sub h2n_pos]
+  simp [sub_eq_zero]
+
+-- q | sigma 1 (2^a) iff orderOf (2 : ZMod q) | (a + 1)
+lemma q_dvd_sigma_two_pow_iff (q a : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2) :
+    q ∣ sigma 1 (2^a) ↔ orderOf (2 : ZMod q) ∣ (a + 1) := by
+  rw [sigma_pow_two', dvd_two_pow_sub_one_iff]
+  exact orderOf_dvd_iff_pow_eq_one.symm
+
+-- orderOf (2 : ZMod q) ≥ 1 for odd prime q (since 2 ≠ 1 in ZMod q when q > 2)
+lemma orderOf_two_pos (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2) :
+    orderOf (2 : ZMod q) ≥ 1 := by
+  have h : orderOf (2 : ZMod q) ≠ 0 := by
+    intro h
+    have : IsOfFinOrder (2 : ZMod q) := by
+      exact isOfFinOrder_of_finite (2 : ZMod q)
+    rw [isOfFinOrder_iff_orderOf_pos] at this
+    omega
+  omega
+
+-- If d | (a+1) for some a where v_2(σ_k(n)) = a, then q | σ(2^a) | σ_{k+1}(n)
+-- The key is: σ(n) is multiplicative, and 2^a || σ_k(n) means σ_k(n) = 2^a * m with m odd
+-- Then σ(σ_k(n)) = σ(2^a) * σ(m) when gcd(2^a, m) = 1
+
+-- Check if we can get q | σ(n) from q | σ(2^a) when 2^a | n
+-- This requires: n = 2^a * m with gcd(2^a, m) = 1
+
+EOF
+lake env lean /tmp/test_order7.lean 2>&1 | head -20
+[2026-02-08T01:17:49.760Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_order8.lean << 'EOF'
+import Mathlib
+
+-- orderOf (2 : ZMod q) ≥ 1 for prime q > 2
+lemma orderOf_two_pos (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2) :
+    orderOf (2 : ZMod q) ≥ 1 := by
+  -- (2 : ZMod q) has finite order since ZMod q is finite
+  -- orderOf > 0 for elements in finite groups
+  have hfin : 0 < Fintype.card (ZMod q) := by simp [ZMod.card q]; exact hq.pos
+  have := orderOf_pos (2 : ZMod q)
+  omega
+EOF
+lake env lean /tmp/test_order8.lean 2>&1 | head -20
+[2026-02-08T01:18:04.933Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_order9.lean << 'EOF'
+import Mathlib
+
+-- orderOf (2 : ZMod q) ≥ 1 for prime q > 2
+lemma orderOf_two_pos (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2) :
+    orderOf (2 : ZMod q) ≥ 1 := by
+  haveI : Fact (Nat.Prime q) := ⟨hq⟩
+  -- ZMod q is a field when q is prime
+  -- (2 : ZMod q) ≠ 0 since q > 2
+  have h2ne : (2 : ZMod q) ≠ 0 := by
+    rw [Ne, ZMod.natCast_eq_zero_iff]
+    intro h; exact hodd (Nat.eq_of_dvd_of_lt h (by omega) |>.symm)
+  have h2ne1 : (2 : ZMod q) ≠ 1 := by
+    sorry
+  -- In a finite group, orderOf > 0
+  have : 0 < orderOf (2 : ZMod q) := by
+    exact orderOf_pos (2 : ZMod q)
+  omega
+EOF
+lake env lean /tmp/test_order9.lean 2>&1 | head -20
+[2026-02-08T01:18:34.231Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_order10.lean << 'EOF'
+import Mathlib
+
+-- (2 : ZMod q) ≠ 0 for prime q > 2
+lemma two_ne_zero_zmod (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2) :
+    (2 : ZMod q) ≠ 0 := by
+  haveI : Fact (Nat.Prime q) := ⟨hq⟩
+  intro h
+  have : q ∣ 2 := by rwa [ZMod.natCast_zmod_eq_zero_iff_dvd] at h
+  exact hodd (Nat.eq_of_dvd_of_lt this (by omega) |>.symm)
+
+#check @orderOf_pos_iff
+-- Hmm, the issue is LeftCancelMonoid. For ZMod q when q is prime, 
+-- we need to work with the units group or use Field properties.
+
+-- Actually let me try using (ZMod q)ˣ
+-- Or just use the fact that ZMod q is an integral domain
+
+-- For fields/integral domains, ZMod q should have LeftCancelMonoid via IsDomain
+-- Actually ZMod q for prime q is a Field, hence an IsDomain
+-- IsDomain has NoZeroDivisors, which gives cancellation for multiplication
+-- But orderOf is for the additive or multiplicative monoid...
+
+-- Actually orderOf is in the multiplicative monoid
+-- For ZMod q as multiplicative monoid with q prime:
+-- ZMod q is a CommMonoidWithZero, and also a GroupWithZero
+-- GroupWithZero gives cancellation
+
+-- Let me check
+example (q : ℕ) (hq : Nat.Prime q) : GroupWithZero (ZMod q) := by
+  haveI : Fact (Nat.Prime q) := ⟨hq⟩
+  exact ZMod.instGroupWithZero
+
+-- So ZMod q is a GroupWithZero. But is it a LeftCancelMonoid?
+-- GroupWithZero implies monoid but not necessarily LeftCancelMonoid
+-- because 0 * a = 0 * b but a ≠ b is possible
+
+-- The trick: work with (ZMod q)ˣ instead, or use orderOf on (ZMod q)ˣ
+-- Or use the additive group structure?
+
+-- Actually, let me look at what orderOf needs
+#check @orderOf_pos -- needs LeftCancelMonoid
+-- Hmm
+
+-- Alternative: work with ZMod.unitOfCoprime
+-- Since 2 is coprime to q (when q is odd prime), we can get 2 as a unit
+example (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2) : (ZMod q)ˣ := by
+  haveI : Fact (Nat.Prime q) := ⟨hq⟩
+  exact ZMod.unitOfCoprime 2 (by
+    rw [Nat.coprime_comm]
+    exact (Nat.Coprime.prime_dvd_iff_eq (Nat.coprime_two_left.mpr (Nat.Prime.odd_of_ne_two hq hodd)) hq).not.mp (by omega) |>.elim
+  )
+
+-- Actually this is getting complicated. Let me just prove it differently.
+-- For the multiplicative group (ZMod q)ˣ, orderOf always works.
+
+-- Key fact: for a unit u in a finite group, orderOf u > 0
+-- (ZMod q)ˣ is a finite group when q is prime
+
+EOF
+lake env lean /tmp/test_order10.lean 2>&1 | head -20
+[2026-02-08T01:18:50.492Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_order11.lean << 'EOF'
+import Mathlib
+
+-- Let me search for the right API
+#check ZMod.natCast_eq_zero_iff  -- (a : ZMod n) = 0 ↔ n ∣ a
+-- Actually let me search with exact?
+
+-- Key goal: orderOf (2 : ZMod q) > 0 when q is an odd prime
+-- Since (ZMod q) for prime q is a field, and fields have IsDomain
+-- But orderOf_pos needs LeftCancelMonoid...
+
+-- Alternative approach: use orderOf_pos_iff and show IsOfFinOrder
+example (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2) :
+    orderOf (2 : ZMod q) ≥ 1 := by
+  haveI : Fact (Nat.Prime q) := ⟨hq⟩
+  rw [Nat.one_le_iff_ne_zero, ← Nat.pos_iff_ne_zero, orderOf_pos_iff]
+  exact isOfFinOrder_of_finite _
+
+-- Check if ZMod q is Finite when q is prime
+-- It should be since ZMod q = Fin q for q > 0
+EOF
+lake env lean /tmp/test_order11.lean 2>&1 | head -20
+[2026-02-08T01:19:14.900Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_order12.lean << 'EOF'
+import Mathlib
+
+example (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2) :
+    orderOf (2 : ZMod q) ≥ 1 := by
+  haveI : Fact (Nat.Prime q) := ⟨hq⟩
+  have h : 0 < orderOf (2 : ZMod q) := by
+    rw [orderOf_pos_iff]
+    exact isOfFinOrder_of_finite _
+  omega
+
+-- Now the key lemma: q | sigma 1 (2^a) iff orderOf (2 : ZMod q) | (a+1)
+-- We already have sigma 1 (2^a) = 2^(a+1) - 1
+
+-- q | 2^n - 1 iff (2 : ZMod q)^n = 1
+lemma dvd_two_pow_sub_one_iff (q n : ℕ) :
+    q ∣ 2^n - 1 ↔ (2 : ZMod q)^n = 1 := by
+  have h2n_pos : 2^n ≥ 1 := Nat.one_le_pow n 2 (by omega)
+  rw [← ZMod.natCast_eq_zero_iff, Nat.cast_sub h2n_pos]
+  simp [sub_eq_zero]
+
+-- Main: if orderOf (2 : ZMod q) | (a+1), then q | sigma 1 (2^a)
+-- And sigma 1 (2^a) = 2^(a+1) - 1
+lemma sigma_pow_two'_val (k : ℕ) : ArithmeticFunction.sigma 1 (2^k) = 2^(k+1) - 1 := by
+  rw [ArithmeticFunction.sigma_apply_prime_pow (Nat.prime_two)]
+  have h : ∀ j, 2^(j * 1) = 2^j := fun j => by ring_nf
+  simp_rw [h]
+  have hgs := Nat.geomSum_eq (by norm_num : (2 : ℕ) ≤ 2) (k + 1)
+  have h2 : (2 : ℕ) - 1 = 1 := by norm_num
+  rw [h2, Nat.div_one] at hgs
+  exact hgs
+
+-- Now combine: q | sigma 1 (2^a) ↔ orderOf (2 : ZMod q) | (a + 1)
+lemma q_dvd_sigma_two_pow_iff (q a : ℕ) :
+    q ∣ ArithmeticFunction.sigma 1 (2^a) ↔ orderOf (2 : ZMod q) ∣ (a + 1) := by
+  rw [sigma_pow_two'_val, dvd_two_pow_sub_one_iff]
+  exact orderOf_dvd_iff_pow_eq_one.symm
+
+-- Now: if σ_k(n) = 2^a * m with m odd and gcd(2^a, m) = 1,
+-- then σ(σ_k(n)) = σ(2^a) * σ(m) by multiplicativity
+-- If q | σ(2^a), then q | σ(σ_k(n))
+
+-- So: if orderOf (2 : ZMod q) | (v_2(σ_k(n)) + 1), then q | σ_{k+1}(n)
+
+-- For this to give persistence, we need v_2(σ_k(n)) + 1 to hit multiples of d = orderOf(2 : ZMod q)
+-- This requires v_2(σ_k(n)) to be unbounded (or hit specific residues)
+
+EOF
+lake env lean /tmp/test_order12.lean 2>&1 | head -10
+[2026-02-08T01:19:29.282Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_order13.lean << 'EOF'
+import Mathlib
+
+example (q : ℕ) (hq : Nat.Prime q) :
+    orderOf (2 : ZMod q) ≥ 1 := by
+  haveI : Fact (Nat.Prime q) := ⟨hq⟩
+  have h : 0 < orderOf (2 : ZMod q) := by
+    rw [orderOf_pos_iff]
+    exact isOfFinOrder_of_finite (2 : ZMod q)
+  omega
+EOF
+lake env lean /tmp/test_order13.lean 2>&1 | head -10
+[2026-02-08T01:19:57.325Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_units.lean << 'EOF'
+import Mathlib
+
+-- Work with (ZMod q)ˣ for the order theory
+-- For q prime, (ZMod q)ˣ is a finite group of order q-1
+
+-- Can we lift 2 to (ZMod q)ˣ?
+-- Yes, when q is odd prime, gcd(2,q) = 1
+
+example (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2) :
+    IsUnit (2 : ZMod q) := by
+  haveI : Fact (Nat.Prime q) := ⟨hq⟩
+  rw [ZMod.isUnit_prime_iff_not_dvd hq]
+  intro h2q
+  interval_cases q <;> simp_all
+
+-- orderOf for units works in finite groups
+-- orderOf in (ZMod q)ˣ equals orderOf in ZMod q when 2 is a unit
+
+-- Actually, let me use a different approach: 
+-- orderOf_pos for Monoid needs LeftCancelMonoid
+-- But I can show IsOfFinOrder directly
+
+-- Actually for CommMonoidWithZero that is also a GroupWithZero...
+-- hmm
+
+-- Let me try: since 2 is a unit, orderOf (IsUnit.unit ...) > 0
+-- and orderOf u = orderOf (IsUnit.unit u) ... ?
+
+-- Actually the key fact:
+#check orderOf_pos_iff
+-- orderOf_pos_iff : 0 < orderOf x ↔ IsOfFinOrder x
+-- This needs Monoid, not LeftCancelMonoid!
+
+-- And IsOfFinOrder in a Monoid (ZMod q) for a finite type:
+-- IsOfFinOrder means ∃ n > 0, x^n = 1
+
+-- For a unit: its order divides the group order, hence finite
+-- isOfFinOrder_of_finite needs Finite and Monoid
+
+-- But ZMod q IS a Monoid (it's a CommRing)
+-- And ZMod q IS Finite when q > 0
+
+-- Let me check if Lean can synthesize these
+example (q : ℕ) (hq : Nat.Prime q) :
+    @Finite (ZMod q) := by
+  haveI : Fact (Nat.Prime q) := ⟨hq⟩
+  -- ZMod q for q > 0 is Fin q, which is finite
+  haveI : NeZero q := ⟨hq.ne_zero⟩
+  exact ZMod.instFinite q
+
+example (q : ℕ) (hq : Nat.Prime q) :
+    @Monoid (ZMod q) := by
+  exact CommMonoidWithZero.toMonoid
+
+-- Wait, Monoid from CommMonoidWithZero... but the problem is that
+-- isOfFinOrder_of_finite requires Monoid AND Finite, and orderOf_pos_iff
+-- only requires Monoid.
+
+-- But earlier we got "failed to synthesize LeftCancelMonoid"
+-- That was from orderOf_pos, not orderOf_pos_iff!
+
+-- Let me try orderOf_pos_iff directly
+example (q : ℕ) (hq : Nat.Prime q) :
+    0 < orderOf (2 : ZMod q) := by
+  haveI : Fact (Nat.Prime q) := ⟨hq⟩
+  haveI : NeZero q := ⟨hq.ne_zero⟩
+  rw [orderOf_pos_iff]
+  exact isOfFinOrder_of_finite (2 : ZMod q)
+EOF
+lake env lean /tmp/test_units.lean 2>&1 | head -20
+[2026-02-08T01:20:10.081Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_fin.lean << 'EOF'
+import Mathlib
+
+#check @isOfFinOrder_of_finite
+-- Check: this should tell us the exact typeclass requirements
+EOF
+lake env lean /tmp/test_fin.lean 2>&1 | head -5
+[2026-02-08T01:20:25.335Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_fin2.lean << 'EOF'
+import Mathlib
+
+#check @orderOf_dvd_of_pow_eq_one
+#check @pow_orderOf_eq_one
+#check @orderOf_dvd_iff_pow_eq_one
+EOF
+lake env lean /tmp/test_fin2.lean 2>&1
+[2026-02-08T01:20:47.197Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_full.lean << 'EOF'
+import Mathlib
+
+open ArithmeticFunction
+
+-- q | 2^n - 1 iff (2 : ZMod q)^n = 1
+lemma dvd_two_pow_sub_one_iff (q n : ℕ) :
+    q ∣ 2^n - 1 ↔ (2 : ZMod q)^n = 1 := by
+  have h2n_pos : 2^n ≥ 1 := Nat.one_le_pow n 2 (by omega)
+  rw [← ZMod.natCast_eq_zero_iff, Nat.cast_sub h2n_pos]
+  simp [sub_eq_zero]
+
+-- sigma 1 (2^k) = 2^(k+1) - 1 (from codebase, repeated here for test)
+lemma sigma_pow_two'_test (k : ℕ) : sigma 1 (2^k) = 2^(k+1) - 1 := by
+  rw [sigma_apply_prime_pow (Nat.prime_two)]
+  have h : ∀ j, 2^(j * 1) = 2^j := fun j => by ring_nf
+  simp_rw [h]
+  exact Nat.geomSum_eq (by norm_num) (k + 1) |>.mp rfl |>.mp rfl |> by
+    have hgs := Nat.geomSum_eq (by norm_num : (2 : ℕ) ≤ 2) (k + 1)
+    simp at hgs; exact hgs
+
+-- q | sigma 1 (2^a) ↔ orderOf (2 : ZMod q) | (a + 1)
+lemma q_dvd_sigma_two_pow_iff' (q a : ℕ) :
+    q ∣ sigma 1 (2^a) ↔ orderOf (2 : ZMod q) ∣ (a + 1) := by
+  rw [sigma_pow_two'_test, dvd_two_pow_sub_one_iff]
+  exact orderOf_dvd_iff_pow_eq_one.symm
+  
+EOF
+lake env lean /tmp/test_full.lean 2>&1 | head -20
+[2026-02-08T01:21:01.793Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_full2.lean << 'EOF'
+import Mathlib
+
+open ArithmeticFunction
+
+-- q | 2^n - 1 iff (2 : ZMod q)^n = 1
+lemma dvd_two_pow_sub_one_iff (q n : ℕ) :
+    q ∣ 2^n - 1 ↔ (2 : ZMod q)^n = 1 := by
+  have h2n_pos : 2^n ≥ 1 := Nat.one_le_pow n 2 (by omega)
+  rw [← ZMod.natCast_eq_zero_iff, Nat.cast_sub h2n_pos]
+  simp [sub_eq_zero]
+
+-- sigma 1 (2^k) = 2^(k+1) - 1 (from codebase)
+lemma sigma_pow_two'_test (k : ℕ) : sigma 1 (2^k) = 2^(k+1) - 1 := by
+  rw [sigma_apply_prime_pow (Nat.prime_two)]
+  have h : ∀ j, 2^(j * 1) = 2^j := fun j => by ring_nf
+  simp_rw [h]
+  have hgs := Nat.geomSum_eq (by norm_num : (2 : ℕ) ≤ 2) (k + 1)
+  have h2 : (2 : ℕ) - 1 = 1 := by norm_num
+  rw [h2, Nat.div_one] at hgs
+  exact hgs
+
+-- q | sigma 1 (2^a) ↔ orderOf (2 : ZMod q) | (a + 1)
+lemma q_dvd_sigma_two_pow_iff' (q a : ℕ) :
+    q ∣ sigma 1 (2^a) ↔ orderOf (2 : ZMod q) ∣ (a + 1) := by
+  rw [sigma_pow_two'_test, dvd_two_pow_sub_one_iff]
+  exact orderOf_dvd_iff_pow_eq_one.symm
+  
+EOF
+lake env lean /tmp/test_full2.lean 2>&1 | head -10
+[2026-02-08T01:21:22.183Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_ord_pos.lean << 'EOF'
+import Mathlib
+
+-- For odd prime q, orderOf (2 : ZMod q) ≥ 1
+-- Strategy: 2 is a unit in ZMod q, so it has positive order in the units group
+-- Then its order in the monoid agrees
+lemma orderOf_two_zmod_pos (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2) :
+    orderOf (2 : ZMod q) ≥ 1 := by
+  haveI : Fact (Nat.Prime q) := ⟨hq⟩
+  -- Since q is odd prime, 2 is coprime to q
+  have hcop : Nat.Coprime 2 q := by
+    rw [Nat.coprime_comm]
+    exact hq.coprime_iff_not_dvd.mpr (fun h => hodd (Nat.le_of_dvd (by omega) h |>.antisymm (Nat.Prime.two_le hq)))
+  -- Lift 2 to a unit
+  let u : (ZMod q)ˣ := ZMod.unitOfCoprime 2 hcop
+  -- The order of u in (ZMod q)ˣ is positive (finite group)
+  have hu_pos : 0 < orderOf u := orderOf_pos u
+  -- The order of u in (ZMod q)ˣ equals the order of (↑u : ZMod q) in ZMod q
+  have h_eq : orderOf (u : ZMod q) = orderOf u := by
+    exact (IsUnit.orderOf_eq_orderOf ⟨u, rfl⟩).symm
+  -- And (↑u : ZMod q) = 2
+  have hu_val : (u : ZMod q) = 2 := by
+    simp [u, ZMod.IsUnit_IsUnit_eq_val]
+    sorry -- need to show the coercion equals 2
+  rw [← hu_val, h_eq]
+  omega
+EOF
+lake env lean /tmp/test_ord_pos.lean 2>&1 | head -20
+[2026-02-08T01:21:41.470Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_ord_pos2.lean << 'EOF'
+import Mathlib
+
+-- Alternative approach: show (2 : ZMod q)^(q-1) = 1 by Fermat's little theorem
+-- Then orderOf divides (q-1), which is ≥ 1
+
+-- For prime q, ZMod q is a field, and Fermat's little theorem says a^(q-1) = 1 for a ≠ 0
+
+lemma orderOf_two_zmod_pos (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2) :
+    orderOf (2 : ZMod q) ≥ 1 := by
+  haveI : Fact (Nat.Prime q) := ⟨hq⟩
+  -- 2 ≠ 0 in ZMod q since q > 2
+  have h2ne : (2 : ZMod q) ≠ 0 := by
+    rw [Ne, ZMod.natCast_eq_zero_iff]
+    intro hdvd
+    exact hodd (Nat.le_of_dvd (by omega) hdvd |>.antisymm hq.two_le)
+  -- By Fermat's little theorem: 2^(q-1) = 1 in ZMod q
+  have hfermat : (2 : ZMod q)^(q - 1) = 1 := by
+    have := ZMod.pow_card_sub_one_eq_one h2ne
+    exact this
+  -- orderOf divides q-1
+  have hdvd := orderOf_dvd_of_pow_eq_one hfermat
+  -- q-1 ≥ 1
+  have hq1 : q - 1 ≥ 1 := by omega
+  -- orderOf ≥ 1
+  exact Nat.one_le_iff_ne_zero.mpr (fun h => by simp [h] at hdvd; omega)
+EOF
+lake env lean /tmp/test_ord_pos2.lean 2>&1 | head -10
+[2026-02-08T01:21:54.430Z] [overseer] 💓 Heartbeat starting...
+[2026-02-08T01:21:54.433Z] [overseer] Running with model: anthropic/claude-opus-4-6:high
+[2026-02-08T01:21:57.014Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_ord_pos3.lean << 'EOF'
+import Mathlib
+
+-- (2 : ZMod q) ≠ 0 for odd prime q
+lemma two_ne_zero_zmod (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2) :
+    (2 : ZMod q) ≠ 0 := by
+  haveI : Fact (Nat.Prime q) := ⟨hq⟩  
+  -- 2 = (2 : ℕ) cast to ZMod q
+  -- (2 : ZMod q) = 0 iff q | 2
+  have : (2 : ZMod q) = ((2 : ℕ) : ZMod q) := by norm_cast
+  rw [this, Ne, ZMod.natCast_eq_zero_iff]
+  intro hdvd
+  exact hodd (Nat.le_of_dvd (by omega) hdvd |>.antisymm hq.two_le)
+
+lemma orderOf_two_zmod_pos (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2) :
+    orderOf (2 : ZMod q) ≥ 1 := by
+  haveI : Fact (Nat.Prime q) := ⟨hq⟩
+  have h2ne := two_ne_zero_zmod q hq hodd
+  have hfermat : (2 : ZMod q)^(q - 1) = 1 := ZMod.pow_card_sub_one_eq_one h2ne
+  have hdvd := orderOf_dvd_of_pow_eq_one hfermat
+  exact Nat.one_le_iff_ne_zero.mpr (fun h => by simp [h] at hdvd; omega)
+EOF
+lake env lean /tmp/test_ord_pos3.lean 2>&1 | head -10
+[2026-02-08T01:22:11.967Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_ord_pos4.lean << 'EOF'
+import Mathlib
+
+lemma two_ne_zero_zmod (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2) :
+    (2 : ZMod q) ≠ 0 := by
+  haveI : Fact (Nat.Prime q) := ⟨hq⟩  
+  have : (2 : ZMod q) = ((2 : ℕ) : ZMod q) := by norm_cast
+  rw [this, Ne, ZMod.natCast_eq_zero_iff]
+  intro hdvd
+  exact hodd (Nat.le_of_dvd (by omega) hdvd |>.antisymm hq.two_le)
+
+lemma orderOf_two_zmod_pos (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2) :
+    orderOf (2 : ZMod q) ≥ 1 := by
+  haveI : Fact (Nat.Prime q) := ⟨hq⟩
+  have h2ne := two_ne_zero_zmod q hq hodd
+  have hfermat : (2 : ZMod q)^(q - 1) = 1 := ZMod.pow_card_sub_one_eq_one h2ne
+  have hdvd := orderOf_dvd_of_pow_eq_one hfermat
+  -- hdvd : orderOf (2 : ZMod q) ∣ (q - 1), and q - 1 ≥ 1
+  have hq1 : q - 1 ≥ 1 := by omega
+  exact Nat.pos_of_div_pos (Nat.div_pos (Nat.le_of_dvd (by omega) hdvd) (by omega)) |>.le |> by
+    omega
+EOF
+lake env lean /tmp/test_ord_pos4.lean 2>&1 | head -10
+[2026-02-08T01:22:26.771Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_ord_pos5.lean << 'EOF'
+import Mathlib
+
+lemma two_ne_zero_zmod (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2) :
+    (2 : ZMod q) ≠ 0 := by
+  haveI : Fact (Nat.Prime q) := ⟨hq⟩  
+  have : (2 : ZMod q) = ((2 : ℕ) : ZMod q) := by norm_cast
+  rw [this, Ne, ZMod.natCast_eq_zero_iff]
+  intro hdvd
+  exact hodd (Nat.le_of_dvd (by omega) hdvd |>.antisymm hq.two_le)
+
+lemma orderOf_two_zmod_pos (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2) :
+    orderOf (2 : ZMod q) ≥ 1 := by
+  haveI : Fact (Nat.Prime q) := ⟨hq⟩
+  have h2ne := two_ne_zero_zmod q hq hodd
+  have hfermat : (2 : ZMod q)^(q - 1) = 1 := ZMod.pow_card_sub_one_eq_one h2ne
+  have hdvd := orderOf_dvd_of_pow_eq_one hfermat
+  -- hdvd : orderOf (2 : ZMod q) ∣ (q - 1), and q - 1 ≥ 1
+  -- orderOf ∣ (q-1) and q-1 ≥ 1 implies orderOf ≥ 1
+  rcases hdvd with ⟨c, hc⟩
+  -- hc : q - 1 = orderOf (2 : ZMod q) * c
+  by_contra h
+  push_neg at h
+  -- orderOf = 0
+  simp_all
+  omega
+EOF
+lake env lean /tmp/test_ord_pos5.lean 2>&1 | head -10
+[2026-02-08T01:22:41.504Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_ord_pos6.lean << 'EOF'
+import Mathlib
+
+lemma two_ne_zero_zmod (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2) :
+    (2 : ZMod q) ≠ 0 := by
+  haveI : Fact (Nat.Prime q) := ⟨hq⟩  
+  have : (2 : ZMod q) = ((2 : ℕ) : ZMod q) := by norm_cast
+  rw [this, Ne, ZMod.natCast_eq_zero_iff]
+  intro hdvd
+  exact hodd (Nat.le_of_dvd (by omega) hdvd |>.antisymm hq.two_le)
+
+lemma orderOf_two_zmod_pos (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2) :
+    orderOf (2 : ZMod q) ≥ 1 := by
+  haveI : Fact (Nat.Prime q) := ⟨hq⟩
+  have h2ne := two_ne_zero_zmod q hq hodd
+  have hfermat : (2 : ZMod q)^(q - 1) = 1 := ZMod.pow_card_sub_one_eq_one h2ne
+  have hdvd := orderOf_dvd_of_pow_eq_one hfermat
+  -- If orderOf = 0, then 0 | (q-1), so q-1 = 0, so q = 1, contradiction with prime
+  by_contra h
+  push_neg at h
+  interval_cases (orderOf (2 : ZMod q))
+  · -- orderOf = 0 means 0 ∣ (q-1), i.e. q - 1 = 0
+    simp at hdvd; omega
+EOF
+lake env lean /tmp/test_ord_pos6.lean 2>&1 | head -10
+[2026-02-08T01:22:56.032Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_ord_pos7.lean << 'EOF'
+import Mathlib
+
+lemma two_ne_zero_zmod (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2) :
+    (2 : ZMod q) ≠ 0 := by
+  haveI : Fact (Nat.Prime q) := ⟨hq⟩  
+  have : (2 : ZMod q) = ((2 : ℕ) : ZMod q) := by norm_cast
+  rw [this, Ne, ZMod.natCast_eq_zero_iff]
+  intro hdvd
+  exact hodd (Nat.le_of_dvd (by omega) hdvd |>.antisymm hq.two_le)
+
+lemma orderOf_two_zmod_pos (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2) :
+    orderOf (2 : ZMod q) ≥ 1 := by
+  haveI : Fact (Nat.Prime q) := ⟨hq⟩
+  have h2ne := two_ne_zero_zmod q hq hodd
+  have hfermat : (2 : ZMod q)^(q - 1) = 1 := ZMod.pow_card_sub_one_eq_one h2ne
+  have hdvd := orderOf_dvd_of_pow_eq_one hfermat
+  -- If orderOf were 0, then 0 ∣ (q-1), so q - 1 = 0, contradiction
+  have hord_ne_zero : orderOf (2 : ZMod q) ≠ 0 := by
+    intro h0
+    rw [h0] at hdvd
+    -- hdvd : 0 ∣ (q - 1), i.e., q - 1 = 0
+    have := Nat.eq_zero_of_dvd_of_lt hdvd (by omega : q - 1 < q)
+    omega
+  omega
+EOF
+lake env lean /tmp/test_ord_pos7.lean 2>&1 | head -10
+[2026-02-08T01:23:19.882Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_ord_pos8.lean << 'EOF'
+import Mathlib
+
+lemma two_ne_zero_zmod (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2) :
+    (2 : ZMod q) ≠ 0 := by
+  haveI : Fact (Nat.Prime q) := ⟨hq⟩  
+  have : (2 : ZMod q) = ((2 : ℕ) : ZMod q) := by norm_cast
+  rw [this, Ne, ZMod.natCast_eq_zero_iff]
+  intro hdvd
+  exact hodd (Nat.le_of_dvd (by omega) hdvd |>.antisymm hq.two_le)
+
+lemma orderOf_two_zmod_pos (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2) :
+    orderOf (2 : ZMod q) ≥ 1 := by
+  haveI : Fact (Nat.Prime q) := ⟨hq⟩
+  have h2ne := two_ne_zero_zmod q hq hodd
+  have hfermat : (2 : ZMod q)^(q - 1) = 1 := ZMod.pow_card_sub_one_eq_one h2ne
+  have hdvd := orderOf_dvd_of_pow_eq_one hfermat
+  have hord_ne_zero : orderOf (2 : ZMod q) ≠ 0 := by
+    intro h0
+    rw [h0] at hdvd
+    -- 0 ∣ (q - 1) means q - 1 = 0
+    have : q - 1 = 0 := Nat.zero_dvd.mp hdvd |>.symm ▸ rfl
+    omega
+  omega
+EOF
+lake env lean /tmp/test_ord_pos8.lean 2>&1 | head -10
+[2026-02-08T01:23:33.765Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_ord_pos9.lean << 'EOF'
+import Mathlib
+
+lemma two_ne_zero_zmod (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2) :
+    (2 : ZMod q) ≠ 0 := by
+  haveI : Fact (Nat.Prime q) := ⟨hq⟩  
+  have : (2 : ZMod q) = ((2 : ℕ) : ZMod q) := by norm_cast
+  rw [this, Ne, ZMod.natCast_eq_zero_iff]
+  intro hdvd
+  exact hodd (Nat.le_of_dvd (by omega) hdvd |>.antisymm hq.two_le)
+
+lemma orderOf_two_zmod_pos (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2) :
+    orderOf (2 : ZMod q) ≥ 1 := by
+  haveI : Fact (Nat.Prime q) := ⟨hq⟩
+  have h2ne := two_ne_zero_zmod q hq hodd
+  have hfermat : (2 : ZMod q)^(q - 1) = 1 := ZMod.pow_card_sub_one_eq_one h2ne
+  have hdvd := orderOf_dvd_of_pow_eq_one hfermat
+  have hord_ne_zero : orderOf (2 : ZMod q) ≠ 0 := by
+    intro h0
+    rw [h0] at hdvd
+    -- Now hdvd : 0 ∣ q - 1
+    have h01 := Nat.eq_zero_of_zero_dvd hdvd
+    omega
+  omega
+  
+-- Check what exists for 0 ∣ n
+#check Nat.eq_zero_of_zero_dvd
+EOF
+lake env lean /tmp/test_ord_pos9.lean 2>&1 | head -10
+[2026-02-08T01:23:41.454Z] [overseer] 💓 Heartbeat complete: No intervention needed — formalize agent productively decomposing
+[2026-02-08T01:23:49.509Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_ord_pos10.lean << 'EOF'
+import Mathlib
+
+lemma two_ne_zero_zmod (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2) :
+    (2 : ZMod q) ≠ 0 := by
+  haveI : Fact (Nat.Prime q) := ⟨hq⟩  
+  have : (2 : ZMod q) = ((2 : ℕ) : ZMod q) := by norm_cast
+  rw [this, Ne, ZMod.natCast_eq_zero_iff]
+  intro hdvd
+  exact hodd (Nat.le_of_dvd (by omega) hdvd |>.antisymm hq.two_le)
+
+lemma orderOf_two_zmod_pos (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2) :
+    orderOf (2 : ZMod q) ≥ 1 := by
+  haveI : Fact (Nat.Prime q) := ⟨hq⟩
+  have h2ne := two_ne_zero_zmod q hq hodd
+  have hfermat : (2 : ZMod q)^(q - 1) = 1 := ZMod.pow_card_sub_one_eq_one h2ne
+  have hdvd := orderOf_dvd_of_pow_eq_one hfermat
+  -- orderOf ∣ (q - 1), so orderOf ≤ q - 1
+  -- Also orderOf ≠ 0 (since 0 ∣ (q-1) → q = 1, contradiction)
+  let d := orderOf (2 : ZMod q)
+  change d ≥ 1
+  have hdvd' : d ∣ q - 1 := hdvd
+  have hd_ne_zero : d ≠ 0 := by
+    intro h0
+    have := Nat.eq_zero_of_zero_dvd (h0 ▸ hdvd' : 0 ∣ q - 1)
+    omega
+  omega
+EOF
+lake env lean /tmp/test_ord_pos10.lean 2>&1 | head -10
+[2026-02-08T01:24:05.688Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_ord_pos11.lean << 'EOF'
+import Mathlib
+
+lemma two_ne_zero_zmod (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2) :
+    (2 : ZMod q) ≠ 0 := by
+  haveI : Fact (Nat.Prime q) := ⟨hq⟩  
+  have : (2 : ZMod q) = ((2 : ℕ) : ZMod q) := by norm_cast
+  rw [this, Ne, ZMod.natCast_eq_zero_iff]
+  intro hdvd
+  exact hodd (Nat.le_of_dvd (by omega) hdvd |>.antisymm hq.two_le)
+
+lemma orderOf_two_zmod_pos (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2) :
+    orderOf (2 : ZMod q) ≥ 1 := by
+  haveI : Fact (Nat.Prime q) := ⟨hq⟩
+  have h2ne := two_ne_zero_zmod q hq hodd
+  have hfermat : (2 : ZMod q)^(q - 1) = 1 := ZMod.pow_card_sub_one_eq_one h2ne
+  have hdvd := orderOf_dvd_of_pow_eq_one hfermat
+  exact Nat.pos_of_ne_zero fun h0 => by
+    rw [h0] at hdvd
+    exact absurd (Nat.eq_zero_of_zero_dvd hdvd) (by omega)
+EOF
+lake env lean /tmp/test_ord_pos11.lean 2>&1 | head -10
+[2026-02-08T01:24:21.408Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_ord_pos12.lean << 'EOF'
+import Mathlib
+
+-- Simple test: omega with Nat.Prime q
+example (q : ℕ) (hq : Nat.Prime q) : q - 1 ≠ 0 := by
+  have := hq.two_le; omega
+
+example (q : ℕ) (hq : Nat.Prime q) (h : q - 1 = 0) : False := by
+  have := hq.two_le; omega
+
+-- OK so the issue is just connecting the omega-visible facts
+
+lemma two_ne_zero_zmod (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2) :
+    (2 : ZMod q) ≠ 0 := by
+  haveI : Fact (Nat.Prime q) := ⟨hq⟩  
+  have : (2 : ZMod q) = ((2 : ℕ) : ZMod q) := by norm_cast
+  rw [this, Ne, ZMod.natCast_eq_zero_iff]
+  intro hdvd
+  exact hodd (Nat.le_of_dvd (by omega) hdvd |>.antisymm hq.two_le)
+
+lemma orderOf_two_zmod_pos (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2) :
+    orderOf (2 : ZMod q) ≥ 1 := by
+  haveI : Fact (Nat.Prime q) := ⟨hq⟩
+  have h2ne := two_ne_zero_zmod q hq hodd
+  have hfermat : (2 : ZMod q)^(q - 1) = 1 := ZMod.pow_card_sub_one_eq_one h2ne
+  have hdvd := orderOf_dvd_of_pow_eq_one hfermat
+  have hqm1_pos : q - 1 ≠ 0 := by have := hq.two_le; omega
+  exact Nat.pos_of_ne_zero fun h0 => hqm1_pos (Nat.eq_zero_of_zero_dvd (h0 ▸ hdvd))
+EOF
+lake env lean /tmp/test_ord_pos12.lean 2>&1 | head -10
+[2026-02-08T01:24:42.110Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_structure.lean << 'EOF'
+import Mathlib
+
+open ArithmeticFunction
+
+-- Key structural lemma: if q | σ(2^a) and 2^a ∥ m (i.e., 2^a | m, m/2^a is odd),
+-- then q | σ(m) (via multiplicativity)
+-- This is because σ(m) = σ(2^a) * σ(m/2^a) when gcd(2^a, m/2^a) = 1
+
+-- More precisely: for m = 2^a * t with t odd:
+-- σ(m) = σ(2^a) * σ(t)
+-- So q | σ(2^a) implies q | σ(m)
+
+lemma q_dvd_sigma_of_two_pow_dvd (q a t : ℕ) (hq : q ∣ sigma 1 (2^a)) (ht : Odd t) :
+    q ∣ sigma 1 (2^a * t) := by
+  by_cases ht0 : t = 0
+  · simp [ht0, sigma_apply_zero]
+  by_cases ha : a = 0
+  · simp [ha]; exact hq
+  · have hcop : Nat.Coprime (2^a) t := 
+      Nat.Coprime.pow_left a (Nat.coprime_two_left.mpr ht)
+    rw [isMultiplicative_sigma.map_mul_of_coprime hcop]
+    exact dvd_mul_right q (sigma 1 t) |>.symm ▸ mul_dvd_mul hq (dvd_refl _)
+
+EOF
+lake env lean /tmp/test_structure.lean 2>&1 | head -10
+[2026-02-08T01:24:53.578Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_structure2.lean << 'EOF'
+import Mathlib
+
+open ArithmeticFunction
+
+lemma q_dvd_sigma_of_two_pow_dvd (q a t : ℕ) (hq : q ∣ sigma 1 (2^a)) (ht : Odd t) :
+    q ∣ sigma 1 (2^a * t) := by
+  have hcop : Nat.Coprime (2^a) t := 
+    Nat.Coprime.pow_left a (Nat.coprime_two_left.mpr ht)
+  rw [isMultiplicative_sigma.map_mul_of_coprime hcop]
+  exact dvd_mul_of_dvd_left hq _
+  
+EOF
+lake env lean /tmp/test_structure2.lean 2>&1 | head -10
+[2026-02-08T01:25:09.575Z] 
+🛠️  Executing tool: read...
+[2026-02-08T01:25:43.422Z] 
+🛠️  Executing tool: edit...
+[2026-02-08T01:25:48.015Z] 
+$ cd /home/jarred/code/erdos-410 && lake build 2>&1 | tail -15
+[2026-02-08T01:26:57.734Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_enters.lean << 'EOF'
+import Mathlib
+
+open ArithmeticFunction
+
+-- We need: ∀ K, ∃ k ≥ K, q ∣ (sigma 1)^[k] n
+-- Strategy: 
+-- 1. v_2(σ_k(n)) is unbounded (from v2_sigma_iterate_unbounded)
+-- 2. Let d = orderOf (2 : ZMod q). Then d ≥ 1.
+-- 3. For any K, find k ≥ K with v_2(σ_k(n)) ≥ d-1 and d | (v_2(σ_k(n)) + 1)
+-- 4. This is where we need: unbounded v_2 implies we can find one with d | (v_2 + 1)
+
+-- Actually, we need: for any K, there exists k ≥ K such that d | (v_2(σ_k(n)) + 1)
+-- This follows from: v_2(σ_k(n)) is unbounded, and for any B, 
+-- there exists k with v_2(σ_k(n)) = d*j - 1 for some j, since v_2 ≥ B means it hits d*j - 1
+
+-- Hmm, but "unbounded" doesn't mean it hits every value. It could skip values.
+-- We need: for any B, ∃ k, v_2(σ_k(n)) ≥ B AND d | (v_2(σ_k(n)) + 1)
+
+-- Stronger: for any B, ∃ k, v_2(σ_k(n)) + 1 is a multiple of d and ≥ B.
+-- This follows from: there exists k with v_2(σ_k(n)) ≥ B*d, 
+-- then v_2(σ_k(n)) ≥ d, so v_2(σ_k(n)) + 1 ≥ d+1 > d, 
+-- wait, that doesn't help directly.
+
+-- Actually let's think differently. We have σ_k(n) = 2^{a_k} * m_k with m_k odd.
+-- We need d | (a_k + 1) for some large k.
+-- a_k is unbounded (from v2_sigma_iterate_unbounded).
+-- As a_k → ∞ along a subsequence, a_k + 1 takes all large values.
+-- Among any d consecutive integers, one is divisible by d.
+-- So for a_k + 1 ≥ d, there's... wait, a_k + 1 might not hit all values.
+
+-- The claim is just: there exist infinitely many k with d | (a_k + 1).
+-- Since a_k is unbounded, for any M, there exists k with a_k ≥ M*d.
+-- Then we need to show d | (a_k + 1). But a_k ≥ M*d doesn't give d | (a_k + 1).
+
+-- Hmm, the NL proof says: as v_2 grows unboundedly, it passes through d-1, 2d-1, 3d-1, ...
+-- But that assumes v_2 takes consecutive values, which may not be true!
+
+-- Actually Corollary 5.1 just uses that v_2 is unbounded:
+-- "As v_2(σ_k(n)) grows unboundedly, it passes through the values d-1, 2d-1, 3d-1, ..."
+-- This is NOT generally true for an arbitrary unbounded sequence!
+
+-- We need a STRONGER statement: v_2(σ_k(n)) hits every residue class mod d infinitely often.
+-- Or at least hits the specific class d-1 mod d.
+
+-- Alternative approach: maybe we don't need v_2 unbounded at all.
+-- We just need: for infinitely many k, d | (v_2(σ_k(n)) + 1).
+
+-- Hmm, this IS harder than just unboundedness.
+
+-- Wait, let me reconsider. The NL proof might be using a different mechanism.
+-- Let me re-read it.
+
+-- OK here's another approach: instead of using v_2 of the iterates,
+-- use the fact that σ_k(n) → ∞ and q is prime.
+-- By Dirichlet's theorem, there are primes p ≡ 1 (mod q).
+-- Since σ_k(n) → ∞, eventually σ_k(n) is large enough to have
+-- such a prime factor. But this doesn't directly give q | σ_{k+1}(n).
+
+-- Let me try yet another approach: just use v2 unbounded + pigeonhole
+-- If v2 is unbounded, then {a_k + 1 : k ∈ ℕ} is an infinite set of positive naturals.
+-- Wait, is it? No, a_k could repeat.
+-- But a_k is unbounded, so it takes infinitely many distinct values.
+-- Among infinitely many distinct positive naturals, infinitely many must have the same
+-- residue mod d. In particular, infinitely many have residue 0 mod d. Wait, that's not right either.
+-- Among infinitely many distinct positive naturals, by pigeonhole, at least one residue class
+-- mod d is hit infinitely often. But we need residue 0 specifically.
+
+-- Actually: for any d ≥ 1, an unbounded sequence of naturals contains a term ≥ d-1,
+-- and then... no, that still doesn't give divisibility.
+
+-- Wait, I think the key insight is simpler: we want d | (a_k + 1).
+-- This means a_k ≡ d - 1 (mod d), i.e., a_k mod d = d - 1.
+-- An unbounded sequence takes values in all residue classes... no it doesn't necessarily.
+
+-- OK, let me look at this from a different angle. Instead of trying to prove
+-- prime_enters_infinitely from v2_sigma_iterate_unbounded, let me just combine them
+-- and leave prime_enters_infinitely as a sorry too.
+
+-- Actually, let me try a completely different approach to prime_enters_infinitely
+-- that avoids the v2 mechanism entirely.
+
+-- Alternative: σ_k(n) → ∞, so the set of primes dividing various σ_k(n) is infinite.
+-- (If only finitely many primes divide any σ_k(n), then σ_k(n) would be bounded.)
+-- Among infinitely many primes, at least one ≡ 1 mod q exists (by Dirichlet).
+-- When p ≡ 1 mod q first divides σ_k(n), we need q | σ(p^{v_p}) = 1+p+...+p^{v_p}.
+-- Since p ≡ 1 mod q, this equals v_p + 1 mod q.
+-- So q | σ(p^{v_p}) iff q | (v_p + 1).
+-- For v_p = q-1 (or any multiple of q minus 1), this holds.
+-- But v_p at first appearance is typically 1, and q | 2 only for q=2.
+
+-- This doesn't quite work for odd q. Let me think more...
+
+-- Hmm, what if we use: σ_k(n) → ∞, so for large k, σ_k(n) > q.
+-- Then σ_k(n) has at least... no, that doesn't help either.
+
+-- I think the v2 mechanism is really the right approach. Let me just
+-- prove a stronger version of v2_sigma_iterate_unbounded that gives
+-- the specific divisibility.
+
+-- Actually, the simplest approach might be to strengthen
+-- v2_sigma_iterate_unbounded to:
+-- ∀ d ≥ 1, ∀ K, ∃ k ≥ K, d ∣ ((sigma 1)^[k] n).factorization 2 + 1
+
+-- But this is what we ultimately need and it's essentially the same as
+-- prime_enters_infinitely itself.
+
+-- Let me just leave prime_enters_infinitely as a sorry and move on.
+EOF
+echo "Analysis complete"
+[2026-02-08T01:27:45.778Z] 
+$ cd /home/jarred/code/erdos-410 && grep -rn "Dirichlet\|dirichlet\|primes.*arithmetic.*progression\|prime.*coprime.*infinite" .lake/packages/mathlib/Mathlib/ --include="*.lean" -l 2>/dev/null | head -10
+[2026-02-08T01:27:50.727Z] 
+$ cd /home/jarred/code/erdos-410 && grep -n "theorem\|lemma" .lake/packages/mathlib/Mathlib/NumberTheory/LSeries/PrimesInAP.lean | head -20
+[2026-02-08T01:27:53.917Z] 
+$ cd /home/jarred/code/erdos-410 && grep -A 3 "theorem infinite_setOf_prime_and_eq_mod" .lake/packages/mathlib/Mathlib/NumberTheory/LSeries/PrimesInAP.lean
+[2026-02-08T01:28:04.958Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_dirichlet.lean << 'EOF'
+import Mathlib
+
+-- Dirichlet's theorem on primes in AP
+#check Nat.infinite_setOf_prime_and_eq_mod
+
+-- For our use: there are infinitely many primes ≡ 1 mod q
+-- This is the case a = 1, which is always a unit in ZMod q for q ≥ 2
+example (q : ℕ) (hq : Nat.Prime q) : 
+    {p : ℕ | p.Prime ∧ (p : ZMod q) = 1}.Infinite := by
+  haveI : Fact (Nat.Prime q) := ⟨hq⟩
+  exact Nat.infinite_setOf_prime_and_eq_mod (isUnit_one)
+EOF
+lake env lean /tmp/test_dirichlet.lean 2>&1 | head -10
+[2026-02-08T01:28:47.999Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_approach.lean << 'EOF'
+import Mathlib
+
+open ArithmeticFunction
+
+-- Alternative approach to prime_enters_infinitely:
+-- 
+-- Fact: σ_k(n) → ∞ (already proven)
+-- Fact: the set S* = ∪_k primeFactors(σ_k(n)) is infinite
+--   (otherwise σ_k(n) would be bounded by ∏_{p ∈ S*} p^{max valuation}, 
+--    but valuations would need to grow, and... actually this IS true
+--    since σ_k(n) → ∞ and each prime has finite power)
+--
+-- Wait, S* being infinite needs proof. Let me think about this.
+--
+-- If S* is finite, say S* = {p_1, ..., p_m}, then every σ_k(n) is a product 
+-- of powers of p_1, ..., p_m. 
+-- σ(p_i^e) = 1 + p_i + ... + p_i^e
+-- For this to be divisible only by p_1, ..., p_m, we need strong constraints.
+-- For p_i ∉ {p_1, ..., p_m} to never divide σ(p_j^e), which seems impossible
+-- as e → ∞ (by Zsygmondy-type results).
+--
+-- Actually this IS hard to prove formally without Zsygmondy.
+--
+-- Alternative: just prove S* is infinite from σ_k(n) → ∞
+-- If S* = {p_1, ..., p_m} is finite, then σ_k(n) | ∏ p_i^{v_{p_i}(σ_k(n))}
+-- Since σ_k(n) → ∞, max_i v_{p_i}(σ_k(n)) → ∞
+-- Consider just one prime, say p = min(S*). Then v_p(σ_k(n)) is unbounded.
+-- σ(p^e) for large e: by Zsygmondy... again needs Zsygmondy.
+
+-- OK let me try to prove S* infinite WITHOUT Zsygmondy.
+-- 
+-- Claim: if S* is finite, then σ_k(n) is bounded.
+-- Proof: if S* = {p_1, ..., p_m}, then σ_k(n) = ∏ p_i^{a_{k,i}}.
+-- σ_{k+1}(n) = σ(σ_k(n)) = ∏ σ(p_i^{a_{k,i}}) by multiplicativity
+-- (assuming pairwise coprimality, which holds since they're distinct primes).
+-- 
+-- Now σ(p^a) = (p^{a+1} - 1)/(p-1) < p^{a+1}/(p-1) ≤ p^{a+1}
+-- Wait, that gives σ(p^a) < p^{a+1}, so ∏ σ(p_i^{a_{k,i}}) < ∏ p_i^{a_{k,i}+1}
+-- = ∏ p_i * ∏ p_i^{a_{k,i}} = C * σ_k(n)
+-- where C = ∏ p_i is a constant.
+-- So σ_{k+1}(n) < C * σ_k(n), giving exponential growth at most.
+-- But this doesn't give a BOUND — σ_k(n) still grows.
+-- 
+-- The issue is that σ(p^a) introduces new prime factors. If S* is finite,
+-- then σ(p_i^{a_{k,i}}) must be divisible only by primes in S*.
+-- But σ(p^a) = 1 + p + ... + p^a, and for large a, this has prime factors
+-- outside {p} ∪ {factors of p-1}.
+-- 
+-- This is getting very deep into number theory. Let me not go down this rabbit hole.
+
+-- Let me instead just make sure what I have compiles and commit.
+-- The sorrys are well-structured for follow-up work.
+example : True := trivial
+EOF
+lake env lean /tmp/test_approach.lean 2>&1 | head -5
+[2026-02-08T01:29:14.286Z] 
+$ cd /home/jarred/code/erdos-410 && ls proofs/
+[2026-02-08T01:29:17.597Z] 
+$ cd /home/jarred/code/erdos-410 && grep -n "Escape\|escape\|S\*.*infinite\|infinite.*S\*" proofs/prime-factors-accumulate.md | head -20
+[2026-02-08T01:29:20.500Z] 
+🛠️  Executing tool: read...
+[2026-02-08T01:30:31.469Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_decomp.lean << 'EOF'
+import Mathlib
+
+-- Decomposition: n = 2^{v_2(n)} * (n / 2^{v_2(n)})
+-- The odd part of n
+#check Nat.factorization
+-- n = ∏ p^{v_p(n)} = factorization.prod pow
+#check Nat.factorization_prod_pow_eq_self
+
+-- For n = 2^a * m with m odd:
+-- We can extract a = n.factorization 2
+-- And m = n / 2^a
+
+-- Check: n.factorization 2 gives the 2-adic valuation
+example (n : ℕ) (hn : n ≠ 0) : 2^(n.factorization 2) ∣ n := by
+  exact Nat.ord_pow_dvd_of_factorization n 2
+
+-- Actually:
+#check Nat.ord_pow_dvd_of_factorization  -- doesn't exist?
+#check Nat.pow_factorization_dvd  
+-- Nat.pow_factorization_dvd (n p : ℕ) : p ^ n.factorization p ∣ n
+
+-- The odd part:
+-- n / 2^(n.factorization 2) is odd
+-- How to prove this? n.factorization 2 is the maximal power of 2 dividing n
+-- So n / 2^(n.factorization 2) is not divisible by 2
+
+-- Actually we need n = 2^a * (n / 2^a) and (n / 2^a) is odd
+-- This might be easier via Nat.coprime_div_gcd or similar
+
+-- Let me check what's available
+#check Nat.factorization_le_iff_pow_dvd
+EOF
+lake env lean /tmp/test_decomp.lean 2>&1 | head -20
+[2026-02-08T01:30:43.857Z] 
+$ cd /home/jarred/code/erdos-410 && grep -rn "pow_factorization_dvd\|factorization_dvd\|ord_compl_dvd_ord_compl" .lake/packages/mathlib/Mathlib/Data/Nat/Factorization/ --include="*.lean" | head -10
+[2026-02-08T01:30:48.062Z] 
+$ cd /home/jarred/code/erdos-410 && grep -rn "pow.*factorization.*dvd" .lake/packages/mathlib/Mathlib/ --include="*.lean" | head -10
+[2026-02-08T01:30:59.917Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_decomp2.lean << 'EOF'
+import Mathlib
+
+-- p^{v_p(n)} | n
+#check Nat.Prime.pow_dvd_iff_le_factorization  -- p.Prime → (p^k ∣ n ↔ k ≤ n.factorization p)
+
+-- So 2^{n.factorization 2} | n follows from this (with k = n.factorization 2)
+example (n : ℕ) (hn : n ≠ 0) : 2 ^ (n.factorization 2) ∣ n := by
+  rw [Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hn]
+
+-- n / 2^{v_2(n)} is odd:
+-- 2 ∤ (n / 2^{v_2(n)}) because v_2(n) is the maximal power
+-- i.e., 2^{v_2(n)+1} ∤ n by Nat.pow_succ_factorization_not_dvd
+#check Nat.pow_succ_factorization_not_dvd
+-- Nat.pow_succ_factorization_not_dvd (hn : n ≠ 0) (hp : p.Prime) : ¬p ^ (n.factorization p + 1) ∣ n
+
+-- So n / 2^{v_2(n)} is odd:
+-- 2 ∤ (n / 2^a) where a = v_2(n)
+-- Because 2 | (n / 2^a) would mean 2^{a+1} | n, contradiction
+
+example (n : ℕ) (hn : n ≥ 2) : Odd (n / 2 ^ (n.factorization 2)) := by
+  sorry
+  
+EOF
+lake env lean /tmp/test_decomp2.lean 2>&1 | head -10
+[2026-02-08T01:32:26.383Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_decomp3.lean << 'EOF'
+import Mathlib
+
+open ArithmeticFunction
+
+-- n = 2^{v_2(n)} * (n / 2^{v_2(n)}) with odd part
+-- And the odd part is indeed odd
+
+-- First: 2^{v_2(n)} | n
+lemma two_pow_val_dvd (n : ℕ) (hn : n ≠ 0) : 2 ^ (n.factorization 2) ∣ n := by
+  exact (Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hn).mpr le_rfl
+
+-- The odd part is odd 
+lemma odd_part_odd (n : ℕ) (hn : n ≠ 0) : 
+    Odd (n / 2 ^ (n.factorization 2)) := by
+  rw [Nat.odd_iff]
+  by_contra h
+  push_neg at h
+  -- n / 2^a is even, so 2 | (n / 2^a)
+  -- This means 2^{a+1} | n, contradicting maximality of a
+  have heven : 2 ∣ n / 2 ^ (n.factorization 2) := by
+    rw [Nat.even_iff] at h
+    exact Nat.dvd_of_mod_eq_zero (by omega)  -- doesn't work if h says ≠ 1
+  sorry
+
+-- Let me try differently
+lemma odd_part_odd' (n : ℕ) (hn : n ≠ 0) : 
+    ¬ 2 ∣ n / 2 ^ (n.factorization 2) := by
+  intro h2dvd
+  -- 2 | (n / 2^a) means 2^{a+1} | n
+  have hdvd : 2 ^ (n.factorization 2 + 1) ∣ n := by
+    rw [pow_succ]
+    exact Nat.mul_dvd_of_dvd_div (two_pow_val_dvd n hn) h2dvd
+  -- But this contradicts n.factorization 2 being the maximal exponent
+  exact Nat.pow_succ_factorization_not_dvd hn Nat.prime_two hdvd
+
+-- n = 2^a * (n / 2^a)
+lemma two_pow_mul_div (n : ℕ) (hn : n ≠ 0) : 
+    n = 2 ^ (n.factorization 2) * (n / 2 ^ (n.factorization 2)) := by
+  exact (Nat.mul_div_cancel' (two_pow_val_dvd n hn)).symm
+
+-- Combine: if q | σ(2^a) where a = v_2(m), then q | σ(m) for m ≥ 1
+-- via multiplicativity: σ(m) = σ(2^a * t) = σ(2^a) * σ(t) where t = m / 2^a is odd
+lemma q_dvd_sigma_of_v2_dvd (q m : ℕ) (hm : m ≠ 0) 
+    (hq : q ∣ sigma 1 (2 ^ (m.factorization 2))) :
+    q ∣ sigma 1 m := by
+  conv_rhs => rw [two_pow_mul_div m hm]
+  have hodd : Odd (m / 2 ^ (m.factorization 2)) := by
+    rw [Nat.odd_iff]
+    by_contra h
+    push_neg at h
+    have : m / 2 ^ (m.factorization 2) % 2 = 0 := by omega
+    have h2dvd : 2 ∣ m / 2 ^ (m.factorization 2) := Nat.dvd_of_mod_eq_zero this
+    have hdvd : 2 ^ (m.factorization 2 + 1) ∣ m := by
+      rw [pow_succ]; exact Nat.mul_dvd_of_dvd_div (two_pow_val_dvd m hm) h2dvd
+    exact Nat.pow_succ_factorization_not_dvd hm Nat.prime_two hdvd
+  have hcop : Nat.Coprime (2 ^ (m.factorization 2)) (m / 2 ^ (m.factorization 2)) :=
+    Nat.Coprime.pow_left _ (Nat.coprime_two_left.mpr hodd)
+  rw [isMultiplicative_sigma.map_mul_of_coprime hcop]
+  exact dvd_mul_of_dvd_left hq _
+EOF
+lake env lean /tmp/test_decomp3.lean 2>&1 | head -20
+[2026-02-08T01:32:44.207Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_decomp4.lean << 'EOF'
+import Mathlib
+
+open ArithmeticFunction
+
+-- 2^{v_2(n)} | n
+lemma two_pow_val_dvd (n : ℕ) (hn : n ≠ 0) : 2 ^ (n.factorization 2) ∣ n :=
+  (Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hn).mpr le_rfl
+
+-- n = 2^a * (n / 2^a) 
+lemma two_pow_mul_div (n : ℕ) (hn : n ≠ 0) : 
+    n = 2 ^ (n.factorization 2) * (n / 2 ^ (n.factorization 2)) :=
+  (Nat.mul_div_cancel' (two_pow_val_dvd n hn)).symm
+
+-- If q | σ(2^{v_2(m)}), then q | σ(m) (via multiplicativity)
+lemma q_dvd_sigma_of_v2_dvd (q m : ℕ) (hm : m ≠ 0) 
+    (hq : q ∣ sigma 1 (2 ^ (m.factorization 2))) :
+    q ∣ sigma 1 m := by
+  conv_rhs => rw [two_pow_mul_div m hm]
+  have hodd : Odd (m / 2 ^ (m.factorization 2)) := by
+    rw [Nat.odd_iff]
+    by_contra h
+    push_neg at h
+    have h0 : m / 2 ^ (m.factorization 2) % 2 = 0 := by omega
+    have h2dvd : 2 ∣ m / 2 ^ (m.factorization 2) := Nat.dvd_of_mod_eq_zero h0
+    have hdvd : 2 ^ (m.factorization 2 + 1) ∣ m := by
+      rw [pow_succ]; exact Nat.mul_dvd_of_dvd_div (two_pow_val_dvd m hm) h2dvd
+    exact Nat.pow_succ_factorization_not_dvd hm Nat.prime_two hdvd
+  have hcop : Nat.Coprime (2 ^ (m.factorization 2)) (m / 2 ^ (m.factorization 2)) :=
+    Nat.Coprime.pow_left _ (Nat.coprime_two_left.mpr hodd)
+  rw [isMultiplicative_sigma.map_mul_of_coprime hcop]
+  exact dvd_mul_of_dvd_left hq _
+EOF
+lake env lean /tmp/test_decomp4.lean 2>&1 | head -10
+[2026-02-08T01:33:27.223Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_enters.lean << 'EOF'
+import Mathlib
+
+open ArithmeticFunction
+
+-- From our codebase (proven):
+-- sigma_iterate_ge_two, sigma_pow_two', q_dvd_sigma_two_pow_iff, orderOf_two_zmod_pos
+
+-- Stubs for testing:
+lemma sigma_pow_two'_s (k : ℕ) : sigma 1 (2^k) = 2^(k+1) - 1 := by
+  rw [sigma_apply_prime_pow Nat.prime_two]
+  simp_rw [fun j => show 2^(j * 1) = 2^j from by ring_nf]
+  have := Nat.geomSum_eq (by norm_num : (2 : ℕ) ≤ 2) (k + 1)
+  simp at this; exact this
+
+lemma q_dvd_sigma_two_pow_iff_s (q a : ℕ) :
+    q ∣ sigma 1 (2 ^ a) ↔ orderOf (2 : ZMod q) ∣ (a + 1) := by
+  rw [sigma_pow_two'_s]
+  have h2n_pos : 2 ^ (a + 1) ≥ 1 := Nat.one_le_pow _ 2 (by omega)
+  rw [← ZMod.natCast_eq_zero_iff, Nat.cast_sub h2n_pos]; simp [sub_eq_zero]
+  exact orderOf_dvd_iff_pow_eq_one.symm
+
+lemma orderOf_two_zmod_pos_s (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2) :
+    orderOf (2 : ZMod q) ≥ 1 := by
+  haveI : Fact (Nat.Prime q) := ⟨hq⟩
+  have h2ne : (2 : ZMod q) ≠ 0 := by
+    have : (2 : ZMod q) = ((2 : ℕ) : ZMod q) := by norm_cast
+    rw [this, Ne, ZMod.natCast_eq_zero_iff]
+    intro hdvd; exact hodd (Nat.le_of_dvd (by omega) hdvd |>.antisymm hq.two_le)
+  have hfermat : (2 : ZMod q) ^ (q - 1) = 1 := ZMod.pow_card_sub_one_eq_one h2ne
+  have hdvd := orderOf_dvd_of_pow_eq_one hfermat
+  exact Nat.pos_of_ne_zero fun h0 =>
+    (by have := hq.two_le; omega : q - 1 ≠ 0) (Nat.eq_zero_of_zero_dvd (h0 ▸ hdvd))
+
+-- 2^{v_2(n)} | n
+lemma two_pow_val_dvd_s (n : ℕ) (hn : n ≠ 0) : 2 ^ (n.factorization 2) ∣ n :=
+  (Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hn).mpr le_rfl
+
+-- q_dvd_sigma_of_v2_dvd
+lemma q_dvd_sigma_of_v2_dvd_s (q m : ℕ) (hm : m ≠ 0) 
+    (hq : q ∣ sigma 1 (2 ^ (m.factorization 2))) :
+    q ∣ sigma 1 m := by
+  conv_rhs => rw [(Nat.mul_div_cancel' (two_pow_val_dvd_s m hm)).symm]
+  have hodd : Odd (m / 2 ^ (m.factorization 2)) := by
+    rw [Nat.odd_iff]; by_contra h; push_neg at h
+    have h2dvd : 2 ∣ m / 2 ^ (m.factorization 2) := Nat.dvd_of_mod_eq_zero (by omega)
+    exact Nat.pow_succ_factorization_not_dvd hm Nat.prime_two
+      (by rw [pow_succ]; exact Nat.mul_dvd_of_dvd_div (two_pow_val_dvd_s m hm) h2dvd)
+  rw [isMultiplicative_sigma.map_mul_of_coprime 
+    (Nat.Coprime.pow_left _ (Nat.coprime_two_left.mpr hodd))]
+  exact dvd_mul_of_dvd_left hq _
+
+-- The key sorry: v_2 of iterates hits multiples of any d
+lemma v2_hits_residue_s (n : ℕ) (hn : n ≥ 2) (d : ℕ) (hd : d ≥ 1) :
+    ∀ K, ∃ k ≥ K, d ∣ ((sigma 1)^[k] n).factorization 2 + 1 := by
+  sorry
+
+-- Now prove: for odd prime q, q divides σ_k(n) for infinitely many k
+lemma prime_enters_infinitely_s (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2)
+    (n : ℕ) (hn : n ≥ 2) :
+    ∀ K, ∃ k ≥ K, q ∣ (sigma 1)^[k] n := by
+  intro K
+  -- d = multiplicative order of 2 mod q, d ≥ 1
+  have hd_pos := orderOf_two_zmod_pos_s q hq hodd
+  -- Find k ≥ K with d | (v_2(σ_k(n)) + 1)
+  obtain ⟨k, hk_ge, hd_dvd⟩ := v2_hits_residue_s n hn (orderOf (2 : ZMod q)) hd_pos K
+  -- q | σ(2^{v_2(σ_k(n))}) since d | (v_2 + 1)
+  have hq_dvd_2part : q ∣ sigma 1 (2 ^ (((sigma 1)^[k] n).factorization 2)) :=
+    (q_dvd_sigma_two_pow_iff_s q _).mpr hd_dvd
+  -- σ_k(n) ≠ 0
+  have hne : (sigma 1)^[k] n ≠ 0 := by
+    have : (sigma 1)^[k] n ≥ 2 := by
+      induction k with
+      | zero => simp; omega
+      | succ k ih =>
+        simp only [Function.iterate_succ', Function.comp_apply]
+        have hge2 : (sigma 1)^[k] n ≥ 2 := ih
+        calc sigma 1 ((sigma 1)^[k] n) ≥ (sigma 1)^[k] n + 1 := by
+              rw [sigma_one_apply]
+              have hn0 : (sigma 1)^[k] n ≠ 0 := by omega
+              calc ∑ d ∈ ((sigma 1)^[k] n).divisors, d 
+                  ≥ ∑ d ∈ ({1, (sigma 1)^[k] n} : Finset ℕ), d := by
+                    exact Finset.sum_le_sum_of_subset (by
+                      intro d hd; simp at hd ⊢
+                      rcases hd with rfl | rfl
+                      · exact Nat.one_mem_divisors.mpr hn0
+                      · exact Nat.mem_divisors_self _ hn0)
+                _ = 1 + (sigma 1)^[k] n := by
+                    simp [Finset.sum_pair (by omega : (1 : ℕ) ≠ (sigma 1)^[k] n)]
+          _ ≥ 2 := by omega
+    omega
+  -- q | σ(σ_k(n)) by q_dvd_sigma_of_v2_dvd
+  have hq_dvd := q_dvd_sigma_of_v2_dvd_s q ((sigma 1)^[k] n) hne hq_dvd_2part
+  -- σ_{k+1}(n) = σ(σ_k(n))
+  use k + 1, by omega
+  simp only [Function.iterate_succ', Function.comp_apply]
+  exact hq_dvd
+  
+EOF
+lake env lean /tmp/test_enters.lean 2>&1 | head -10
+[2026-02-08T01:34:05.426Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_enters2.lean << 'EOF'
+import Mathlib
+
+open ArithmeticFunction
+
+-- Minimal stubs for testing
+axiom sigma_iterate_ge_two' (n : ℕ) (hn : n ≥ 2) (k : ℕ) :
+    (sigma 1)^[k] n ≥ 2
+
+lemma sigma_pow_two'_s (k : ℕ) : sigma 1 (2^k) = 2^(k+1) - 1 := by
+  rw [sigma_apply_prime_pow Nat.prime_two]
+  simp_rw [fun j => show 2^(j * 1) = 2^j from by ring_nf]
+  have := Nat.geomSum_eq (by norm_num : (2 : ℕ) ≤ 2) (k + 1)
+  simp at this; exact this
+
+lemma q_dvd_sigma_two_pow_iff_s (q a : ℕ) :
+    q ∣ sigma 1 (2 ^ a) ↔ orderOf (2 : ZMod q) ∣ (a + 1) := by
+  rw [sigma_pow_two'_s]
+  have h2n_pos : 2 ^ (a + 1) ≥ 1 := Nat.one_le_pow _ 2 (by omega)
+  rw [← ZMod.natCast_eq_zero_iff, Nat.cast_sub h2n_pos]; simp [sub_eq_zero]
+  exact orderOf_dvd_iff_pow_eq_one.symm
+
+lemma orderOf_two_zmod_pos_s (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2) :
+    orderOf (2 : ZMod q) ≥ 1 := by
+  haveI : Fact (Nat.Prime q) := ⟨hq⟩
+  have h2ne : (2 : ZMod q) ≠ 0 := by
+    have : (2 : ZMod q) = ((2 : ℕ) : ZMod q) := by norm_cast
+    rw [this, Ne, ZMod.natCast_eq_zero_iff]
+    intro hdvd; exact hodd (Nat.le_of_dvd (by omega) hdvd |>.antisymm hq.two_le)
+  have hfermat : (2 : ZMod q) ^ (q - 1) = 1 := ZMod.pow_card_sub_one_eq_one h2ne
+  have hdvd := orderOf_dvd_of_pow_eq_one hfermat
+  exact Nat.pos_of_ne_zero fun h0 =>
+    (by have := hq.two_le; omega : q - 1 ≠ 0) (Nat.eq_zero_of_zero_dvd (h0 ▸ hdvd))
+
+lemma q_dvd_sigma_of_v2_dvd_s (q m : ℕ) (hm : m ≠ 0) 
+    (hq : q ∣ sigma 1 (2 ^ (m.factorization 2))) :
+    q ∣ sigma 1 m := by
+  conv_rhs => rw [(Nat.mul_div_cancel' 
+    ((Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hm).mpr le_rfl)).symm]
+  have hodd : Odd (m / 2 ^ (m.factorization 2)) := by
+    rw [Nat.odd_iff]; by_contra h; push_neg at h
+    have h2dvd : 2 ∣ m / 2 ^ (m.factorization 2) := Nat.dvd_of_mod_eq_zero (by omega)
+    exact Nat.pow_succ_factorization_not_dvd hm Nat.prime_two
+      (by rw [pow_succ]; exact Nat.mul_dvd_of_dvd_div 
+        ((Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hm).mpr le_rfl) h2dvd)
+  rw [isMultiplicative_sigma.map_mul_of_coprime 
+    (Nat.Coprime.pow_left _ (Nat.coprime_two_left.mpr hodd))]
+  exact dvd_mul_of_dvd_left hq _
+
+-- The key sorry: v_2 hits multiples of d
+lemma v2_hits_residue_s (n : ℕ) (hn : n ≥ 2) (d : ℕ) (hd : d ≥ 1) :
+    ∀ K, ∃ k ≥ K, d ∣ ((sigma 1)^[k] n).factorization 2 + 1 := by
+  sorry
+
+-- Prove prime_enters_infinitely from v2_hits_residue
+lemma prime_enters_infinitely_s (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2)
+    (n : ℕ) (hn : n ≥ 2) :
+    ∀ K, ∃ k ≥ K, q ∣ (sigma 1)^[k] n := by
+  intro K
+  have hd_pos := orderOf_two_zmod_pos_s q hq hodd
+  obtain ⟨k, hk_ge, hd_dvd⟩ := v2_hits_residue_s n hn (orderOf (2 : ZMod q)) hd_pos K
+  have hq_dvd_2part : q ∣ sigma 1 (2 ^ (((sigma 1)^[k] n).factorization 2)) :=
+    (q_dvd_sigma_two_pow_iff_s q _).mpr hd_dvd
+  have hne : (sigma 1)^[k] n ≠ 0 := by
+    have := sigma_iterate_ge_two' n hn k; omega
+  have hq_dvd := q_dvd_sigma_of_v2_dvd_s q ((sigma 1)^[k] n) hne hq_dvd_2part
+  exact ⟨k + 1, by omega, by simp [Function.iterate_succ', Function.comp_apply]; exact hq_dvd⟩
+EOF
+lake env lean /tmp/test_enters2.lean 2>&1 | head -10
+[2026-02-08T01:34:37.963Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_enters3.lean << 'EOF'
+import Mathlib
+
+open ArithmeticFunction
+
+axiom sigma_iterate_ge_two' (n : ℕ) (hn : n ≥ 2) (k : ℕ) :
+    (sigma 1)^[k] n ≥ 2
+
+lemma sigma_pow_two'_s (k : ℕ) : sigma 1 (2^k) = 2^(k+1) - 1 := by
+  rw [sigma_apply_prime_pow Nat.prime_two]
+  simp_rw [fun j => show 2^(j * 1) = 2^j from by ring_nf]
+  have := Nat.geomSum_eq (by norm_num : (2 : ℕ) ≤ 2) (k + 1)
+  simp at this; exact this
+
+lemma q_dvd_sigma_two_pow_iff_s (q a : ℕ) :
+    q ∣ sigma 1 (2 ^ a) ↔ orderOf (2 : ZMod q) ∣ (a + 1) := by
+  rw [sigma_pow_two'_s]; have h := Nat.one_le_pow _ 2 (by omega)
+  rw [← ZMod.natCast_eq_zero_iff, Nat.cast_sub h]; simp [sub_eq_zero]
+  exact orderOf_dvd_iff_pow_eq_one.symm
+
+lemma orderOf_two_zmod_pos_s (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2) :
+    orderOf (2 : ZMod q) ≥ 1 := by
+  haveI : Fact (Nat.Prime q) := ⟨hq⟩
+  have h2ne : (2 : ZMod q) ≠ 0 := by
+    have : (2 : ZMod q) = ((2 : ℕ) : ZMod q) := by norm_cast
+    rw [this, Ne, ZMod.natCast_eq_zero_iff]
+    intro hdvd; exact hodd (Nat.le_of_dvd (by omega) hdvd |>.antisymm hq.two_le)
+  exact Nat.pos_of_ne_zero fun h0 =>
+    (by have := hq.two_le; omega : q - 1 ≠ 0) 
+    (Nat.eq_zero_of_zero_dvd (h0 ▸ orderOf_dvd_of_pow_eq_one (ZMod.pow_card_sub_one_eq_one h2ne)))
+
+-- Decomposition helper
+lemma two_pow_factorization_dvd (m : ℕ) (hm : m ≠ 0) : 2 ^ (m.factorization 2) ∣ m :=
+  (Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hm).mpr le_rfl
+
+lemma odd_part_is_odd (m : ℕ) (hm : m ≠ 0) : 
+    Odd (m / 2 ^ (m.factorization 2)) := by
+  rw [Nat.odd_iff]; by_contra h; push_neg at h
+  have h2 : 2 ∣ m / 2 ^ (m.factorization 2) := Nat.dvd_of_mod_eq_zero (by omega)
+  have : 2 ^ (m.factorization 2 + 1) ∣ m := by
+    rw [pow_succ, mul_comm]
+    exact Nat.mul_dvd_of_dvd_div (two_pow_factorization_dvd m hm) h2
+  exact Nat.pow_succ_factorization_not_dvd hm Nat.prime_two this
+
+lemma q_dvd_sigma_of_v2_dvd_s (q m : ℕ) (hm : m ≠ 0) 
+    (hq : q ∣ sigma 1 (2 ^ (m.factorization 2))) :
+    q ∣ sigma 1 m := by
+  conv_rhs => rw [(Nat.mul_div_cancel' (two_pow_factorization_dvd m hm)).symm]
+  rw [isMultiplicative_sigma.map_mul_of_coprime 
+    (Nat.Coprime.pow_left _ (Nat.coprime_two_left.mpr (odd_part_is_odd m hm)))]
+  exact dvd_mul_of_dvd_left hq _
+
+-- The key sorry
+lemma v2_hits_residue_s (n : ℕ) (hn : n ≥ 2) (d : ℕ) (hd : d ≥ 1) :
+    ∀ K, ∃ k ≥ K, d ∣ ((sigma 1)^[k] n).factorization 2 + 1 := by
+  sorry
+
+-- Main result
+lemma prime_enters_infinitely_s (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2)
+    (n : ℕ) (hn : n ≥ 2) :
+    ∀ K, ∃ k ≥ K, q ∣ (sigma 1)^[k] n := by
+  intro K
+  obtain ⟨k, hk_ge, hd_dvd⟩ := v2_hits_residue_s n hn 
+    (orderOf (2 : ZMod q)) (orderOf_two_zmod_pos_s q hq hodd) K
+  have hne : (sigma 1)^[k] n ≠ 0 := by have := sigma_iterate_ge_two' n hn k; omega
+  have hq_dvd : q ∣ sigma 1 ((sigma 1)^[k] n) :=
+    q_dvd_sigma_of_v2_dvd_s q _ hne ((q_dvd_sigma_two_pow_iff_s q _).mpr hd_dvd)
+  exact ⟨k + 1, by omega, by 
+    simp only [Function.iterate_succ', Function.comp_apply]; exact hq_dvd⟩
+EOF
+lake env lean /tmp/test_enters3.lean 2>&1 | head -10
+[2026-02-08T01:35:10.005Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_enters4.lean << 'EOF'
+import Mathlib
+
+open ArithmeticFunction
+
+axiom sigma_iterate_ge_two' (n : ℕ) (hn : n ≥ 2) (k : ℕ) :
+    (sigma 1)^[k] n ≥ 2
+
+lemma sigma_pow_two'_s (k : ℕ) : sigma 1 (2^k) = 2^(k+1) - 1 := by
+  rw [sigma_apply_prime_pow Nat.prime_two]
+  simp_rw [fun j => show 2^(j * 1) = 2^j from by ring_nf]
+  exact (Nat.geomSum_eq (by norm_num : (2 : ℕ) ≤ 2) (k + 1) |>.symm ▸ by simp)
+
+-- q | 2^n - 1 iff (2 : ZMod q)^n = 1
+lemma dvd_two_pow_sub_one_iff_s (q n : ℕ) :
+    q ∣ 2^n - 1 ↔ (2 : ZMod q)^n = 1 := by
+  rw [← ZMod.natCast_eq_zero_iff, Nat.cast_sub (Nat.one_le_pow n 2 (by omega))]
+  simp [sub_eq_zero]
+
+lemma q_dvd_sigma_two_pow_iff_s (q a : ℕ) :
+    q ∣ sigma 1 (2 ^ a) ↔ orderOf (2 : ZMod q) ∣ (a + 1) := by
+  rw [sigma_pow_two'_s, dvd_two_pow_sub_one_iff_s]
+  exact orderOf_dvd_iff_pow_eq_one.symm
+
+lemma orderOf_two_zmod_pos_s (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2) :
+    orderOf (2 : ZMod q) ≥ 1 := by
+  haveI : Fact (Nat.Prime q) := ⟨hq⟩
+  have h2ne : (2 : ZMod q) ≠ 0 := by
+    have : (2 : ZMod q) = ((2 : ℕ) : ZMod q) := by norm_cast
+    rw [this, Ne, ZMod.natCast_eq_zero_iff]
+    intro hdvd; exact hodd (Nat.le_of_dvd (by omega) hdvd |>.antisymm hq.two_le)
+  exact Nat.pos_of_ne_zero fun h0 =>
+    (by have := hq.two_le; omega : q - 1 ≠ 0) 
+    (Nat.eq_zero_of_zero_dvd (h0 ▸ orderOf_dvd_of_pow_eq_one (ZMod.pow_card_sub_one_eq_one h2ne)))
+
+lemma two_pow_factorization_dvd' (m : ℕ) (hm : m ≠ 0) : 2 ^ (m.factorization 2) ∣ m :=
+  (Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hm).mpr le_rfl
+
+lemma odd_part_is_odd' (m : ℕ) (hm : m ≠ 0) : 
+    Odd (m / 2 ^ (m.factorization 2)) := by
+  rw [Nat.odd_iff]; by_contra h; push_neg at h
+  exact Nat.pow_succ_factorization_not_dvd hm Nat.prime_two
+    (by rw [pow_succ, mul_comm]
+        exact Nat.mul_dvd_of_dvd_div (two_pow_factorization_dvd' m hm) 
+          (Nat.dvd_of_mod_eq_zero (by omega)))
+
+lemma q_dvd_sigma_of_v2_dvd' (q m : ℕ) (hm : m ≠ 0) 
+    (hq : q ∣ sigma 1 (2 ^ (m.factorization 2))) :
+    q ∣ sigma 1 m := by
+  conv_rhs => rw [show m = 2 ^ (m.factorization 2) * (m / 2 ^ (m.factorization 2)) from
+    (Nat.mul_div_cancel' (two_pow_factorization_dvd' m hm)).symm]
+  rw [isMultiplicative_sigma.map_mul_of_coprime 
+    (Nat.Coprime.pow_left _ (Nat.coprime_two_left.mpr (odd_part_is_odd' m hm)))]
+  exact dvd_mul_of_dvd_left hq _
+
+lemma v2_hits_residue' (n : ℕ) (hn : n ≥ 2) (d : ℕ) (hd : d ≥ 1) :
+    ∀ K, ∃ k ≥ K, d ∣ ((sigma 1)^[k] n).factorization 2 + 1 := by
+  sorry
+
+lemma prime_enters_infinitely_s (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2)
+    (n : ℕ) (hn : n ≥ 2) :
+    ∀ K, ∃ k ≥ K, q ∣ (sigma 1)^[k] n := by
+  intro K
+  obtain ⟨k, hk_ge, hd_dvd⟩ := v2_hits_residue' n hn 
+    (orderOf (2 : ZMod q)) (orderOf_two_zmod_pos_s q hq hodd) K
+  have hne : (sigma 1)^[k] n ≠ 0 := by have := sigma_iterate_ge_two' n hn k; omega
+  exact ⟨k + 1, by omega, by 
+    simp only [Function.iterate_succ', Function.comp_apply]
+    exact q_dvd_sigma_of_v2_dvd' q _ hne ((q_dvd_sigma_two_pow_iff_s q _).mpr hd_dvd)⟩
+EOF
+lake env lean /tmp/test_enters4.lean 2>&1 | head -20
+[2026-02-08T01:35:32.811Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_odd_part.lean << 'EOF'
+import Mathlib
+
+lemma two_pow_factorization_dvd' (m : ℕ) (hm : m ≠ 0) : 2 ^ (m.factorization 2) ∣ m :=
+  (Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hm).mpr le_rfl
+
+lemma odd_part_is_odd' (m : ℕ) (hm : m ≠ 0) : 
+    Odd (m / 2 ^ (m.factorization 2)) := by
+  rw [Nat.odd_iff]
+  by_contra h
+  push_neg at h
+  -- m / 2^a % 2 ≠ 1, so m / 2^a is even
+  have h0 : (m / 2 ^ (m.factorization 2)) % 2 = 0 := by omega
+  have h2dvd : 2 ∣ (m / 2 ^ (m.factorization 2)) := Nat.dvd_of_mod_eq_zero h0
+  -- Then 2^{a+1} | m
+  have h_pow_dvd : 2 ^ (m.factorization 2) * 2 ∣ m := by
+    calc 2 ^ (m.factorization 2) * 2 
+        = 2 ^ (m.factorization 2) * (m / 2 ^ (m.factorization 2) / (m / 2 ^ (m.factorization 2) / 2) * (m / 2 ^ (m.factorization 2) / 2)) := by sorry
+      _ ∣ m := by sorry
+  sorry
+  
+-- Actually let me try a cleaner approach
+lemma odd_part_is_odd2 (m : ℕ) (hm : m ≠ 0) : 
+    Odd (m / 2 ^ (m.factorization 2)) := by
+  by_contra h
+  rw [Nat.not_odd_iff_even] at h
+  obtain ⟨c, hc⟩ := h
+  -- m / 2^a = 2c, so m = 2^a * 2c = 2^{a+1} * c
+  have hdvd := two_pow_factorization_dvd' m hm
+  have h_eq : m = 2 ^ (m.factorization 2) * (2 * c) := by
+    rw [← hc]; exact (Nat.mul_div_cancel' hdvd).symm
+  have h_pow : 2 ^ (m.factorization 2 + 1) ∣ m := by
+    rw [pow_succ, h_eq, mul_assoc]
+    exact dvd_mul_right _ _
+  exact Nat.pow_succ_factorization_not_dvd hm Nat.prime_two h_pow
+    
+EOF
+lake env lean /tmp/test_odd_part.lean 2>&1 | head -10
+[2026-02-08T01:35:46.594Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_odd_part2.lean << 'EOF'
+import Mathlib
+
+lemma two_pow_factorization_dvd' (m : ℕ) (hm : m ≠ 0) : 2 ^ (m.factorization 2) ∣ m :=
+  (Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hm).mpr le_rfl
+
+lemma odd_part_is_odd' (m : ℕ) (hm : m ≠ 0) : 
+    Odd (m / 2 ^ (m.factorization 2)) := by
+  by_contra h
+  rw [Nat.not_odd_iff_even] at h
+  obtain ⟨c, hc⟩ := h
+  -- hc : m / 2^a = c + c = 2*c
+  have hdvd := two_pow_factorization_dvd' m hm
+  have h_eq : m = 2 ^ (m.factorization 2) * (m / 2 ^ (m.factorization 2)) :=
+    (Nat.mul_div_cancel' hdvd).symm
+  have h_pow : 2 ^ (m.factorization 2 + 1) ∣ m := by
+    rw [h_eq, hc, pow_succ]
+    ring_nf
+    exact dvd_mul_right _ _
+  exact Nat.pow_succ_factorization_not_dvd hm Nat.prime_two h_pow
+
+EOF
+lake env lean /tmp/test_odd_part2.lean 2>&1 | head -10
+[2026-02-08T01:36:00.349Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_odd_part3.lean << 'EOF'
+import Mathlib
+
+lemma two_pow_factorization_dvd' (m : ℕ) (hm : m ≠ 0) : 2 ^ (m.factorization 2) ∣ m :=
+  (Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hm).mpr le_rfl
+
+lemma odd_part_is_odd' (m : ℕ) (hm : m ≠ 0) : 
+    Odd (m / 2 ^ (m.factorization 2)) := by
+  by_contra h
+  rw [Nat.not_odd_iff_even] at h
+  obtain ⟨c, hc⟩ := h
+  have hdvd := two_pow_factorization_dvd' m hm
+  have h_eq : m = 2 ^ (m.factorization 2) * (m / 2 ^ (m.factorization 2)) :=
+    (Nat.mul_div_cancel' hdvd).symm
+  have h_pow : 2 ^ (m.factorization 2 + 1) ∣ m := by
+    rw [h_eq, hc, pow_succ (n := m.factorization 2)]
+    calc (2 : ℕ) ^ m.factorization 2 * 2 ∣ 2 ^ m.factorization 2 * (c + c) := by
+          apply Nat.mul_dvd_mul_left
+          exact dvd_of_eq (by omega)
+      _ = 2 ^ m.factorization 2 * (c + c) := rfl
+  exact Nat.pow_succ_factorization_not_dvd hm Nat.prime_two h_pow
+EOF
+lake env lean /tmp/test_odd_part3.lean 2>&1 | head -10
+[2026-02-08T01:36:18.081Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_odd_part4.lean << 'EOF'
+import Mathlib
+
+lemma two_pow_factorization_dvd' (m : ℕ) (hm : m ≠ 0) : 2 ^ (m.factorization 2) ∣ m :=
+  (Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hm).mpr le_rfl
+
+lemma odd_part_is_odd' (m : ℕ) (hm : m ≠ 0) : 
+    Odd (m / 2 ^ (m.factorization 2)) := by
+  by_contra h
+  rw [Nat.not_odd_iff_even] at h
+  obtain ⟨c, hc⟩ := h
+  -- hc : m / 2^a = c + c = 2*c
+  -- So 2 | (m / 2^a)
+  have h2div : 2 ∣ (m / 2 ^ (m.factorization 2)) := ⟨c, by omega⟩
+  -- So 2^{a+1} | m
+  have h_pow : 2 ^ (m.factorization 2 + 1) ∣ m := by
+    rw [pow_succ]
+    exact Nat.mul_dvd_of_dvd_div (two_pow_factorization_dvd' m hm) h2div
+  exact Nat.pow_succ_factorization_not_dvd hm Nat.prime_two h_pow
+  
+-- Hmm let me check if Nat.mul_dvd_of_dvd_div has the right type
+#check @Nat.mul_dvd_of_dvd_div
+-- (a b c : ℕ) (h₁ : a ∣ b) (h₂ : c ∣ b / a) : a * c ∣ b
+-- Wait it's: a ∣ b → c ∣ b/a → a*c ∣ b
+-- We have: 2^a ∣ m → 2 ∣ m/2^a → 2^a * 2 ∣ m
+-- And 2^a * 2 = 2^{a+1} (with pow_succ)
+-- So the types should match
+EOF
+lake env lean /tmp/test_odd_part4.lean 2>&1 | head -10
+[2026-02-08T01:36:37.688Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_odd_part5.lean << 'EOF'
+import Mathlib
+
+lemma two_pow_factorization_dvd' (m : ℕ) (hm : m ≠ 0) : 2 ^ (m.factorization 2) ∣ m :=
+  (Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hm).mpr le_rfl
+
+lemma odd_part_is_odd' (m : ℕ) (hm : m ≠ 0) : 
+    Odd (m / 2 ^ (m.factorization 2)) := by
+  by_contra h
+  rw [Nat.not_odd_iff_even] at h
+  obtain ⟨c, hc⟩ := h
+  have h2div : 2 ∣ (m / 2 ^ (m.factorization 2)) := ⟨c, by omega⟩
+  have h_mul : 2 ^ (m.factorization 2) * 2 ∣ m :=
+    Nat.mul_dvd_of_dvd_div (two_pow_factorization_dvd' m hm) h2div
+  have h_pow : 2 ^ (m.factorization 2 + 1) ∣ m := by
+    rwa [pow_succ]
+  exact Nat.pow_succ_factorization_not_dvd hm Nat.prime_two h_pow
+EOF
+lake env lean /tmp/test_odd_part5.lean 2>&1 | head -10
+[2026-02-08T01:37:17.565Z] 
+$ cd /home/jarred/code/erdos-410 && cat > /tmp/test_full_enters.lean << 'EOF'
+import Mathlib
+
+open ArithmeticFunction
+
+-- Axiom stand-in for already-proven lemma
+axiom sigma_iterate_ge_two_ax (n : ℕ) (hn : n ≥ 2) (k : ℕ) :
+    (sigma 1)^[k] n ≥ 2
+
+-- From codebase (proven)
+lemma sigma_pow_two'_f (k : ℕ) : sigma 1 (2^k) = 2^(k+1) - 1 := by
+  rw [sigma_apply_prime_pow Nat.prime_two]
+  simp_rw [fun j => show 2^(j * 1) = 2^j from by ring_nf]
+  have := Nat.geomSum_eq (by norm_num : (2 : ℕ) ≤ 2) (k + 1); simp at this; exact this
+
+-- Helpers
+lemma dvd_two_pow_sub_one_iff_f (q n : ℕ) :
+    q ∣ 2^n - 1 ↔ (2 : ZMod q)^n = 1 := by
+  rw [← ZMod.natCast_eq_zero_iff, Nat.cast_sub (Nat.one_le_pow n 2 (by omega))]
+  simp [sub_eq_zero]
+
+lemma q_dvd_sigma_two_pow_iff_f (q a : ℕ) :
+    q ∣ sigma 1 (2 ^ a) ↔ orderOf (2 : ZMod q) ∣ (a + 1) := by
+  rw [sigma_pow_two'_f, dvd_two_pow_sub_one_iff_f]
+  exact orderOf_dvd_iff_pow_eq_one.symm
+
+lemma orderOf_two_zmod_pos_f (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2) :
+    orderOf (2 : ZMod q) ≥ 1 := by
+  haveI : Fact (Nat.Prime q) := ⟨hq⟩
+  have h2ne : (2 : ZMod q) ≠ 0 := by
+    have : (2 : ZMod q) = ((2 : ℕ) : ZMod q) := by norm_cast
+    rw [this, Ne, ZMod.natCast_eq_zero_iff]
+    intro hdvd; exact hodd (Nat.le_of_dvd (by omega) hdvd |>.antisymm hq.two_le)
+  exact Nat.pos_of_ne_zero fun h0 =>
+    (by have := hq.two_le; omega : q - 1 ≠ 0)
+    (Nat.eq_zero_of_zero_dvd (h0 ▸ orderOf_dvd_of_pow_eq_one (ZMod.pow_card_sub_one_eq_one h2ne)))
+
+lemma two_pow_factorization_dvd_f (m : ℕ) (hm : m ≠ 0) : 2 ^ (m.factorization 2) ∣ m :=
+  (Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hm).mpr le_rfl
+
+lemma odd_part_is_odd_f (m : ℕ) (hm : m ≠ 0) :
+    Odd (m / 2 ^ (m.factorization 2)) := by
+  by_contra h; rw [Nat.not_odd_iff_even] at h
+  obtain ⟨c, hc⟩ := h
+  exact Nat.pow_succ_factorization_not_dvd hm Nat.prime_two (by
+    rw [pow_succ]; exact Nat.mul_dvd_of_dvd_div (two_pow_factorization_dvd_f m hm) ⟨c, by omega⟩)
+
+lemma q_dvd_sigma_of_v2_dvd_f (q m : ℕ) (hm : m ≠ 0) 
+    (hq : q ∣ sigma 1 (2 ^ (m.factorization 2))) :
+    q ∣ sigma 1 m := by
+  conv_rhs => rw [show m = 2 ^ (m.factorization 2) * (m / 2 ^ (m.factorization 2)) from
+    (Nat.mul_div_cancel' (two_pow_factorization_dvd_f m hm)).symm]
+  rw [isMultiplicative_sigma.map_mul_of_coprime
+    (Nat.Coprime.pow_left _ (Nat.coprime_two_left.mpr (odd_part_is_odd_f m hm)))]
+  exact dvd_mul_of_dvd_left hq _
+
+-- The key sorry
+lemma v2_hits_residue_f (n : ℕ) (hn : n ≥ 2) (d : ℕ) (hd : d ≥ 1) :
+    ∀ K, ∃ k ≥ K, d ∣ ((sigma 1)^[k] n).factorization 2 + 1 := by
+  sorry
+
+-- Main: prime enters infinitely often
+lemma prime_enters_infinitely_f (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2)
+    (n : ℕ) (hn : n ≥ 2) :
+    ∀ K, ∃ k ≥ K, q ∣ (sigma 1)^[k] n := by
+  intro K
+  obtain ⟨k, hk_ge, hd_dvd⟩ := v2_hits_residue_f n hn
+    (orderOf (2 : ZMod q)) (orderOf_two_zmod_pos_f q hq hodd) K
+  have hne : (sigma 1)^[k] n ≠ 0 := by have := sigma_iterate_ge_two_ax n hn k; omega
+  exact ⟨k + 1, by omega, by
+    simp only [Function.iterate_succ', Function.comp_apply]
+    exact q_dvd_sigma_of_v2_dvd_f q _ hne ((q_dvd_sigma_two_pow_iff_f q _).mpr hd_dvd)⟩
+EOF
+lake env lean /tmp/test_full_enters.lean 2>&1 | head -10
+[2026-02-08T01:37:30.679Z] 
+$ cd /home/jarred/code/erdos-410 && tm update erdos410-zp6 --status "Integrating proven helper lemmas and reducing prime_enters_infinitely to v2_hits_residue"
+[2026-02-08T01:38:38.248Z] 
+🛠️  Executing tool: edit...
+[2026-02-08T01:38:41.457Z] [overseer] 💓 Heartbeat starting...
+[2026-02-08T01:38:41.461Z] [overseer] Running with model: anthropic/claude-opus-4-6:high
+[2026-02-08T01:38:42.620Z] 
+$ cd /home/jarred/code/erdos-410 && lake build 2>&1 | tail -15
+[2026-02-08T01:39:16.350Z] 
+$ cd /home/jarred/code/erdos-410 && grep -n "sorry" Erdos/Basic.lean
+[2026-02-08T01:39:19.483Z] 
+$ cd /home/jarred/code/erdos-410 && grep -B 3 "sorry" Erdos/Basic.lean
+[2026-02-08T01:39:32.233Z] 
+$ cd /home/jarred/code/erdos-410 && git add -A && git commit -m "Close prime_enters_infinitely; reduce to 3 atomic sorrys
+
+Proven lemmas:
+- two_ne_zero_zmod, orderOf_two_zmod_pos (Fermat's little theorem)
+- dvd_two_pow_sub_one_iff (ZMod bridge)
+- q_dvd_sigma_two_pow_iff (order characterization of q | σ(2^a))
+- two_pow_factorization_dvd, odd_part_is_odd (2-adic decomposition)
+- q_dvd_sigma_of_v2_dvd (multiplicativity + decomposition)
+- prime_enters_infinitely (from v2_hits_residue + above)
+- prime_persistence_odd (from prime_enters_infinitely + prime_div_eventually_always)
+
+Remaining sorrys (3):
+1. squarish_iterates_finite — needs Zsygmondy's theorem
+2. v2_hits_residue — needs Escape Lemma + Dirichlet
+3. prime_div_eventually_always — persistence argument"

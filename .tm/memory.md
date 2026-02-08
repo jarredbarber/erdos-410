@@ -400,3 +400,49 @@ an6 (done) → 5bt (in progress, ~16 min) → zp6 (blocked)
 - If approved: zp6 starts immediately. Monitor for Zsygmondy availability in Mathlib.
 - If revision requested again: this would be the 3rd review round. Consider whether the proof needs fundamental restructuring or if we should proceed to formalization with decomposed sorrys anyway.
 - Time estimate: if 5bt approves within ~15 min, zp6 could start by ~01:30 UTC.
+
+## Heartbeat — 2026-02-08 01:22 UTC (Check-in 15)
+
+**Metrics**: 2 sorrys (lines 793, 827), 1049 lines, 39 tasks (36 closed, 1 in_progress, 2 open). 1 Verified proof, prime-persistence.md Under review.
+**Status**: Productive decomposition — sorry count UP (1→2) but this is progress (targeted sorrys).
+
+**Key developments since last heartbeat**:
+1. **5bt (verify) COMPLETED**: Requested revision 🔍 again. Issues 1-3 resolved but Issue 4 (permanence of odd primes) still has gaps. Created:
+   - vfp (explore, p:1): Fix permanence gap in Theorem 2
+   - lqx (explore, p:3): Clarify Lemma 3' (minor)
+
+2. **zp6 (formalize) IN PROGRESS**: Making excellent progress — 980 lines of log, actively exploring ZMod API. Decomposed `prime_persistence` into 4 pieces:
+   - `squarish_iterates_finite` — sorry (line 793) — q=2 foundation
+   - `prime_persistence_two` — **PROVEN!** Uses squarish_iterates_finite + sigma_even_of_not_squarish
+   - `prime_persistence_odd` — sorry (line 827) — odd q case
+   - `prime_persistence` — combines the two (proven from sub-lemmas)
+   
+   Agent exploring `orderOf` for `ZMod q`, `ZMod.pow_card_sub_one_eq_one` — correct API area for multiplicative orders.
+   File grew to 1049 lines. Two commits: `c375670` (decomposition), `54e033b` (proof hints).
+
+3. **Human intervened**: Commit `54e033b Add proof hints from human reviewer` — the human added hints!
+
+**Sorry decomposition**:
+```
+squarish_iterates_finite (sorry) ──┐
+                                    ├──→ prime_persistence_two (PROVEN)
+                                    │
+prime_persistence_odd (sorry) ──────┤
+                                    ├──→ prime_persistence (PROVEN from sub-lemmas)
+                                    │
+                                    └──→ prime_factors_accumulate (PROVEN)
+                                         └──→ abundancy_ratio_diverges (PROVEN)
+                                              └──→ sigma_iterate_superexp_gt_one (PROVEN)
+                                                   └──→ erdos_410 (PROVEN)
+```
+
+**Pipeline concern**: Worker is single-threaded. zp6 (formalize) is running, so vfp (explore, NL fix) can't start until zp6 finishes. If zp6 gets stuck on the unverified permanence argument, it might waste time. But zp6 is NOT stale and is making real API progress, so let it run.
+
+**Actions**: None — system healthy. Let the formalize agent finish its decomposition.
+
+**Watch next**:
+- Does zp6 finish with 2 clean sorrys? Or does it add more?
+- After zp6: vfp should run next (fix permanence NL proof)
+- After vfp: need verify + formalize for the remaining sorrys
+- Monitor for zp6 going stale (980 lines is a very long session)
+- The 2 remaining sorrys are the genuine mathematical core: Zsygmondy (squarish) and permanence (odd primes)

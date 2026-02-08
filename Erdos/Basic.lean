@@ -810,21 +810,126 @@ lemma prime_persistence_two (n : ℕ) (hn : n ≥ 2) :
   simp only [Function.iterate_succ', Function.comp_apply]
   exact even_iff_two_dvd.mp heven
 
+/-! ### Helper lemmas for odd prime persistence
+
+The proof of odd prime persistence uses the following chain:
+1. `v2_hits_residue` — the 2-adic valuation of σₖ(n) hits every residue class mod d
+2. `q_dvd_sigma_two_pow_iff` — connects divisibility by q to multiplicative order
+3. `q_dvd_sigma_of_v2_dvd` — if q | σ(2^{v₂(m)}), then q | σ(m)
+4. `prime_enters_infinitely` — q enters the orbit infinitely often (from 1-3)
+5. `prime_div_eventually_always` — infinitely often → eventually always
+-/
+
+/-- (2 : ZMod q) ≠ 0 for odd prime q. -/
+lemma two_ne_zero_zmod (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2) :
+    (2 : ZMod q) ≠ 0 := by
+  haveI : Fact (Nat.Prime q) := ⟨hq⟩
+  have : (2 : ZMod q) = ((2 : ℕ) : ZMod q) := by norm_cast
+  rw [this, Ne, ZMod.natCast_eq_zero_iff]
+  intro hdvd
+  exact hodd (Nat.le_of_dvd (by omega) hdvd |>.antisymm hq.two_le)
+
+/-- The multiplicative order of 2 in (ZMod q) is at least 1 for prime q ≠ 2.
+    Uses Fermat's little theorem: 2^(q-1) ≡ 1 (mod q). -/
+lemma orderOf_two_zmod_pos (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2) :
+    orderOf (2 : ZMod q) ≥ 1 := by
+  haveI : Fact (Nat.Prime q) := ⟨hq⟩
+  have h2ne := two_ne_zero_zmod q hq hodd
+  have hfermat : (2 : ZMod q) ^ (q - 1) = 1 := ZMod.pow_card_sub_one_eq_one h2ne
+  have hdvd := orderOf_dvd_of_pow_eq_one hfermat
+  exact Nat.pos_of_ne_zero fun h0 =>
+    (by have := hq.two_le; omega : q - 1 ≠ 0) (Nat.eq_zero_of_zero_dvd (h0 ▸ hdvd))
+
+/-- q ∣ 2^n - 1 iff (2 : ZMod q)^n = 1.
+    This bridges between natural number divisibility and ZMod arithmetic. -/
+lemma dvd_two_pow_sub_one_iff (q n : ℕ) :
+    q ∣ 2 ^ n - 1 ↔ (2 : ZMod q) ^ n = 1 := by
+  rw [← ZMod.natCast_eq_zero_iff, Nat.cast_sub (Nat.one_le_pow n 2 (by omega))]
+  simp [sub_eq_zero]
+
+/-- q ∣ σ(2^a) iff ord_q(2) ∣ (a + 1).
+    Since σ(2^a) = 2^(a+1) - 1, this reduces to the order condition. -/
+lemma q_dvd_sigma_two_pow_iff (q a : ℕ) :
+    q ∣ sigma 1 (2 ^ a) ↔ orderOf (2 : ZMod q) ∣ (a + 1) := by
+  rw [sigma_pow_two', dvd_two_pow_sub_one_iff]
+  exact orderOf_dvd_iff_pow_eq_one.symm
+
+/-- 2^{v₂(m)} divides m. -/
+lemma two_pow_factorization_dvd (m : ℕ) (hm : m ≠ 0) : 2 ^ (m.factorization 2) ∣ m :=
+  (Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hm).mpr le_rfl
+
+/-- The odd part m / 2^{v₂(m)} is odd (by maximality of v₂). -/
+lemma odd_part_is_odd (m : ℕ) (hm : m ≠ 0) :
+    Odd (m / 2 ^ (m.factorization 2)) := by
+  by_contra h; rw [Nat.not_odd_iff_even] at h
+  obtain ⟨c, hc⟩ := h
+  exact Nat.pow_succ_factorization_not_dvd hm Nat.prime_two (by
+    rw [pow_succ]; exact Nat.mul_dvd_of_dvd_div
+      (two_pow_factorization_dvd m hm) ⟨c, by omega⟩)
+
+/-- If q ∣ σ(2^{v₂(m)}), then q ∣ σ(m).
+    Uses multiplicativity: σ(m) = σ(2^a) · σ(t) where m = 2^a · t, t odd. -/
+lemma q_dvd_sigma_of_v2_dvd (q m : ℕ) (hm : m ≠ 0)
+    (hq : q ∣ sigma 1 (2 ^ (m.factorization 2))) :
+    q ∣ sigma 1 m := by
+  conv_rhs => rw [show m = 2 ^ (m.factorization 2) * (m / 2 ^ (m.factorization 2)) from
+    (Nat.mul_div_cancel' (two_pow_factorization_dvd m hm)).symm]
+  rw [isMultiplicative_sigma.map_mul_of_coprime
+    (Nat.Coprime.pow_left _ (Nat.coprime_two_left.mpr (odd_part_is_odd m hm)))]
+  exact dvd_mul_of_dvd_left hq _
+
+/-- The 2-adic valuation of σₖ(n) hits multiples of any d ≥ 1 infinitely often.
+    
+    Precisely: for any d ≥ 1 and K, there exists k ≥ K such that
+    d ∣ (v₂(σₖ(n)) + 1). This is the key number-theoretic input for
+    showing that odd primes enter the orbit.
+    
+    The proof uses the Escape Lemma (S* is infinite) together with
+    Dirichlet's theorem on primes in arithmetic progressions to show
+    that v₂(σₖ(n)) is unbounded and hits all residue classes.
+    See proofs/prime-persistence.md, Lemma 5 and Corollary 5.1. -/
+lemma v2_hits_residue (n : ℕ) (hn : n ≥ 2) (d : ℕ) (hd : d ≥ 1) :
+    ∀ K, ∃ k ≥ K, d ∣ ((sigma 1)^[k] n).factorization 2 + 1 := by
+  sorry
+
+/-- Once a prime q divides σₖ(n) for infinitely many k, it eventually always divides.
+    This is the "persistence" step: once q enters, exits become impossible.
+    
+    The argument uses: when q ∣ σₖ(n), write σₖ(n) = q^b · M with gcd(M,q) = 1.
+    Then σ(q^b) ≡ 1 (mod q), so q ∣ σₖ₊₁(n) iff q ∣ σ(M).
+    The growing number of prime factors of M ensures q ∣ σ(M) eventually.
+    See proofs/prime-persistence.md, Theorem 2, Stage 2. -/
+lemma prime_div_eventually_always (q : ℕ) (hq : Nat.Prime q) (n : ℕ) (hn : n ≥ 2)
+    (hinf : ∀ K, ∃ k ≥ K, q ∣ (sigma 1)^[k] n) :
+    ∃ K, ∀ k ≥ K, q ∣ (sigma 1)^[k] n := by
+  sorry
+
+/-- For odd prime q, q divides σₖ(n) for infinitely many k.
+    
+    Proof: Let d = ord_q(2). By `v2_hits_residue`, there are infinitely many k
+    with d ∣ (v₂(σₖ(n)) + 1). For such k, q ∣ σ(2^{v₂(σₖ(n))}) by
+    `q_dvd_sigma_two_pow_iff`, and then q ∣ σ(σₖ(n)) = σₖ₊₁(n) by
+    `q_dvd_sigma_of_v2_dvd`. -/
+lemma prime_enters_infinitely (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2)
+    (n : ℕ) (hn : n ≥ 2) :
+    ∀ K, ∃ k ≥ K, q ∣ (sigma 1)^[k] n := by
+  intro K
+  obtain ⟨k, hk_ge, hd_dvd⟩ := v2_hits_residue n hn
+    (orderOf (2 : ZMod q)) (orderOf_two_zmod_pos q hq hodd) K
+  have hne : (sigma 1)^[k] n ≠ 0 := by
+    have := sigma_iterate_ge_two n hn k; omega
+  exact ⟨k + 1, by omega, by
+    simp only [Function.iterate_succ', Function.comp_apply]
+    exact q_dvd_sigma_of_v2_dvd q _ hne ((q_dvd_sigma_two_pow_iff q _).mpr hd_dvd)⟩
+
 /-- For odd prime q, q eventually always divides σₖ(n).
     
-    The proof uses:
-    - Once 2 permanently divides (from `prime_persistence_two`), write
-      σₖ(n) = 2^{aₖ} · mₖ with mₖ odd.
-    - The 2-adic valuation aₖ is unbounded (since σₖ(n) → ∞).
-    - Let d = ord_q(2). When d | (aₖ + 1), we get q | σ(2^aₖ) | σₖ₊₁(n).
-    - Once q enters, it persists because σ(q^b) ≡ 1 (mod q) contributes
-      no factors of q, but the growing number of prime factors ensures
-      q | σ(M) for the q-free part M.
-    See proofs/prime-persistence.md, Theorem 2. -/
+    Combines `prime_enters_infinitely` (q enters infinitely often)
+    with `prime_div_eventually_always` (infinitely often → eventually always). -/
 lemma prime_persistence_odd (q : ℕ) (hq : Nat.Prime q) (hodd : q ≠ 2)
     (n : ℕ) (hn : n ≥ 2) :
     ∃ K, ∀ k ≥ K, q ∣ (sigma 1)^[k] n := by
-  sorry
+  exact prime_div_eventually_always q hq n hn (prime_enters_infinitely q hq hodd n hn)
 
 /-- **Prime Persistence**: Every prime eventually always divides σₖ(n).
     
