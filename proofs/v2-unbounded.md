@@ -1,6 +1,6 @@
 # The 2-adic Valuation of σₖ(n) Is Unbounded
 
-**Status:** Draft ✏️
+**Status:** Under review 🔍
 **Statement:** For any $n \geq 2$, the 2-adic valuation $v_2(\sigma_k(n))$ is unbounded as $k \to \infty$. That is, for every $M \geq 1$, there exists $k$ such that $v_2(\sigma_k(n)) \geq M$.
 **Dependencies:** proofs/prime-factors-accumulate.md (Verified ✅)
 **Confidence:** Certain
@@ -228,3 +228,60 @@ The unboundedness of $v_2(\sigma_k(n))$ is a key step toward proving:
 - Lifting the Exponent Lemma (LTE) for 2-adic valuations
 - Dirichlet's theorem on primes in arithmetic progressions
 - Chinese Remainder Theorem
+
+---
+
+## Review Notes
+
+**Reviewer:** Task erdos410-xov (verify agent)  
+**Date:** 2026-02-08  
+**Decision:** Revision requested 🔍
+
+### Strengths
+
+- **Lemmas 1-3 are rigorous and correct**: The 2-adic valuation reduction, odd part contribution, and LTE application are all properly justified
+- **LTE formula (Lemma 3)**: The derivation of $v_2(\sigma(p^e)) = v_2(p+1) + v_2(e+1) - 1$ for odd $e$ is correct. The application of LTE for $v_2(p^{e+1} - 1)$ when $p$ is odd and $e+1$ is even is properly done, and the cancellation of $v_2(p-1)$ is valid
+- **Escape Lemma usage**: The proof correctly applies the Escape Lemma from the verified dependency to show that $S^*$ is infinite and that exponents of primes in $S^*$ grow unbounded
+- **Main theorem logic**: Steps 1-5 of the main theorem follow logically from the stated lemmas - the argument structure is sound
+- **Dependency verification**: Correctly cites only prime-factors-accumulate.md (Verified ✅) and uses it appropriately
+- **Overall mathematical insight**: The key idea—that primitive primes with high $v_2(p+1)$ enter with odd exponent 1 and contribute their full 2-adic valuation—is correct and elegant
+
+### Issues Requiring Revision
+
+**Critical Issue: Lemma 5 (CRT Density Argument) has a rigor gap**
+
+The proof attempts to show that for any $j \geq 1$, infinitely many primitive prime divisors exist with $v_2(q+1) \geq j$. The argument:
+
+1. Correctly applies CRT to find primes $q \equiv 1 \pmod{a+1}$ AND $q \equiv 2^j - 1 \pmod{2^{j+1}}$
+2. Correctly invokes Dirichlet to show infinitely many such primes exist
+
+**However**, the proof does not rigorously justify that among these primes, some are **primitive** divisors of $p_0^{a+1} - 1$. The statement "Among these infinitely many primes $q$ with $\mathrm{ord}_q(p_0) \mid (a+1)$, some are primitive" is not proven.
+
+Dirichlet's theorem guarantees primes in the residue class, and such primes satisfy $(a+1) \mid (q-1)$, which implies $\mathrm{ord}_q(p_0) \mid (a+1)$. But primitive means $\mathrm{ord}_q(p_0) = a+1$ exactly, which is a stronger condition. The proportion of primes with this property is related to Artin's conjecture (still open in general).
+
+**Suggested fixes:**
+
+1. **Alternative approach**: Instead of using CRT to control both conditions simultaneously, argue as follows:
+   - By Zsygmondy, for infinitely many odd values $a+1$, there exist primitive primes $q$ dividing $p_0^{a+1} - 1$
+   - These primes $q$ have varying values of $v_2(q+1)$ as $a+1$ varies
+   - For any bound $j$, the set $\{v_2(q+1) : q \text{ primitive for some } a+1\}$ is unbounded (prove this directly or cite)
+   - Therefore, for any $j$, some primitive prime has $v_2(q+1) \geq j$
+
+2. **Explicit construction**: For specific infinite families of $a+1$ (e.g., $a+1 = 2^k - 1$), analyze the primitive primes explicitly
+
+3. **Density argument**: Use a more careful counting/density argument to show that the primitive primes among those satisfying the CRT conditions have positive density (this may require additional number-theoretic machinery)
+
+**Minor Issue: Lemma 6 "generically" claim**
+
+The proof states that $v_q(\sigma(p_0^a)) = 1$ holds "generically" for primitive primes, with finitely many exceptions. While this is standard for primitive prime divisors, the proof should either:
+- Cite a specific theorem about primitive divisors having valuation 1
+- Or explicitly work with a subsequence avoiding the exceptional cases
+- Or provide a clearer bound on the exceptional set
+
+This is minor because the "generically" claim is correct in spirit and doesn't invalidate the main argument (we can avoid finitely many bad values of $a$).
+
+### Verdict
+
+The proof demonstrates strong mathematical understanding and the core insight is sound. However, **Lemma 5 requires strengthening** before the proof can be verified. The gap is fixable—the claim that primitive primes with arbitrarily large $v_2(q+1)$ exist is almost certainly true—but the current argument doesn't rigorously establish it.
+
+Once Lemma 5 is fixed, the proof will be ready for verification and subsequent formalization in Lean.
