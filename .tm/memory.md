@@ -446,3 +446,49 @@ prime_persistence_odd (sorry) ──────┤
 - After vfp: need verify + formalize for the remaining sorrys
 - Monitor for zp6 going stale (980 lines is a very long session)
 - The 2 remaining sorrys are the genuine mathematical core: Zsygmondy (squarish) and permanence (odd primes)
+
+## Heartbeat — 2026-02-08 01:59 UTC (Check-in 17)
+
+**Metrics**: 3 sorrys (lines 793, 893, 905), 1154 lines, 40 tasks (37 closed, 1 failed, 1 in_progress, 1 open). 1 Verified proof.
+**Status**: ESCALATION — sorry #3 (persistence) declared unsolvable after 4+ attempts. Pivoting to sorrys #1-2.
+
+**Key developments**:
+1. **vfp (explore) FAILED**: Explored BOTH approaches from the task description:
+   - **Approach A (energy/potential from hints.md)**: Agent correctly identified this reduces to same obstacle — still need to know which primes divide σ_k(n).
+   - **Approach B (persistence fix)**: Circular analysis, can't break through σ(q^b) ≡ 1 mod q.
+   - **Conclusion**: "Both Approach A and Approach B face the same fundamental obstacle."
+   - DID prove Theorem 4 (every prime enters infinitely often) is solid, but infinitely often → always is the gap.
+
+2. **Human escalation sent**: Notified human with clear options:
+   - (1) Different proof of prime_factors_accumulate avoiding persistence
+   - (2) Accept sorry #3 as mathematical frontier, focus on #1-2
+   - (3) More specific hint for persistence argument
+
+3. **xxd (formalize, p:0) CREATED**: Formalize `squarish_iterates_finite` — sorry #1 has reviewed NL proof and doesn't depend on sorry #3.
+
+4. **lqx (explore, p:3) IN PROGRESS**: Minor Lemma 3' clarification.
+
+**Persistence failure count**: q0l (partial) → opj (gaps found) → an6 (3/4 fixed) → 5bt (issue 4 remains) → vfp (FAILED both approaches). **5 attempts total.**
+
+**Sorrys #1-2 are INDEPENDENT of #3**:
+- squarish_iterates_finite → only needs Zsygmondy (reviewed NL proof)
+- v2_hits_residue → needs v_2 dynamics (reviewed NL proof)
+- prime_div_eventually_always → THE GAP (no NL proof, 5 failed attempts)
+Even if #3 remains unsolvable, closing #1-2 reduces the proof to a single mathematical claim.
+
+**Pipeline**:
+```
+lqx (in progress, minor) → xxd (formalize squarish, p:0)
+                            + wait for human on sorry #3
+```
+
+**Actions**:
+1. Created xxd (formalize, p:0) for squarish_iterates_finite
+2. Escalated sorry #3 to human via tm notify
+3. Will create formalize task for v2_hits_residue after xxd completes
+
+**Watch next**:
+- Does xxd make progress on squarish_iterates_finite? Zsygmondy availability in Mathlib is the key question.
+- Human response on sorry #3 — may provide breakthrough hint or accept it as frontier
+- After xxd: create formalize task for v2_hits_residue (sorry #2)
+- If human provides no further guidance: the project reaches its mathematical limit at sorry #3

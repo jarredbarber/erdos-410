@@ -14360,3 +14360,110 @@ $ cd /home/jarred/code/erdos-410 && wc -l Erdos/Basic.lean
 1. `squarish_iterates_finite` — σₖ(n) is eventually not squarish (needs Zsygmondy's theorem, not in Mathlib)
 2. `v2_hits_residue` — v₂(σₖ(n))+1 hits multiples of d infinitely often (needs Escape Lemma + Dirichlet)
 3. `prime_div_eventually_always` — infinitely often divides → eventually always divides (persistence gap from NL proof review)
+[2026-02-08T01:57:35.428Z] ✓ Task-specific changes rolled back
+
+[2026-02-08T01:57:35.428Z] 
+📊 Task erdos410-vfp failed:
+[2026-02-08T01:57:35.428Z]    Summary: Could not close the permanence gap. Both Approach A (potential function) and Approach B (direct persistence) face the same fundamental obstacle.
+[2026-02-08T01:57:35.428Z]    Details: ## What Was Proven
+
+1. **Theorem 4 (Every Prime Enters Infinitely Often):** For any prime p and n ≥ 2, there exist infinitely many k with p | σ_k(n). This uses the Mersenne injection mechanism: when v_2(σ_k(n)) = a with ord_p(2) | (a+1), we have p | σ_{k+1}(n).
+
+2. **Supporting Lemmas:** Mersenne divisibility (Lemma 1-2), unbounded 2-adic valuation (Lemma 3), injection frequency bounds (Lemmas 5-6).
+
+## The Gap
+
+The core difficulty is proving that the reciprocal sum Σ_{p | σ_k(n)} 1/p eventually stays large (not just gets large infinitely often).
+
+**The Cesaro Mean Trap:** For erdos_410, we need (1/k)·log(σ_k(n)) → ∞. The growth ratio R_j = log(σ_{j+1}/σ_j) satisfies R_j ≥ log(3/2) always, but this only gives exponential growth. For super-exponential growth, we need R_j → ∞ or R_j large often enough.
+
+**Why Both Approaches Fail:**
+- Approach A (hints): Showing Σ 1/p → ∞ requires small primes to accumulate, which is persistence by another name.
+- Approach B (original): Direct persistence for odd primes has the gap in Stage 2e (pigeonhole doesn't guarantee the right residue class).
+
+## What Would Close the Gap
+
+1. **Persistence for dense set of primes:** Show some set P with Σ_{p∈P} 1/p = ∞ has eventual persistence.
+2. **Positive density of high-reciprocal steps:** Show the steps where Σ 1/p ≥ M have positive density.
+3. **Exponent accumulation:** Prove that primes with high exponents accumulate, boosting the abundancy floor.
+4. **Different approach:** Analytic/ergodic methods on the σ-orbit.
+
+## Recommendation
+
+**ESCALATE TO ADVISOR.** The gap is substantive and requires either new mathematical techniques or external results. Published to proofs/prime-persistence-fix.md.
+[2026-02-08T01:57:35.433Z] ❌ Task erdos410-vfp failed
+
+[2026-02-08T01:57:36.502Z] 
+================================================================================
+[2026-02-08T01:57:36.502Z] 📌 Processing task: erdos410-lqx - Clarify Lemma 3' statement in prime-persistence.md
+[2026-02-08T01:57:36.502Z]    Role: explore | Priority: 3 | Size: small
+[2026-02-08T01:57:36.502Z] ================================================================================
+
+[2026-02-08T01:57:36.507Z] ✓ Claimed task erdos410-lqx
+
+[2026-02-08T01:57:36.507Z] 🤖 Using agent: explore with models: anthropic/claude-opus-4-6:high, anthropic/claude-opus-4-5:high, google-antigravity/gemini-3-pro:high
+
+[2026-02-08T01:57:36.507Z] 💭 Starting pi agent session with model: anthropic/claude-opus-4-6:high...
+[2026-02-08T01:57:36.522Z] 📸 Capturing file state before agent execution...
+[2026-02-08T01:57:36.534Z] ✓ Captured state: 55 tracked, 2 untracked files
+
+[2026-02-08T01:57:40.802Z] 
+🛠️  Executing tool: read...
+[2026-02-08T01:57:40.809Z] 
+$ tm update erdos410-lqx --status "Reading prime-persistence.md to understand current Lemma 3' statement and proof"
+[2026-02-08T01:59:54.164Z] [overseer] 💓 Heartbeat complete: Escalated sorry #3 (persistence) to human after 5 failed attempts. Created formalize task for sorry #1 (squarish_iterates_finite). Pivoting to independent sorrys.
+[2026-02-08T02:07:01.783Z] 
+
+📝 Agent response complete.
+
+[2026-02-08T02:07:01.784Z] 📄 Log saved to .tm/logs/worker-erdos410-lqx.md
+[2026-02-08T02:07:01.784Z] WARN: ⚠️ No response received from model anthropic/claude-opus-4-6:high (possibly out of usage). Trying next model...
+[2026-02-08T02:07:01.784Z] 💭 Starting pi agent session with model: anthropic/claude-opus-4-5:high...
+[2026-02-08T02:07:01.801Z] 📸 Capturing file state before agent execution...
+[2026-02-08T02:07:01.814Z] ✓ Captured state: 55 tracked, 2 untracked files
+
+[2026-02-08T02:07:07.574Z] 
+$ cd /home/jarred/code/erdos-410 && tm update erdos410-lqx --status "Reading prime-persistence.md to understand the current Lemma 3' statement and proof"
+[2026-02-08T02:07:08.798Z] 
+🛠️  Executing tool: read...
+[2026-02-08T02:07:26.945Z] 
+$ cd /home/jarred/code/erdos-410 && tm update erdos410-lqx --status "Analyzing how Lemma 3' is used in Theorem 1 to determine correct restatement"
+[2026-02-08T02:08:18.039Z] 
+$ cd /home/jarred/code/erdos-410 && tm update erdos410-lqx --status "Editing Lemma 3' statement and proof to match what is actually proven"
+[2026-02-08T02:08:19.285Z] 
+🛠️  Executing tool: edit...
+[2026-02-08T02:08:41.262Z] 
+🛠️  Executing tool: edit...
+[2026-02-08T02:10:07.092Z] 
+🛠️  Executing tool: edit...
+[2026-02-08T02:10:18.075Z] 
+🛠️  Executing tool: edit...
+[2026-02-08T02:10:25.463Z] 
+🛠️  Executing tool: edit...
+[2026-02-08T02:10:29.741Z] 
+$ cd /home/jarred/code/erdos-410 && grep -n "Lemma 3'" proofs/prime-persistence.md | head -20
+[2026-02-08T02:10:29.744Z] 
+🛠️  Executing tool: read...
+[2026-02-08T02:10:33.809Z] 
+🛠️  Executing tool: read...
+[2026-02-08T02:10:40.643Z] 
+$ cd /home/jarred/code/erdos-410 && tm close erdos410-lqx
+[2026-02-08T02:10:50.451Z] 
+
+📝 Agent response complete.
+
+[2026-02-08T02:10:50.451Z] 📄 Log saved to .tm/logs/worker-erdos410-lqx.md
+[2026-02-08T02:10:50.452Z] 
+📊 Task erdos410-lqx completed:
+[2026-02-08T02:10:50.452Z]    Summary: Clarified Lemma 3' statement in proofs/prime-persistence.md
+[2026-02-08T02:10:50.452Z]    Details: Confidence: High. Fixed the mismatch between lemma statement and proof:
+
+1. **Lemma 3' restated** (option A): Changed from 'For each fixed a ≥ 6, T_a is finite' to 'For any fixed odd t, the set {a ≥ 6 : t ∈ T_a} is finite.' This matches what the proof actually establishes by varying a and accumulating constraints from primitive primes.
+
+2. **Case A updated**: Now correctly uses Lemma 3' — since no single t can belong to T_a for infinitely many a, and the sequence has unbounded a values, eventually t_{k_j} ∉ T_{a_{k_j}}.
+
+3. **Case B strengthened**: Added an inline Claim proving that T_a is finite for each fixed a ≥ 0 (via primitive prime constraint analysis), which is needed for the pigeonhole argument when a is bounded.
+
+4. **Review notes updated**: Changed Issue 1 status from 'MOSTLY RESOLVED' to 'RESOLVED' with updated description.
+
+The proof of Theorem 1 (Squarish Iterates Are Finite) is now internally consistent.

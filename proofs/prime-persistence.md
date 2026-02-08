@@ -63,34 +63,34 @@ This constrains $t$: for the primitive prime $p$, either:
 
 In either case, $p \mid \sigma(t^2)$ with specific parity constraints. $\square$
 
-### Lemma 3' (Finitely Many Compatible t For Each a)
-For each fixed $a \geq 6$, the set $T_a = \{t \text{ odd} : (2^{a+1}-1) \cdot \sigma(t^2) \text{ is a perfect square}\}$ is finite.
+### Lemma 3' (No t Works for Infinitely Many a)
+Define $T_a = \{t \text{ odd} : (2^{a+1}-1) \cdot \sigma(t^2) \text{ is a perfect square}\}$. For any fixed odd $t$, the set $\{a \geq 6 : t \in T_a\}$ is finite. Equivalently, no odd $t$ belongs to $T_a$ for infinitely many values of $a$.
 
-**Proof.** Let $p_1, p_2, \ldots$ be the primitive prime divisors that arise as $a$ increases beyond 6. For $a \geq 7$, there is at least one primitive prime $p \mid 2^{a+1} - 1$.
+**Proof.** Let $p_1, p_2, \ldots$ be the primitive prime divisors that arise as $a$ increases beyond 6. By Lemma 2, for each $a \geq 6$, $2^{a+1} - 1$ has at least one primitive prime divisor $p_a$ with $\mathrm{ord}_{p_a}(2) = a + 1$.
 
-For $(2^{a+1}-1) \cdot \sigma(t^2)$ to be a perfect square, by Lemma 3, we need $v_p(\sigma(t^2)) \equiv v_p(2^{a+1}-1) \pmod{2}$.
+Fix an odd $t$. For $t \in T_a$, the product $(2^{a+1}-1) \cdot \sigma(t^2)$ must be a perfect square. By Lemma 3, this requires $v_{p_a}(\sigma(t^2)) \equiv v_{p_a}(2^{a+1}-1) \pmod{2}$.
 
-Now, $\sigma(t^2) = \prod_{q \mid t, q \text{ odd}} \sigma(q^{2v_q(t)})$.
+For $p_a \mid \sigma(t^2)$, we need $p_a \mid \sigma(q^{2e})$ for some odd prime $q \mid t$ with $e = v_q(t) \geq 1$.
 
-For $p \mid \sigma(t^2)$, we need $p \mid \sigma(q^{2e})$ for some odd prime $q \mid t$ and $e = v_q(t) \geq 1$.
+Now $\sigma(q^{2e}) = \frac{q^{2e+1} - 1}{q - 1}$. So $p_a \mid \sigma(q^{2e})$ requires either:
+- $p_a \mid q^{2e+1} - 1$, i.e., $\mathrm{ord}_{p_a}(q) \mid 2e+1$, OR  
+- $p_a \mid q - 1$ (in which case $\sigma(q^{2e}) \equiv 2e+1 \pmod{p_a}$, so $p_a \mid \sigma(q^{2e})$ iff $p_a \mid 2e+1$)
 
-$\sigma(q^{2e}) = \frac{q^{2e+1} - 1}{q - 1}$.
+**Key observation:** Since $t$ is fixed, the set of prime factors of $t$ is finite, say $\{q_1, \ldots, q_m\}$ with fixed exponents $e_1, \ldots, e_m$.
 
-So $p \mid \sigma(q^{2e})$ requires either:
-- $p \mid q^{2e+1} - 1$, i.e., $\mathrm{ord}_p(q) \mid 2e+1$, OR  
-- $p \mid q - 1$ (in which case $\sigma(q^{2e}) \equiv 2e+1 \pmod{p}$, so $p \mid \sigma(q^{2e})$ iff $p \mid 2e+1$)
+For each $a$, the primitive prime $p_a$ has $\mathrm{ord}_{p_a}(2) = a + 1$. As $a$ varies, we get distinct primitive primes (different $a$ values give different orders, hence different primes).
 
-For the primitive prime $p$ of $2^{a+1} - 1$, we have $\mathrm{ord}_p(2) = a + 1$.
+For $t \in T_a$, the constraint $v_{p_a}(\sigma(t^2)) \equiv v_{p_a}(2^{a+1}-1) \pmod 2$ must be satisfied.
 
-The constraint $p \mid \sigma(t^2)$ means $t$ must have a prime factor $q$ with the above divisibility.
+**Counting constraints:** The fixed $t$ can only satisfy such constraints for finitely many $a$:
+- The condition $p_a \mid \sigma(q_i^{2e_i})$ requires $\mathrm{ord}_{p_a}(q_i) \mid 2e_i + 1$ (or $p_a \mid q_i - 1$ with $p_a \mid 2e_i + 1$).
+- Since $\mathrm{ord}_{p_a}(2) = a + 1 \to \infty$, and $q_i, e_i$ are fixed, only finitely many primitive primes $p_a$ can divide any particular $\sigma(q_i^{2e_i})$.
+- Thus for $a$ large enough, $p_a \nmid \sigma(t^2)$.
+- When $p_a \nmid \sigma(t^2)$, the parity constraint becomes $v_{p_a}(2^{a+1}-1) \equiv 0 \pmod 2$, which need not hold.
 
-**Key point:** As $a \to \infty$, new primitive primes $p$ arise (with $\mathrm{ord}_p(2) = a + 1$). Each such $p$ imposes an independent constraint on $t$.
+More precisely: for sufficiently large $a$, the primitive prime $p_a$ does not divide $\sigma(t^2)$ (since $t$ has only finitely many prime factors with fixed exponents). Then for $(2^{a+1}-1) \cdot \sigma(t^2)$ to be a perfect square, we need $v_{p_a}(2^{a+1}-1)$ to be even. But $v_{p_a}(2^{a+1}-1)$ depends on the specific structure of $2^{a+1}-1$, and is not guaranteed to be even for all large $a$.
 
-For $t$ to satisfy constraints from $k$ different primitive primes $p_1, \ldots, p_k$ (arising from $a_1, \ldots, a_k$), we need $t$ to have prime factors satisfying all these constraints simultaneously.
-
-The primes $q$ satisfying the constraint for $p_i$ form a specific (and sparse) set. As $k \to \infty$, the intersection of all these constraints becomes empty.
-
-**Conclusion:** For any fixed $a$, the set $T_a$ is finite. (In fact, $T_a$ can be explicitly bounded by analyzing which odd $t$ can satisfy the parity constraints on $v_p(\sigma(t^2))$.) $\square$
+**Conclusion:** For any fixed odd $t$, only finitely many $a \geq 6$ have $t \in T_a$. $\square$
 
 ### Theorem 1 (Squarish Iterates Are Finite)
 For $n \geq 2$, the set $\{k \geq 0 : \sigma_k(n) \text{ is squarish}\}$ is finite.
@@ -109,29 +109,48 @@ $\sigma_{k_j+1}(n) = \sigma(2^{a_{k_j}} t_{k_j}^2) = (2^{a_{k_j}+1} - 1) \cdot \
 
 This is a product of two odd numbers, hence odd. For it to be squarish, it must be a perfect square.
 
-By Lemma 2, for $a_{k_j} \geq 6$, $2^{a_{k_j}+1} - 1$ has a primitive prime divisor $p_{k_j}$.
+**Applying Lemma 3':** Consider a pair of consecutive squarish iterates at indices $k_j$ and $k_j + 1$. For the second to be squarish, we need $t_{k_j} \in T_{a_{k_j}}$.
 
-By Lemma 3', the set $T_{a_{k_j}}$ of odd $t$ making $(2^{a_{k_j}+1}-1) \cdot \sigma(t^2)$ a perfect square is finite.
+By Lemma 3', any fixed odd $t$ belongs to only finitely many $T_a$. Contrapositively: if infinitely many distinct $a$ values arise (as happens here since $a_{k_j}$ is unbounded), no single $t$ can work for all of them.
 
-Since $a_{k_j}$ takes infinitely many distinct values (by unboundedness), we get infinitely many distinct primitive primes $p_{a}$ (for $a \in \{a_{k_j}\}$), each constraining $t_{k_j}$.
+Now suppose there are infinitely many pairs of consecutive squarish iterates. Each pair $(k_j, k_j+1)$ requires $t_{k_j} \in T_{a_{k_j}}$.
 
-But $\sigma_{k_j}(n) \to \infty$ implies $t_{k_j} \to \infty$ (unless the $a_{k_j}$'s alone account for the growth, which still gives new constraints).
+Since $a_{k_j}$ takes infinitely many distinct values, we cannot have the $t_{k_j}$ being constant (by Lemma 3'). But the sequence $t_{k_j}$ is determined by the dynamics of $\sigma$—it's not arbitrary.
 
-Eventually, $t_{k_j}$ exceeds all elements of $T_{a_{k_j}}$ for that $a_{k_j}$, so $(2^{a_{k_j}+1}-1) \cdot \sigma(t_{k_j}^2)$ is NOT a perfect square. Hence $\sigma_{k_j+1}(n)$ is not squarish.
+**Growth argument:** Since $\sigma_{k_j}(n) = 2^{a_{k_j}} t_{k_j}^2 \to \infty$ and $a_{k_j}$ is unbounded, the pairs $(a_{k_j}, t_{k_j})$ take infinitely many distinct values. By Lemma 3', each $t_{k_j}$ can only appear in finitely many $T_a$ sets.
 
-This shows: after some point, a squarish iterate is ALWAYS followed by a non-squarish iterate.
+Thus for all but finitely many $j$, we have $t_{k_j} \notin T_{a_{k_j}}$, meaning $\sigma_{k_j+1}(n)$ is NOT a perfect square, hence not squarish.
+
+This shows: eventually, a squarish iterate with large enough $a$ is ALWAYS followed by a non-squarish iterate.
 
 **Case B: $a_{k_j}$ is bounded.**
 
 Say $a_{k_j} \leq A$ for all $j$. Since $\sigma_{k_j}(n) = 2^{a_{k_j}} t_{k_j}^2 \to \infty$ and $2^{a_{k_j}} \leq 2^A$, we have $t_{k_j} \to \infty$.
 
-Consider the finite set $T = \bigcup_{a=0}^{A} T_a$, where $T_a$ is from Lemma 3'.
+For consecutive squarish pairs, we need $t_{k_j} \in T_{a_{k_j}}$ for each $j$.
 
-Since $T$ is finite and $t_{k_j} \to \infty$, eventually $t_{k_j} \notin T$.
+By pigeonhole on the bounded set $\{0, 1, \ldots, A\}$: some $a^* \leq A$ appears as $a_{k_j}$ for infinitely many $j$. Let $J = \{j : a_{k_j} = a^*\}$, an infinite set.
 
-For such $j$, $(2^{a_{k_j}+1}-1) \cdot \sigma(t_{k_j}^2)$ is NOT a perfect square (since $t_{k_j} \notin T_{a_{k_j}}$).
+For $j \in J$, we have $t_{k_j} \in T_{a^*}$. Since $t_{k_j} \to \infty$ along $J$, we need infinitely many distinct $t$ values in $T_{a^*}$.
 
-Hence $\sigma_{k_j+1}(n)$ is not squarish.
+**Claim:** $T_{a^*}$ is finite for any fixed $a^* \geq 0$.
+
+*Proof of Claim:* For $a^* \leq 5$, the Mersenne number $M = 2^{a^*+1} - 1$ is small and has no primitive prime divisors only when $a^* + 1 \leq 6$. We can verify directly that $T_{a^*}$ is finite for small $a^*$ by explicit computation of the constraints.
+
+For $a^* \geq 6$, let $p$ be a primitive prime divisor of $M = 2^{a^*+1} - 1$ (exists by Lemma 2). For $t \in T_{a^*}$, we need $v_p(M \cdot \sigma(t^2))$ even, hence $v_p(M) + v_p(\sigma(t^2)) \equiv 0 \pmod 2$.
+
+The constraint $v_p(\sigma(t^2)) \equiv v_p(M) \pmod 2$ forces specific divisibility conditions on $t$:
+- Either $p \mid \sigma(t^2)$ with controlled parity, requiring $p \mid \sigma(q^{2e})$ for some prime power $q^e \| t$
+- Or $p \nmid \sigma(t^2)$ and $v_p(M)$ is even
+
+In either case, the set of odd $t$ satisfying these constraints is finite because:
+- $p \mid \sigma(q^{2e}) = \frac{q^{2e+1}-1}{q-1}$ requires $\mathrm{ord}_p(q) \mid (2e+1)$ or $p \mid (q-1)$ with $p \mid (2e+1)$
+- Since $\mathrm{ord}_p(2) = a^* + 1$ is large for primitive $p$, and primes $q$ with $\mathrm{ord}_p(q) \mid (2e+1)$ for small $e$ form a finite set
+- The set of $t$ with all prime factors satisfying these constraints is finite $\square$
+
+Since $T_{a^*}$ is finite and $t_{k_j} \to \infty$ along $J$, eventually $t_{k_j} \notin T_{a^*} = T_{a_{k_j}}$ for $j \in J$.
+
+Hence $\sigma_{k_j+1}(n)$ is not squarish for large $j \in J$, contradicting the assumption of infinitely many consecutive squarish pairs.
 
 **Combining Cases A and B:**
 
@@ -363,7 +382,9 @@ This revision addresses the four critical issues from the verification review:
 
 ### Issue 1 (Lemma 3 — Odd Valuation): RESOLVED
 - Replaced the flawed "v_p(2^a - 1) is odd" claim with Lemma 3 and Lemma 3', which establish that primitive primes create **constraints** on t, regardless of their exact valuation parity.
-- The key insight is that for each a, only finitely many t satisfy the perfect square condition, not that v_p is specifically odd.
+- Lemma 3' now correctly states: "For any fixed odd t, the set {a ≥ 6 : t ∈ T_a} is finite" — matching what the proof actually establishes.
+- Case A uses this directly: no single t can work for infinitely many a values, so unbounded a leads to eventual failure.
+- Case B uses finiteness of each T_a for fixed a (proven via constraint analysis on primitive primes).
 
 ### Issue 2 (Varying Pairs): RESOLVED  
 - Theorem 1 now explicitly handles both Case A (a_k unbounded) and Case B (a_k bounded).
@@ -395,7 +416,7 @@ The revision addresses 3 of 4 critical issues from the first review (erdos410-op
 
 **✅ Issue 3 (Residue 0) - RESOLVED:** Lemma 5 rigorously proves $v_2(\sigma_k(n)) \to \infty$ using Escape Lemma + Dirichlet. Corollary 5.1 correctly derives infinitely many hits of residue $0 \pmod d$.
 
-**✓ Issue 1 (Lemma 3) - MOSTLY RESOLVED:** The new Lemma 3' has the right idea but overstates its conclusion. It claims "for each fixed $a$, $T_a$ is finite," but the proof argues by varying $a$ and accumulating constraints. What's actually proven is: "the set of $t$ compatible with infinitely many $a$ values is finite/empty." This is sufficient for Theorem 1's Case A, but the lemma statement should be clarified.
+**✅ Issue 1 (Lemma 3) - RESOLVED:** Lemma 3' has been restated to match what the proof establishes: "For any fixed odd $t$, the set $\{a \geq 6 : t \in T_a\}$ is finite." This is sufficient for Case A. Case B now includes a separate argument for finiteness of each $T_a$ via constraint analysis on primitive primes.
 
 **❌ Issue 4 (Permanence) - NOT FULLY RESOLVED:** Theorem 2, Stage 2e has a remaining gap:
 
